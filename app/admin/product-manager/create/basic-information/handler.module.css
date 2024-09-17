@@ -1,0 +1,38 @@
+.description button {
+  border: none;
+  background: none;
+  color: skyblue;
+  cursor: pointer;
+  box-shadow: inset 0px 0px 5px 0px;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+.description {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid white;
+  margin-bottom: 20px;
+  max-width: 100%;
+  justify-content: space-between;
+}
+.description textarea {
+  min-height: 150px;
+  padding: 5px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  outline: none;
+  width: 100%;
+  font-size: large;
+  line-height: 20px;
+  background-color: #23232373;
+  border-radius: 5px;
+  color: white;
+}
+.description button {
+  display: none;
+}
+@media only screen and (max-width: 480px) {
+  .description textarea {
+    font-size: medium;
+  }
+}

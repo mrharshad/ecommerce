@@ -1,0 +1,152 @@
+.fullSWait {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  z-index: 20;
+  height: 100vh;
+  background-color: rgb(0 0 0 / 74%);
+
+  @keyframes background {
+    0% {
+      background-color: rgb(0 0 0 / 70%);
+    }
+
+    100% {
+      background-color: rgb(0 0 0 / 25%);
+    }
+  }
+}
+
+.progressBar {
+  margin: auto;
+}
+
+.progressBar > p {
+  grid-column: 1/-1;
+  border-top: 7px solid deepskyblue;
+  border-radius: 50%;
+  width: 65px;
+  height: 65px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.alerts {
+  flex-direction: column;
+  display: flex;
+  width: 100svw;
+  position: fixed;
+  top: max(7.5svh, 55px);
+  z-index: 3;
+  right: 0px;
+  row-gap: 10px;
+}
+.section {
+  margin: max(9svh, 55px) 1% 1% 1%;
+  position: relative;
+  background-color: black;
+  min-height: 90svh;
+  color: white;
+  display: grid;
+  grid-template-columns: 25% 1fr;
+  grid-template-rows: max-content max-content max-content;
+  gap: 10px;
+  z-index: 1;
+}
+
+.header {
+  background-color: #181818;
+  border-radius: 3px;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: fit-content;
+  grid-column: 1 /-1;
+}
+.header h1 {
+  font-size: large;
+  color: white;
+}
+
+.header button {
+  margin-top: 2px;
+  padding: 5px;
+  font-weight: bold;
+  border-radius: 4px;
+  border-left: 2px solid;
+  border-right: 2px solid;
+  background-color: black;
+  border-top: none;
+  border-bottom: none;
+  cursor: pointer;
+  color: white;
+}
+.toggleProcess {
+  margin-bottom: auto;
+}
+.content {
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  padding: 5px;
+  background: linear-gradient(to left, black, black, #393939 130%);
+  min-height: 82svh;
+}
+.processed {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.processed p {
+  margin-top: 10px;
+  height: 2px;
+  background-color: lightsteelblue;
+  width: 100%;
+}
+.processed > span {
+  margin-left: 10px;
+}
+.processed p > span {
+  background-color: cyan;
+  display: block;
+  height: 100%;
+}
+
+@media only screen and (max-width: 480px) {
+  .progressBar {
+    margin: 40svh auto auto auto;
+  }
+  .section {
+    margin: 8svh 1% 1% 1%;
+    gap: 5px;
+  }
+  .header h1 {
+    display: none;
+  }
+  .header button {
+    margin-left: auto;
+  }
+  .content {
+    grid-column: 1/-1;
+    box-shadow: none;
+    background: black;
+  }
+  .processed {
+    font-size: small;
+  }
+  .processed p {
+    height: 1px;
+  }
+}

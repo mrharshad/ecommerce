@@ -1,0 +1,263 @@
+.section {
+  --one: max(1px, 0.1vh);
+  --hundred: max(100px, 10vh);
+  --fifteen: max(15px, 1.5vh);
+  --twenty: max(20px, 2.1vh);
+  --seventy: max(70px, 8svh);
+  padding-top: var(--seventy);
+  padding-bottom: var(--seventy);
+  background-color: black;
+  min-height: 100vh;
+}
+
+.container {
+  color: white;
+  display: flex;
+  max-width: max(500px, 52vh);
+  width: 100%;
+  margin: 0px auto 0px auto;
+  border-radius: 1rem;
+  box-shadow: inset var(--one) var(--one) 2px -1px white;
+  flex-direction: column;
+}
+
+.container > h1 {
+  font-size: var(--twenty);
+  margin: 1em 0px 0.7em 0.7em;
+}
+
+.container > form {
+  display: flex;
+  margin: 0.6em;
+  row-gap: 0.4em;
+  flex-direction: column;
+}
+
+.container > form label {
+  margin-top: 1em;
+  font-size: var(--fifteen);
+}
+
+.container > form input {
+  padding-left: 0.5em;
+  border-radius: 0.5em;
+  height: max(26px, 2.6svh);
+  font-size: var(--fifteen);
+  background-color: rgb(160, 170, 173);
+  transition: background-color 400ms ease-in-out;
+}
+
+.container > form input:focus {
+  background-color: gray;
+}
+
+.container > form input::placeholder {
+  font-size: 0.8em;
+  padding-left: 0.2em;
+}
+
+.container > form > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.email,
+.birth {
+  position: relative;
+}
+.birth {
+  width: 45%;
+}
+.email input {
+  width: 100%;
+}
+
+.email label {
+  margin-bottom: 0.3em;
+}
+
+.email span {
+  right: 5px;
+  bottom: 5px;
+  color: black;
+  position: absolute;
+}
+/* .area {
+  background-color: white !important;
+} */
+.gender p {
+  font-size: var(--fifteen);
+  display: flex;
+  margin-top: 1rem;
+  margin-right: 30%;
+}
+
+.gender label {
+  display: flex;
+  margin-left: auto;
+  align-items: center;
+}
+
+.gender label input {
+  margin-left: 10px;
+}
+
+.birth > input {
+  border-radius: 5px;
+  width: 100%;
+}
+
+.birth > input:focus {
+  background-color: #a0aaad !important;
+}
+
+.birth > span {
+  position: absolute;
+  background-color: #a0aaad;
+  left: 5px;
+  bottom: 2px;
+  height: 80%;
+  display: inline-block;
+  width: calc(100% - 30px);
+  color: black;
+  text-align: center;
+}
+.stateContainer > p {
+  width: 45%;
+  padding-left: 0.5em;
+  border-radius: 0.5em;
+  height: max(26px, 2.6svh);
+  font-size: var(--fifteen);
+  color: black;
+  background-color: #a0aaad;
+  transition: background-color 400ms ease-in-out;
+}
+.container > form > .stateContainer > label {
+  width: 45%;
+  margin-bottom: 0.3em;
+  margin-top: 2em;
+}
+
+.container > form > .stateContainer > input {
+  width: 45%;
+}
+
+.container > form > .stateContainer > select {
+  width: 45%;
+  padding-left: 0.5em;
+  border-radius: 0.5em;
+  height: max(26px, 2.6vh);
+  font-size: var(--fifteen);
+  transition: background-color 400ms ease-in-out;
+  background-color: #a0aaad;
+}
+
+.container > form > button {
+  margin: 15px auto var(--twenty) auto;
+  width: 40%;
+  height: max(40px, 4vh);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--fifteen);
+  border: none;
+  border-radius: 0.5em;
+}
+
+.container > form > button:hover {
+  scale: 1.1;
+}
+
+.firstStep {
+  flex-direction: column;
+}
+
+.container .firstStep > button {
+  background: linear-gradient(to right top, #d2e5ff, #64cfdd);
+}
+
+.container .firstStep > p {
+  margin-bottom: 1.3em;
+  font-size: var(--fifteen);
+}
+
+.container .firstStep > p a {
+  color: #74d3ff;
+}
+
+.checkMail {
+  height: 50px;
+  border-bottom: 1px solid;
+}
+
+.checkMail p:nth-child(2)::before {
+  color: red;
+  content: "\25BA";
+  display: block;
+  animation: moveArrow alternate infinite 2s;
+}
+.verifyLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.verifyLabel input {
+  width: 100px;
+}
+.skeleton {
+  animation: skeleton 300ms infinite alternate;
+}
+.password {
+  border-top: none;
+  border-bottom: none;
+  outline: none;
+}
+
+.password::placeholder {
+  font-size: 0.9em !important;
+}
+@media screen and (min-width: 481px) {
+  .email span {
+    font-size: large;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    width: 98%;
+  }
+
+  .secondStep {
+    .identity {
+      font-size: medium;
+    }
+
+    .resend {
+      font-size: small;
+    }
+  }
+
+  .secondStep > p:nth-child(1) {
+    font-size: medium;
+  }
+}
+
+@keyframes moveArrow {
+  to {
+    translate: -300%;
+  }
+
+  from {
+    translate: 80%;
+  }
+}
+@keyframes skeleton {
+  to {
+    background-color: white;
+  }
+
+  from {
+    background-color: slategray;
+  }
+}

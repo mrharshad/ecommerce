@@ -1,0 +1,165 @@
+.section {
+  background-color: black;
+  min-height: 100vh;
+  --one: max(1px, 0.1vh);
+  --hundred: max(100px, 10vh);
+  --fifteen: max(15px, 1.5vh);
+  --twenty: max(20px, 2.1vh);
+  padding-top: var(--twenty);
+  color: white;
+}
+
+.form {
+  row-gap: 0.4em;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  margin: 10svh auto 0px auto;
+  border-radius: 1rem;
+  box-shadow: inset var(--one) var(--one) 2px -1px white;
+  flex-direction: column;
+  animation: fromAnimation infinite 1s alternate ease-in-out;
+}
+
+@keyframes fromAnimation {
+  from {
+    transform: translateY(3px);
+  }
+
+  to {
+    transform: translateY(-3px);
+  }
+}
+.featureInfo {
+  line-height: 1.5rem;
+}
+
+.form > h1 {
+  font-size: var(--twenty);
+  margin: 0.5em 0px 0.5em 0.2em;
+}
+
+.form > label {
+  display: flex;
+  margin-top: 0.6em;
+  font-size: var(--fifteen);
+}
+
+.form > input {
+  border-radius: 0.5em;
+  font-size: 1rem;
+  padding: 2px 5px;
+  transition: background-color 400ms ease-in-out;
+}
+
+.form > .login {
+  margin: 1rem auto auto auto;
+  width: 40%;
+  appearance: none;
+  color: white;
+  background-color: black;
+  border-top: none;
+  border-bottom: none;
+  box-sizing: border-box;
+  border-radius: 3px;
+  cursor: pointer;
+  line-height: 1em;
+  opacity: 1;
+  outline: 0;
+  padding: 0.7rem;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  text-rendering: geometricprecision;
+  text-transform: uppercase;
+  transition: opacity 300ms cubic-bezier(0.694, 0, 0.335, 1),
+    background-color 100ms cubic-bezier(0.694, 0, 0.335, 1),
+    color 100ms cubic-bezier(0.694, 0, 0.335, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  white-space: nowrap;
+  position: relative;
+  font-size: var(--fifteen);
+  cursor: pointer;
+  font-weight: 600;
+}
+.form > .login:before {
+  animation: opacityFallbackOut 0.5s step-end forwards;
+  backface-visibility: hidden;
+  background-color: #000000a4;
+  clip-path: polygon(-1% 0, 0 0, -25% 100%, -1% 100%);
+  content: "";
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform: translateZ(0);
+  transition: clip-path 0.5s cubic-bezier(0.165, 0.84, 0.44, 1),
+    -webkit-clip-path 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  width: 100%;
+  z-index: 1;
+}
+
+.form > .login:hover:before {
+  border-radius: 3px;
+  animation: opacityFallbackIn 0s step-start forwards;
+  clip-path: polygon(0 0, 101% 0, 101% 101%, 0 101%);
+}
+
+.form .forgotPassword {
+  margin-left: auto;
+  cursor: pointer;
+  width: fit-content;
+  color: #74d3ff;
+  animation: forgotPasswordButton infinite 6s alternate ease-in-out;
+  margin-top: 20px;
+}
+
+.form a {
+  color: #74d3ff;
+  line-height: 1.5rem;
+}
+
+.form > a {
+  margin-left: auto;
+}
+.policy a {
+  line-height: 1.5rem;
+}
+
+@keyframes forgotPasswordButton {
+  from {
+    transform: translateX(0%);
+    opacity: 5;
+  }
+
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .form {
+    width: 98%;
+  }
+
+  .form > h1 {
+    font-size: large;
+  }
+
+  .form > p {
+    font-size: small;
+  }
+
+  .form > a {
+    font-size: small;
+  }
+
+  .forgotPassword {
+    font-size: small;
+  }
+}

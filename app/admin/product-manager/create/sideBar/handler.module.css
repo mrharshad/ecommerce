@@ -1,0 +1,68 @@
+.toggleInput {
+  display: none;
+}
+.sideBar {
+  padding: 5px;
+  background: linear-gradient(to right, black, black, #393939 130%);
+}
+
+@media only screen and (max-width: 480px) {
+  .sideBar {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 70%;
+    transition: translate 500ms ease-in;
+    z-index: 4;
+    translate: -110%;
+    height: 100%;
+    position: absolute;
+  }
+  .toggleBtn::before {
+    display: flex;
+    z-index: 10;
+    margin: 2% 1%;
+    flex-direction: column;
+    width: fit-content;
+    align-items: center;
+    justify-content: space-around;
+    cursor: pointer;
+    position: absolute;
+    /* box-shadow: inset 0px 0px 5px 0px white; */
+    border-left: 1px solid;
+    border-right: 1px solid;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 14px;
+    content: "Open";
+    z-index: 4;
+    top: 2px;
+  }
+  .dropBox {
+    transition: translate 500ms ease-in;
+    height: 100vh;
+    width: 100%;
+    translate: 100%;
+    top: 2px;
+    background: linear-gradient(to right, transparent, black);
+    position: fixed;
+    z-index: 3;
+  }
+  .toggleInput:checked ~ .sideBar {
+    translate: 0;
+  }
+
+  .toggleInput:checked ~ .dropBox {
+    translate: 0;
+  }
+
+  .toggleInput:checked ~ .toggleBtn::before {
+    translate: calc(99svw - max(60px, 10vw));
+    color: red;
+    content: "Close";
+    margin-top: 10px;
+  }
+  .toggleInput:not(:checked) ~ .toggleBtn::before {
+    transition: translate 200ms ease-in;
+    transition-delay: 300ms;
+  }
+}

@@ -1,0 +1,103 @@
+.container {
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  padding: 20px 10px 20px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px 15px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.header input {
+  margin-left: auto;
+  border-radius: 3px;
+  padding-left: 5px;
+  outline: none;
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-top: none;
+  border-bottom: none;
+  height: 25px;
+  color: white;
+  background-color: #23232373;
+}
+.header input[type="file"] {
+  display: none;
+}
+.header label {
+  box-shadow: inset 0px 0px 5px 0px white;
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: small;
+  cursor: pointer;
+}
+.certificate {
+  height: 250px;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  border-radius: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  position: relative;
+  background: black;
+  display: flex;
+  align-items: center;
+}
+.certificate p {
+  cursor: pointer;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  text-wrap: nowrap;
+  font-size: small;
+  position: absolute;
+  top: 5px;
+  width: 100%;
+  background-color: #00000042;
+  padding: 5px;
+}
+.certificate img {
+  width: fit-content;
+  height: fit-content;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 5px;
+  margin: auto;
+}
+.certificate button {
+  position: absolute;
+  bottom: 5px;
+  border: none;
+  background-color: #00000042;
+  color: red;
+  display: block;
+  padding: 3px 10px;
+  cursor: pointer;
+  border-radius: 2px;
+  right: 2px;
+}
+.certificate span {
+  font-size: small;
+  margin: auto;
+  cursor: pointer;
+  font-weight: bold;
+}
+@media screen and (max-width: 480px) {
+  .header h3 {
+    margin-right: auto;
+    font-size: medium;
+  }
+  .header input {
+    margin-left: 0px;
+    order: 2;
+    width: 100%;
+  }
+  .certificate {
+    width: 150px;
+    height: 200px;
+  }
+}

@@ -1,0 +1,39 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.variantsInfo {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 20px;
+  height: 85vh;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+
+.variantsInfo ::-webkit-scrollbar {
+  display: none;
+}
+
+.container > button {
+  margin: 20px auto;
+  box-shadow: inset 0px 0px 4px 0px white;
+  border: none;
+  padding: 7px 20px;
+  background: black;
+  border-radius: 4px;
+  color: aqua;
+  font-size: large;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 480px) {
+  .container > button {
+    font-size: medium;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+  }
+}

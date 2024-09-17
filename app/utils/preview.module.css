@@ -1,0 +1,228 @@
+#single {
+  row-gap: 5px;
+  box-shadow: 0 0 5px 0px black;
+  border-radius: 5px;
+  background-color: white;
+  color: black;
+  padding: 5px;
+  margin: 0px auto 10px auto;
+  .ratingReviews {
+    display: flex;
+    font-size: 90%;
+    font-weight: 600;
+
+    .rating {
+      display: flex;
+      position: relative;
+      color: gold;
+    }
+  }
+
+  .name {
+    color: grey;
+    font-weight: 600;
+    text-overflow: ellipsis;
+  }
+
+  .imgCover {
+    display: flex;
+    min-height: 45%;
+    min-width: 50%;
+  }
+
+  .imgCover p {
+    margin: auto;
+    height: 90%;
+    width: 80%;
+    background-color: #e5e5e5;
+    text-align: center;
+  }
+  .img {
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+    max-height: 100%;
+    max-width: 100%;
+    border-radius: 5%;
+  }
+
+  .priceDiv {
+    display: flex;
+    flex-wrap: wrap;
+    height: 10px;
+    height: 24%;
+  }
+
+  .charges {
+    display: flex;
+    width: 100%;
+  }
+
+  .charges span {
+    margin-bottom: 3px;
+    margin-top: 3px;
+  }
+
+  .charges span:last-child {
+    margin-left: auto;
+  }
+
+  .currentPrice {
+    font-weight: 700;
+  }
+
+  .currentPrice span {
+    color: gray;
+  }
+
+  .mrp {
+    font-size: 14px;
+    margin: auto 0px auto 5%;
+  }
+
+  .mrp span {
+    text-decoration: line-through;
+  }
+
+  .discount {
+    margin: auto 0px auto auto;
+    background-color: #c4eeff;
+    border-radius: 5%;
+    padding-left: 1%;
+    font-weight: bold;
+    font-size: small;
+    padding-right: 1%;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 2px;
+    .delivery {
+      padding: 2px 0px 2px 2px;
+      font-weight: bold;
+      overflow-x: hidden;
+      font-size: 12px;
+      background: linear-gradient(
+        to left,
+        transparent,
+        rgb(109, 193, 109) 160%
+      );
+    }
+
+    .delivery p {
+      color: green;
+      display: inline-block;
+    }
+  }
+}
+
+.options > p {
+  overflow-x: auto;
+  scrollbar-width: none;
+  overflow-x: hidden;
+  white-space: nowrap;
+  font-size: 13px;
+  padding-left: 1%;
+  background: linear-gradient(to right, white, #c3c3c3);
+  border-radius: 2px;
+}
+.options span {
+  font-weight: normal;
+}
+
+.options p::-webkit-scrollbar {
+  display: none;
+}
+
+.Mobile {
+  justify-content: space-between;
+  position: relative;
+  font-size: 14px;
+  height: 200px;
+  width: 90%;
+  min-width: 290px;
+  max-width: 350px;
+  display: grid;
+  grid-template-columns: 38% 60%;
+  grid-template-rows: 10% 20% 25% 45%;
+
+  .ratingReviews {
+    grid-column: 1/-1;
+    align-items: center;
+    height: 100%;
+
+    .review {
+      margin-left: auto;
+    }
+    .rating {
+      margin-left: 20px;
+      font-size: 15px;
+    }
+  }
+  .name {
+    grid-column: 1/-1;
+    font-size: 14px;
+    height: 100%;
+  }
+  .imgCover {
+    grid-row: 3/-1;
+    height: 90%;
+    grid-column: 1/2;
+  }
+  .priceDiv {
+    grid-row: 3/4;
+    .discount {
+      top: 0px;
+      left: 0px;
+      position: absolute;
+    }
+  }
+  .charges {
+    font-size: 90%;
+  }
+  .currentPrice {
+    font-size: large;
+  }
+  .mrp {
+    font-size: small;
+  }
+  .options {
+    height: 85%;
+  }
+}
+/* Desktop design */
+.Desktop {
+  transition: scale 300ms ease-in-out;
+  padding: 5px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  width: 260px !important;
+  .ratingReviews {
+    height: 6%;
+    .rating {
+      margin-left: auto;
+    }
+  }
+  .name {
+    font-size: 13px;
+    height: 14%;
+  }
+  .imgCover {
+    height: 35%;
+  }
+  .charges {
+    font-size: 14px;
+  }
+  .currentPrice {
+    font-size: larger;
+  }
+  .mrp {
+    font-size: 14px;
+  }
+  .options {
+    height: 21%;
+  }
+}

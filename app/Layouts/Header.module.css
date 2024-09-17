@@ -1,0 +1,447 @@
+.header {
+  background-color: black;
+  display: flex;
+  box-shadow: 0px 1px 3px 0px gray;
+  height: max(5vh, 50px);
+  align-items: center;
+  width: 100%;
+  z-index: 5;
+  position: fixed;
+  top: 2px;
+  border-radius: 5px;
+
+  .openProfile,
+  .sideBarInput,
+  .filterInput {
+    display: none;
+  }
+}
+
+.header nav {
+  color: white;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  column-gap: 0.7em;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.header nav::-webkit-scrollbar {
+  display: none;
+}
+
+.header nav img {
+  width: fit-content;
+  height: max(4.5vh, 40px);
+  margin-left: 5px;
+}
+
+.header nav a {
+  white-space: nowrap;
+  font-size: max(1.7vh, 15px);
+  transition: color 500ms ease-in-out;
+}
+
+.header nav > a {
+  color: white;
+}
+
+.loggedIn {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  position: absolute;
+  padding-left: 10px;
+  padding-right: 10px;
+  right: 0px;
+  width: 100px;
+  z-index: 2;
+}
+
+.loggedIn a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  height: 100%;
+}
+
+.orders {
+  position: relative;
+  display: block;
+}
+.orders p {
+  right: 15%;
+  top: 10%;
+  font-size: large;
+  position: absolute;
+}
+
+.orders svg {
+  width: 35px;
+}
+.profileLogo svg {
+  width: 25px;
+}
+
+.loggedIn p {
+  color: white;
+  font-weight: 600;
+}
+.searchBar {
+  margin-left: auto;
+  height: 100%;
+  position: relative;
+}
+.form {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  width: max(450px, 30svw);
+}
+
+.form svg {
+  cursor: pointer;
+
+  border-radius: 0px 5px 5px 0px;
+}
+
+.form > .input {
+  font-size: max(1.5vh, 13px);
+  width: 80%;
+  padding-left: 10px;
+  padding-right: 30px;
+  height: 75%;
+  outline: none;
+  color: white;
+  background-color: transparent;
+  border-radius: 5px 0px 0px 5px;
+  border: none;
+  box-shadow: inset 0px 0px max(0.4vh, 5px) 0px white;
+}
+
+.input::placeholder {
+  color: white;
+}
+
+.form div {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.button {
+  width: 40px;
+  height: 75%;
+  border: none;
+  cursor: pointer;
+  border-radius: 0px 5px 5px 0px;
+}
+
+.button svg {
+  height: 100%;
+  width: 100%;
+  border-radius: 0px 10px 10px 0px;
+  box-shadow: inset 2px 0px 0px 0px #f1f1f1;
+}
+
+.profileLogo {
+  margin-left: auto;
+  .svg {
+    height: 65%;
+  }
+
+  .span {
+    color: white;
+    font-size: x-small;
+    font-weight: 600;
+  }
+}
+
+.profileLogo :hover + .span {
+  color: #00ceff;
+}
+
+.searchCancel {
+  width: 30px;
+  position: absolute;
+  left: -25px;
+}
+.searchKeys {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: fit-content;
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height 500ms ease-in-out;
+  row-gap: 5px;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  background-color: white;
+  border-radius: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.searchKeys svg {
+  background-color: #f1ecec;
+  border-radius: 5px;
+  margin-right: 5px;
+  height: 25px;
+  max-width: 25px;
+  cursor: pointer;
+}
+
+.searchKeys div {
+  width: calc(80% + 40px);
+  justify-content: space-between;
+  padding: 3px 5px;
+  border-radius: 5px;
+  display: flex;
+  background-color: white;
+  font-size: medium;
+  align-items: center;
+}
+
+.searchKeys div:first-child {
+  margin-top: 10px;
+}
+
+.searchKeys div:last-child {
+  margin-bottom: 10px;
+}
+
+.searchKeys div:hover {
+  background-color: rgb(170, 176, 181);
+}
+
+.searchKeys div p {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.cart {
+  margin-left: 5px;
+  margin-right: 100px;
+  display: flex;
+  position: relative;
+}
+.cart span {
+  position: absolute;
+  top: 10%;
+  color: black;
+  left: 43%;
+}
+.cart svg {
+  width: 35px;
+}
+.filterLabel {
+  z-index: 5;
+  position: fixed;
+  top: 7px;
+  width: 40px;
+  right: 7px;
+  display: flex;
+  background-color: #000;
+}
+.filterLabel svg {
+  height: max(4vh, 40px);
+  width: 30px;
+  margin-left: auto;
+  margin-right: 2px;
+}
+.sortBy {
+  position: fixed;
+  z-index: 2;
+  top: 60px;
+  right: 5px;
+  background: white;
+  max-height: 0px;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  padding: 0px 5px;
+  overflow: hidden;
+  transition: max-height ease-in-out 0.3s;
+  box-shadow: inset 0px 0px 0px 1px black;
+}
+.sortBy p:nth-child(1) {
+  font-weight: 600;
+  display: flex;
+}
+.sortBy p span {
+  margin: auto 0px auto auto;
+  font-size: small;
+}
+
+.sortBy > span {
+  cursor: pointer;
+  font-size: 14px;
+  border-top: 1px solid;
+}
+.sortBy p:last-child {
+  height: 25px;
+  width: 50%;
+  margin-left: auto;
+  font-size: 12px;
+  text-align: center;
+  color: red;
+  cursor: pointer;
+}
+@media only screen and (min-width: 480px) {
+  .sortBy > span:hover {
+    scale: 0.9;
+  }
+
+  .filterLabel:hover ~ .sortBy {
+    max-height: 200px;
+  }
+  .sortBy:hover {
+    max-height: 200px;
+  }
+  .header nav a:hover {
+    color: #00ceff;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .header nav {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 70%;
+    background: linear-gradient(to right, black, black, #393939 120%);
+    position: fixed;
+    transition: translate 500ms ease-in;
+    z-index: 5;
+    translate: -110%;
+    top: 2px;
+    height: 100vh;
+  }
+
+  .dropBox {
+    transition: translate 500ms ease-in;
+    height: 100vh;
+    width: 100%;
+    translate: 100%;
+    top: 2px;
+    background: linear-gradient(to right, transparent, black);
+    position: fixed;
+    z-index: 3;
+  }
+
+  .header nav > a {
+    width: 100%;
+    border-top: 2px solid #393939;
+    padding-left: 5px;
+    height: 6%;
+    display: flex;
+    align-items: center;
+  }
+
+  .header nav .first {
+    border-top: 2px solid white;
+    margin-top: 15px;
+    transition: all 400ms ease-in;
+  }
+
+  .header > .sideBarBtn > span {
+    width: 80%;
+    color: red;
+    height: 6%;
+    background-color: aqua;
+  }
+
+  .loggedIn {
+    top: 15px;
+    right: 2%;
+  }
+
+  .header > .sideBarBtn {
+    display: flex;
+    z-index: 10;
+    margin-left: 1%;
+    margin-right: 1%;
+    flex-direction: column;
+    width: clamp(45px, 11vw, 55px);
+    min-width: 35px;
+    align-items: center;
+    height: 60%;
+    justify-content: space-around;
+    cursor: pointer;
+    position: relative;
+    background-color: black;
+  }
+  .header nav img {
+    margin-top: 1rem;
+  }
+  .header > .sideBarInput:checked ~ nav {
+    translate: 0;
+  }
+
+  .header > .sideBarInput:checked ~ .dropBox {
+    translate: 0;
+  }
+
+  .header > .sideBarInput:checked ~ .sideBarBtn {
+    translate: calc(99svw - max(45px, 10vw));
+
+    .first {
+      rotate: -50deg;
+      background-color: red;
+      position: absolute;
+      height: 10%;
+      transition: all 500ms ease-in;
+    }
+
+    .second {
+      opacity: 0;
+    }
+
+    .third {
+      position: absolute;
+      height: 10%;
+      transition: all 500ms ease-in;
+
+      background-color: red;
+      rotate: 50deg;
+    }
+  }
+  .header > .sideBarInput:not(:checked) ~ .sideBarBtn {
+    transition: translate 200ms ease-in;
+    transition-delay: 300ms;
+  }
+
+  .form {
+    width: max(268px, 86svw);
+  }
+  .searchKeys {
+    left: -40px;
+    background-color: white;
+    width: 99svw;
+  }
+  .cart {
+    margin-right: max(2%, 5px);
+  }
+  .searchKeys div {
+    margin-left: unset;
+    background-color: rgb(224, 232, 238);
+    padding: 2px 5px;
+    margin-top: 2px;
+    width: 100%;
+  }
+
+  .filterLabel {
+    right: 0px;
+  }
+
+  .filterInput:checked ~ .sortBy {
+    max-height: 200px;
+  }
+}

@@ -1,0 +1,109 @@
+.container {
+  display: grid;
+  grid-template-columns: auto auto;
+  margin-top: 10px;
+  padding: 10px;
+  grid-gap: 10px;
+}
+.container > p {
+  font-weight: 600;
+  font-size: large;
+}
+.selectImgInput {
+  display: none;
+}
+.selectImgBtn {
+  box-shadow: inset 0px 0px 6px 0px white;
+  border-radius: 3px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-size: small;
+  margin-bottom: 10px;
+  width: fit-content;
+  margin-left: auto;
+}
+
+.diffInput {
+  width: max(220px, 40%);
+  margin-left: auto;
+  border-left: 2px solid white;
+  border-right: 2px solid white;
+  padding: 5px;
+  outline: none;
+  border-radius: 5px;
+  border-top: none;
+  border-bottom: none;
+  background-color: #23232373;
+  color: white;
+}
+.selectedImg {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1/-1;
+  gap: 20px;
+}
+.selectedImg div {
+  position: relative;
+  border-top: 1px solid;
+  border-radius: 5px;
+  border-bottom: 1px solid;
+  height: 200px;
+  background-color: #23232379;
+  display: flex;
+  flex-direction: column;
+}
+.selectedImg div svg {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  right: 0px;
+  cursor: pointer;
+  top: 2px;
+}
+.selectedImg div img {
+  color: transparent;
+  max-width: 98%;
+  width: fit-content;
+  height: fit-content;
+  max-height: 100%;
+  border-radius: 5px;
+  margin: auto;
+}
+.container button {
+  grid-column: 1/-1;
+  width: min(40%, 200px);
+  margin: 20px auto 0px auto;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  background: transparent;
+  color: white;
+  border-top: none;
+  border-bottom: none;
+  border-right: 1px solid;
+  border-left: 1px solid;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #23232373;
+}
+
+@media screen and (max-width: 480px) {
+  .container > p {
+    font-size: medium;
+  }
+  .diffLabel {
+    grid-column: 1/-1;
+    font-size: 14px;
+  }
+  .diffInput {
+    font-size: small;
+    width: 100%;
+    grid-column: 1/-1;
+  }
+  .selectedImg {
+    justify-content: space-between;
+  }
+  .selectedImg div {
+    width: 45%;
+  }
+}

@@ -1,0 +1,56 @@
+.created {
+  padding-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-bottom: 1px solid;
+}
+.created > p {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  width: 100%;
+}
+.created p span {
+  margin-left: auto;
+  color: skyblue;
+  margin-right: 5px;
+}
+.variants {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.variant {
+  min-width: 100px;
+  box-shadow: inset 0px 0px 5px 0px;
+  display: flex;
+  border-radius: 5px;
+  column-gap: 10px;
+  height: 30px;
+  align-items: center;
+  padding: 3px 5px;
+  justify-content: center;
+}
+.variant svg {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.variant .deleteSvg {
+  margin-left: auto;
+}
+.variant p {
+  cursor: pointer;
+  background-color: #232323;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+@media screen and (max-width: 480px) {
+  .variant {
+    font-size: small;
+  }
+}

@@ -1,0 +1,164 @@
+.topContainer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  gap: 10px 20px;
+  justify-content: space-between;
+}
+.thumbnailContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 40%;
+  text-wrap: nowrap;
+}
+.thumbnailContainer input {
+  display: none;
+}
+
+.thumbnailContainer label {
+  cursor: pointer;
+  box-shadow: inset 0px 0px 5px 0px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: small;
+  text-wrap: nowrap;
+}
+.updateSetKey {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: fit-content;
+  min-width: 40%;
+  text-wrap: nowrap;
+}
+
+.updateSetKey input {
+  height: 25px;
+  padding-left: 5px;
+  border-radius: 4px;
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-top: none;
+  border-bottom: none;
+  background-color: #23232373;
+  color: white;
+  outline: none;
+  margin-left: auto;
+  width: max(220px, 50%);
+}
+.updateSetKey button {
+  border: none;
+  background: none;
+  color: white;
+  cursor: pointer;
+  box-shadow: inset 0px 0px 5px 0px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  display: none;
+}
+.created {
+  padding-top: 10px;
+  padding-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+}
+.created > p {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  width: 100%;
+}
+.created p span {
+  margin-left: auto;
+  color: skyblue;
+  margin-right: 5px;
+}
+.created > div {
+  position: relative;
+  border-top: 1px solid;
+  border-radius: 5px;
+  border-bottom: 1px solid;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: #23232379;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 170px;
+}
+.created div div {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  column-gap: 15px;
+  width: 100%;
+  top: 3px;
+  background: #00000073;
+}
+
+.created svg {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+.created .deleteSvg {
+  margin-left: auto;
+}
+.created img {
+  color: transparent;
+  max-width: 100%;
+  width: fit-content;
+  height: fit-content;
+  max-height: 100%;
+  border-radius: 5px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.created div p {
+  font-size: small;
+  position: absolute;
+  bottom: 5px;
+  background: #00000073;
+  width: 100%;
+  text-align: end;
+  padding-right: 5px;
+}
+
+@media screen and (max-width: 480px) {
+  .topContainer {
+    font-size: 14px;
+    margin-top: 0px;
+  }
+  .thumbnailContainer {
+    border-bottom: 1px solid gray;
+    padding-bottom: 10px;
+  }
+  .thumbnailContainer,
+  .updateSetKey {
+    width: 100%;
+  }
+  .updateSetKey {
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .updateSetKey input {
+    margin-right: 0px;
+    margin-left: auto;
+    width: 100%;
+    order: 2;
+  }
+  .updateSetKey button {
+    margin-left: auto;
+  }
+  .created > div {
+    width: 45%;
+    height: 200px;
+  }
+}

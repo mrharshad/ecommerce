@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  align-items: center;
+  margin: auto auto 20px auto;
+  width: max(40%, 250px);
+  padding-top: 20px;
+}
+.container button {
+  border: none;
+  box-shadow: inset 0px 0px 4px 0px white;
+  padding: 5px 25px;
+  font-size: medium;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  background: black;
+}
+
+.container button:hover {
+  scale: 1.1;
+}
