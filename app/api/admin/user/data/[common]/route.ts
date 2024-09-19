@@ -3,11 +3,12 @@ import User from "@/server/models/userModels";
 import { verify } from "jsonwebtoken";
 import client from "@/server/config/redisConnect";
 import errors from "@/server/utils/errorHandler";
-import { NextApiRequest } from "next";
+
 import config from "@/server/config/config";
 
 import { IAuthorizedUser, IJwtTokenValue } from "@/interfaces/userServerSide";
 import { ICustomError } from "@/interfaces/clientAndServer";
+import { NextRequest } from "next/server";
 const { redisUserCache } = config;
 interface IContext {
   params: {
@@ -18,7 +19,7 @@ interface IGetData extends IAuthorizedUser {
   password?: string;
 }
 
-export async function GET(req: NextApiRequest, context: IContext) {
+export async function GET(req: NextRequest, context: IContext) {
   try {
     const { _id } = verify(
       context.params.common,
