@@ -17,6 +17,7 @@ const NewProduct = () => {
   if (!value) {
     notFound();
   }
+
   return (
     <>
       <Handler />

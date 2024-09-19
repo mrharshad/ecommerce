@@ -1,5 +1,5 @@
-import { IServerResponse } from "@/interfaces/clientAndServer";
 import { ICommonData } from "@/interfaces/proManagerClientSide";
+import { ICategoriesInfo, IExInfoData } from "@/static-data/categoriesInfo";
 export interface IDiscounts {
   min: number;
   discount: number;
@@ -20,11 +20,7 @@ export interface ICertificates {
   name: string;
   image: string;
 }
-export interface IExInfoData {
-  key: string;
-  required: boolean;
-  sameOrder?: boolean;
-}
+
 export interface IExInfo extends IExInfoData {
   value?: string;
 }
@@ -65,11 +61,7 @@ export interface IDraft {
   update: string;
   time: string;
 }
-export interface IFetchedCategories {
-  _id: string;
-  brands: string[];
-  tOfProducts: ITypeOfProducts[];
-}
+
 export interface ICreateClientSide {
   newData: INewData;
   drafts: IDraft[];
@@ -77,7 +69,7 @@ export interface ICreateClientSide {
   incomplete: TProcesses;
   opened: TProcesses;
   categories: string[];
-  fetchedCategories: IFetchedCategories[];
+  fetchedCategories: ICategoriesInfo[];
 }
 
 export interface ICreateData extends ICreateClientSide, ICommonData {}
@@ -134,7 +126,7 @@ export interface ITypeOfProducts {
 export interface IFetchCategory {
   success: boolean;
   text: string;
-  resData: IFetchedCategories;
+  resData: ICategoriesInfo;
 }
 
 export interface ICategoryData {

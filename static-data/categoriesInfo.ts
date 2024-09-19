@@ -1,4 +1,25 @@
-const categoriesInfo = [
+import { faceCare } from "./commonExInfoData";
+export interface IExInfoData {
+  key: string;
+  required: boolean;
+  sameOrder?: boolean;
+}
+export interface ITypeOfProducts {
+  tOfPName: string;
+  requiredCertificates: Array<string>;
+  exInfoData: Array<{ key: string; required: boolean; sameOrder?: boolean }>;
+}
+export interface ICategoriesInfo {
+  _id: string;
+  brands: Array<string>;
+  tOfProducts: Array<{
+    tOfPName: string;
+    requiredCertificates: Array<string>;
+    exInfoData: Array<{ key: string; required: boolean; sameOrder?: boolean }>;
+  }>;
+}
+
+const categoriesInfo: Array<ICategoriesInfo> = [
   {
     _id: "Accessories",
     brands: [
@@ -140,7 +161,7 @@ const categoriesInfo = [
         exInfoData: [
           { key: "Material", required: true, sameOrder: true },
           { key: "Container Type", required: false },
-          { key: "Net Quantity", required: false, sameOrder: true },
+          { key: "Quantity", required: false, sameOrder: true },
         ],
       },
       {
@@ -157,7 +178,7 @@ const categoriesInfo = [
         exInfoData: [
           { key: "Country of Origin", required: false },
           { key: "Container Type", required: true },
-          { key: "Net Quantity", required: false },
+          { key: "Quantity", required: false },
         ],
       },
     ],
@@ -222,41 +243,46 @@ const categoriesInfo = [
   //     common: [],
   //   },
   // },
-  // "Face Care": {
-  //   tOfPS: ["Face Wash", "Face Cream", "Face Scrub"],
-  //   brands: [
-  //     "The Body Shop",
-  //     "Neutrogena",
-  //     "L'Oreal",
-  //     "Himalaya",
-  //     "Cetaphil",
-  //     "Clinique",
-  //     "Clean & Clear",
-  //     "Nivea",
-  //     "Garnier",
-  //     "Olay",
-  //     "Ponds",
-  //     "Kiehl's",
-  //     "Forest Essentials",
-  //     "Lotus Herbals",
-  //     "Aveeno",
-  //     "Globus Naturals",
-  //     "Simple",
-  //   ],
-  //   keyValueD: {
-  //     common: ["Skin Type", "Age range"],
-  //     // "Face Cream": ["test 1", "test 2"],  isme kisi type ke product ka keyValue defrance kya hoga likh sakte hai
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin", "Container Type"],
-  //   },
-  //   certificate: {
-  //     common: [
-  //       // "Bureau of Indian Standards (BIS)",
-  //       // "Drug Controller General of India (DCGI)",
-  //     ],
-  //   },
-  // },
+  {
+    _id: "Face Care",
+    brands: [
+      "The Body Shop",
+      "Neutrogena",
+      "L'Oreal",
+      "Himalaya",
+      "Cetaphil",
+      "Clinique",
+      "Clean & Clear",
+      "Nivea",
+      "Garnier",
+      "Olay",
+      "Ponds",
+      "Kiehl's",
+      "Forest Essentials",
+      "Lotus Herbals",
+      "Aveeno",
+      "Globus Naturals",
+      "Simple",
+    ],
+    tOfProducts: [
+      {
+        tOfPName: "Face Wash",
+        exInfoData: [...faceCare],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Face Cream",
+        exInfoData: [...faceCare],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Face Scrub",
+        exInfoData: [...faceCare],
+        requiredCertificates: [],
+      },
+    ],
+  },
+
   // Badminton: {
   //   tOfPS: [
   //     "Badminton Ball",

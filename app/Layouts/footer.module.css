@@ -1,0 +1,73 @@
+.footer {
+  width: 100%;
+  min-height: 60px;
+  display: flex;
+  justify-content: space-between;
+  background-color: black;
+  box-shadow: 0px 0px 8px 0px black;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.footer div {
+  display: flex;
+  border-radius: 10px;
+  width: 49%;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.footer > .secondComponent {
+  background: linear-gradient(to right, #597c90, transparent);
+}
+
+.footer > .secondComponent > p {
+  font-size: larger;
+  text-align: center;
+  font-weight: 600;
+}
+
+.footer a {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer > .firstComponent {
+  background-color: #1717176b;
+  background: linear-gradient(to left, #597c90, transparent);
+}
+
+.footer a:hover {
+  transition: all 200ms ease-in-out;
+  color: #0093ff;
+  scale: 1.1;
+}
+
+@media only screen and (max-width: 370px) {
+  .footer > .secondComponent {
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+
+  .footer > .firstComponent {
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+}
+
+@media only screen and (max-width: 650px) {
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .footer > .secondComponent {
+    width: 90%;
+    height: 100px;
+  }
+
+  .footer > .firstComponent {
+    width: 90%;
+    padding: 5px;
+  }
+}

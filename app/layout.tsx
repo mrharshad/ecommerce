@@ -6,6 +6,7 @@ import Header from "./Layouts/Header";
 import config from "@/server/config/config";
 import { cookies } from "next/headers";
 import { ICartPro, IReduxUserData } from "@/interfaces/userClientSide";
+import Footer from "./Layouts/Footer";
 
 const { fDomainName, cookieName, bHost, bProtocol } = config;
 const inter = Inter({ subsets: ["latin"] });
@@ -44,6 +45,7 @@ export default async function RootLayout({
         <StoreProvider>
           <Header userData={userData} initialToken={value || null} />
           {children}
+          <Footer />
         </StoreProvider>
       </body>
     </html>

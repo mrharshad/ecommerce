@@ -1,7 +1,4 @@
+import style from "./page.module.css";
 export default function Home() {
-  return (
-    <main>
-      <h1>this is home page</h1>
-    </main>
-  );
+  return <main className={style.container}></main>;
 }

@@ -104,10 +104,9 @@ const Navbar: FC<INavbarProp> = ({ fName, numOfCart }) => {
           </Link>
         </div>
 
-        <Link className={style.first} href="/">
-          Men
+        <Link className={style.first} href="/decoration">
+          Decoration
         </Link>
-        <Link href="/">Women</Link>
         <Link href="/">kitchen</Link>
         <Link href="/">Kids</Link>
         <Link href="/">Beauty & Health</Link>
