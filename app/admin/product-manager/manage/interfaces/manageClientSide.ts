@@ -1,4 +1,4 @@
-import { IMediumData } from "@/interfaces/productServerSide";
+import { ISingleProduct } from "@/interfaces/productServerSide";
 
 export interface IThumbnail {
   url: string;
@@ -7,8 +7,8 @@ export interface IThumbnail {
   removedId?: string;
 }
 export interface IManageClientSide {
-  searchResult: IMediumData[];
-  searchData: IMediumData[];
+  searchResult: ISingleProduct[];
+  searchData: ISingleProduct[];
   public_ids: string[];
   search: null | { key: string; page: number | null };
 }

@@ -1,4 +1,4 @@
-import { IUserDataClientSide } from "@/app/api/user/login/interface";
+import { IReduxUserData } from "@/interfaces/userClientSide";
 
 export interface ILoginInfo {
   holdOnVerification?: Date;
@@ -7,13 +7,13 @@ export interface ILoginInfo {
 
 export interface ILoginSuccess {
   text: string;
-  data: IUserDataClientSide;
+  data: IReduxUserData;
   token: string;
 }
 export interface ILoginResponse {
   success: boolean;
   text: string;
   resHoldOnVerification?: Date;
-  data: IUserDataClientSide;
+  data: IReduxUserData;
   token: string;
 }

@@ -1,9 +1,12 @@
 import React, { FC, memo } from "react";
 import styles from "./preview.module.css";
 import Image from "next/image";
-import { IProps } from "./interfaces/preview";
-const Preview: FC<IProps> = ({ data, openDesign }) => {
-  console.log("Preview rerender");
+import { TPreviewDevice } from "./interface";
+
+const Preview: FC<{
+  data: { name: string; thumbnail: string; exInfo: Array<string> };
+  openDesign: TPreviewDevice;
+}> = ({ data, openDesign }) => {
   const { name, thumbnail, exInfo } = data || {};
   const [
     first = "First : Value",
@@ -20,10 +23,10 @@ const Preview: FC<IProps> = ({ data, openDesign }) => {
 
       <p className={styles.name}>{name || "Please enter name"}</p>
       <div className={styles.imgCover}>
-        {thumbnail?.url ? (
+        {thumbnail ? (
           <Image
             className={styles.img}
-            src={thumbnail.url}
+            src={thumbnail}
             height={20}
             width={200}
             alt="product image"

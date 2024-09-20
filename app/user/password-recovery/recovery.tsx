@@ -13,13 +13,13 @@ import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { IRecoveryParams } from "./recoveryInterface";
 import { loginSuccess, mainKeyChange, newAlert } from "@/app/redux/UserSlice";
-import { IAlerts } from "@/interfaces/userClientSide";
-import { IUserStoreGet } from "@/interfaces/userClientSide";
+
 import { IRecoveryPasswordResponse } from "@/app/api/user/recovery-password/passwordInterface";
+import { IReduxStoreData } from "@/app/redux/ReduxStore";
 const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
   const dispatch = useDispatch();
   const { alerts, searches, districts } = useSelector(
-    (data: IUserStoreGet) => data.user
+    (data: IReduxStoreData) => data.user
   );
   const passwordRef = useRef<HTMLInputElement | null>(null);
   const confirmPassword = useRef<HTMLInputElement | null>(null);
@@ -76,7 +76,7 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
 
       const { success, text, token, data }: IRecoveryPasswordResponse =
         await verify.json();
-      console.log("new password response", success, text, token, data);
+
       if (success) {
         localStorage.removeItem("loginInfo");
         dispatch(loginSuccess({ text, token, data }));

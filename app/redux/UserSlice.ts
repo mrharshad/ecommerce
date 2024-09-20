@@ -14,12 +14,13 @@ import {
   IFindSuggestion,
   IReduxUserData,
   ISuggestions,
-  IReduxUser,
   IAlert,
+  IReduxUser,
 } from "../../interfaces/userClientSide";
 import { ILoginSuccess } from "../user/login/loginTypes";
 
 const initialState: IReduxUser = {
+  token: null,
   alerts: [],
   search: { key: "", page: 1, identity: "tOfP" },
   numOfCart: 0,

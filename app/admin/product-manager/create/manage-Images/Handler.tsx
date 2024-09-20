@@ -18,7 +18,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   ICertificates,
   IFetchCategory,
-  IFetchedCategories,
   INewProUpdate,
   IReduxCreateData,
   IVariant,
@@ -28,6 +27,7 @@ import NewSet from "./NewSet";
 
 import Image from "next/image";
 import Certificates from "./Certificates";
+import { ICategoriesInfo } from "@/static-data/categoriesInfo";
 
 const ManageImages: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -91,7 +91,7 @@ const ManageImages: FC = () => {
   const requireCertificate = useMemo(() => {
     const findCategory = fetchedCategories.find(
       (obj) => obj._id === category
-    ) as IFetchedCategories;
+    ) as ICategoriesInfo;
     const data = findCategory.tOfProducts.find((obj) => obj.tOfPName == tOfP)
       ?.requiredCertificates as string[];
     return data;
@@ -212,7 +212,7 @@ const ManageImages: FC = () => {
         ]);
       }
     },
-    [newProKeyFunc, category, fetchedCategories]
+    [newProKeyFunc, category, fetchedCategories, showAlert, certificates]
   );
 
   useEffect(() => {
@@ -237,7 +237,7 @@ const ManageImages: FC = () => {
     ) {
       dispatch(mainKeyChange({ name: "incomplete", value: 3 }));
     }
-  }, [dispatch, newData]);
+  }, [dispatch, certificates, imageSets, thumbnail]);
   return (
     <>
       <div className={style.topContainer}>

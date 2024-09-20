@@ -1,6 +1,6 @@
 import { ChangeEvent, MouseEvent } from "react";
 
-import { IExInfo, IExInfoData, INewProUpdate } from "../interface";
+import { IExInfo, INewProUpdate } from "../interface";
 import { IAlert } from "@/interfaces/userClientSide";
 
 export interface IProductNameProps {

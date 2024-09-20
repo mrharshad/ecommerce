@@ -5,17 +5,13 @@ import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
-import {
-  IFetchUserData,
-  IRequest,
-  ISendResponse,
-  IUserDataClientSide,
-} from "./interface";
+import { IFetchUserData, INewData, IRequest, ISendResponse } from "./interface";
 import config from "@/server/config/config";
 
-import errors, { CustomError } from "@/server/utils/errorHandler";
+import errors from "@/server/utils/errorHandler";
 import { ISearches as ISearchesClientSide } from "@/interfaces/userClientSide";
 import { IJwtInfo, ISearches } from "@/interfaces/userServerSide";
+import { ICustomError } from "@/interfaces/clientAndServer";
 // apply api - /user/login
 export async function PUT(req: NextRequest) {
   try {
@@ -190,7 +186,7 @@ export async function PUT(req: NextRequest) {
           else return { ...search, cached: [{ page: 1, sorted: "Popular" }] };
         }
       }) as ISearchesClientSide[];
-      let newData = { ...findUser } as any as IUserDataClientSide;
+      let newData: INewData = { ...findUser } as any;
       if (newData._doc) newData = newData._doc;
 
       return response({
@@ -239,7 +235,7 @@ export async function PUT(req: NextRequest) {
   } catch (error) {
     if (error instanceof Error) {
       return new Response(
-        JSON.stringify({ success: false, text: errors(error as CustomError) }),
+        JSON.stringify({ success: false, text: errors(error as ICustomError) }),
         {
           status: 200,
         }

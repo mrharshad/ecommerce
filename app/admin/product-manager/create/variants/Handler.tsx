@@ -189,7 +189,7 @@ const Variants: FC = () => {
         dispatch(mainKeyChange({ name: "incomplete", value: 4 }));
       }
     }
-  }, [dispatch, newData]);
+  }, [dispatch, variantKey, variants]);
 
   return (
     <>

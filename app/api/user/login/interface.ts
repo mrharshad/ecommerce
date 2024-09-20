@@ -1,19 +1,8 @@
-"@/server/models/userModelsType";
-
 import {
   ISearches as ISearchesClientSide,
   IReduxUserData,
 } from "@/interfaces/userClientSide";
-import {
-  ICanceled,
-  ICartPro,
-  IDelivered,
-  IIssues,
-  ILocation,
-  ISearches,
-  ITokens,
-  TRoles,
-} from "@/interfaces/userServerSide";
+import { IAuthorizedUser, ITokens, TRoles } from "@/interfaces/userServerSide";
 
 export interface IRequest {
   email: string;
@@ -21,37 +10,18 @@ export interface IRequest {
   searches: ISearchesClientSide[];
 }
 
-export interface ICommonData {
-  _id: number;
-  fName: string;
-  lName: string;
-  email: string;
-  mobileNo: number;
-  role: TRoles[];
-  location: ILocation[];
-  gender: string;
-  bDate: number;
-  bMonth: number;
-  bYear: number;
-  cartPro: ICartPro[];
-  nOfNOrder: number;
-  canceled: ICanceled[];
-  delivered: IDelivered[];
-  createdAt: Date;
+export interface IFetchUserData extends IAuthorizedUser {
+  password?: string;
+  tokens: ITokens;
+  role: Array<TRoles>;
 }
 
-export interface IDocData extends ICommonData {
-  searches: ISearchesClientSide[];
-}
-export interface IUserDataClientSide extends IReduxUserData {
-  _doc?: IUserDataClientSide;
-}
-export interface IFetchUserData extends ICommonData {
-  password?: string;
-  searches: ISearches[];
+export interface IResponseUserData extends IReduxUserData {
   tokens: ITokens;
 }
-
+export interface INewData extends IResponseUserData {
+  _doc?: IResponseUserData;
+}
 export interface ISendResponse {
   success: boolean;
   text: string;

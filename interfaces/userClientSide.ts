@@ -1,4 +1,5 @@
 import { ISearchProduct } from "./productServerSide";
+import { IAuthorizedUser } from "./userServerSide";
 
 export type IDevice = "Desktop" | "Tab" | "Mobile";
 
@@ -52,26 +53,9 @@ export interface IAlert {
   duration?: "2s" | "3s" | "4s" | "5s";
 }
 export interface ICartPro {}
-export interface IReduxUserData {
-  _id: number;
-  fName: string;
-  lName: string;
-  email: string;
-  mobileNo: number;
-  location: Array<{
-    _id: Date;
-    address: string;
-    pinCode: number;
-    state: string;
-    district: string;
-    area: string;
-  }>;
-  gender: string;
-  bDate: number;
-  bMonth: number;
-  bYear: number;
+export interface IReduxUserData
+  extends Omit<IAuthorizedUser, "searches" | "cartPro"> {
   cartPro: ICartPro[];
-  nOfNOrder: number;
   searches: Array<{
     key: string;
     byUser: boolean;
@@ -80,7 +64,6 @@ export interface IReduxUserData {
     identity: "tOfP" | "name" | number;
     cached?: Array<{ sorted: ISearchSort; page: number | null }>;
   }>;
-  createdAt: Date;
 }
 export interface IPageInfo {
   scrolled: number;

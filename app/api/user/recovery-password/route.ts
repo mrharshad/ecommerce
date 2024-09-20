@@ -4,18 +4,16 @@ import crypto from "crypto";
 import Jwt from "jsonwebtoken";
 import { NextRequest } from "next/server";
 import dbConnect from "@/server/config/dbConnect";
-import {
-  IFindUser,
-  INewData,
-  IRecoveryPasswordResponse,
-  IRequest,
-} from "./passwordInterface";
+import { IRecoveryPasswordResponse, IRequest } from "./passwordInterface";
+import { ISearches as IClientSearches } from "@/interfaces/userClientSide";
 import config from "@/server/config/config";
 import client from "@/server/config/redisConnect";
 import User from "@/server/models/userModels";
-import errors, { CustomError } from "@/server/utils/errorHandler";
-import { IDBSearches } from "@/interfaces/userServerSide";
-import { IClientSearches } from "@/interfaces/userClientSide";
+import errors from "@/server/utils/errorHandler";
+
+import { ICustomError } from "@/interfaces/clientAndServer";
+import { ISearches } from "@/interfaces/userServerSide";
+import { IFetchUserData, INewData } from "../login/interface";
 
 // apply api - /user/password-recovery
 export async function PUT(req: NextRequest) {
@@ -38,7 +36,7 @@ export async function PUT(req: NextRequest) {
     } = config;
     let redisCache = redisUserCache === "enable";
     let isRedis = false;
-    let findUser = {} as IFindUser;
+    let findUser = {} as IFetchUserData;
 
     if (redisCache) {
       try {
@@ -58,7 +56,7 @@ export async function PUT(req: NextRequest) {
       findUser = (await User.findOne(
         { email },
         { canceled: 0, delivered: 0 }
-      ).select("+password")) as IFindUser;
+      ).select("+password")) as IFetchUserData;
       console.log("mongodb data");
       if (!findUser?._id) {
         if (redisCache) {
@@ -119,7 +117,7 @@ export async function PUT(req: NextRequest) {
               typeof Number(identity) == "number" ? String(identity) : identity,
             update,
           };
-        }) as IDBSearches[];
+        }) as ISearches[];
     }
     console.log("db searches", findUser.searches);
     findUser.tokens = {};
@@ -180,7 +178,7 @@ export async function PUT(req: NextRequest) {
           else return { ...search, cached: [{ page: 1, sorted: "Popular" }] };
         }
       }) as IClientSearches[];
-      console.log("searchCaches", searchCaches);
+
       let newData: INewData = { ...findUser, searches: searchCaches };
 
       if (newData._doc) newData = newData._doc;
@@ -200,7 +198,7 @@ export async function PUT(req: NextRequest) {
   } catch (err) {
     if (err instanceof Error) {
       return new Response(
-        JSON.stringify({ success: false, text: errors(err as CustomError) }),
+        JSON.stringify({ success: false, text: errors(err as ICustomError) }),
         {
           status: 200,
         }

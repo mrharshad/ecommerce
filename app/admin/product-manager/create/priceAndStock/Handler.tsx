@@ -165,10 +165,12 @@ const PriceAndStock = () => {
   const updateOption = useCallback(
     (mrp: number, variant: ISelectedVariant, updatedStocks: IStocks[]) => {
       if (mrp < 10) {
-        newAlertFunc({
-          type: "Message",
-          text: "Products with MRP less than Rs 29 cannot be sold",
-        });
+        dispatch(
+          newAlert({
+            type: "Message",
+            text: "Products with MRP less than Rs 29 cannot be sold",
+          })
+        );
         return false;
       }
       const { _id, optionId, options } = variant;

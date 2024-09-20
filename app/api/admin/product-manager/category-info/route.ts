@@ -1,12 +1,11 @@
-import { IFetchedCategories } from "@/app/admin/product-manager/create/interface";
-import categoriesInfo from "@/static-data/categoriesInfo";
+import categoriesInfo, { ICategoriesInfo } from "@/static-data/categoriesInfo";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     let { category } = await req.json();
     console.log("api called category", category);
-    const categories: IFetchedCategories[] = categoriesInfo;
+    const categories: ICategoriesInfo[] = categoriesInfo;
 
     const resData = categories.find((obj) => obj._id == category);
     if (!resData) {

@@ -6,9 +6,10 @@ import client from "@/server/config/redisConnect";
 import crypto from "crypto";
 // apply api - /user/login
 import config from "@/server/config/config";
-import errors, { CustomError } from "@/server/utils/errorHandler";
+import errors from "@/server/utils/errorHandler";
 import User from "@/server/models/userModels";
 import { ITokens } from "@/interfaces/userServerSide";
+import { ICustomError } from "@/interfaces/clientAndServer";
 export async function PUT(req: NextRequest) {
   try {
     console.log("forgot password api called");
@@ -174,7 +175,7 @@ export async function PUT(req: NextRequest) {
   } catch (err) {
     if (err instanceof Error) {
       return new Response(
-        JSON.stringify({ success: false, text: errors(err as CustomError) }),
+        JSON.stringify({ success: false, text: errors(err as ICustomError) }),
         {
           status: 200,
         }

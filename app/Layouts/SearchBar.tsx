@@ -2,8 +2,13 @@ import React, { FC, FormEvent, useRef } from "react";
 import style from "./Header.module.css";
 import Link from "next/link";
 
-import { IToggleSuggestion } from "../../interfaces/userClientSide";
+import {
+  ISearch,
+  ISearches,
+  IToggleSuggestion,
+} from "../../interfaces/userClientSide";
 import { IMainKeyChange } from "../redux/UserSliceInterface";
+import Suggestions from "./Suggestions";
 
 interface IProps {
   submitHandler: (formData: FormData) => void;
@@ -13,6 +18,7 @@ interface IProps {
   loading: boolean;
   numOfSuggestion: number;
   numOfCart: number;
+  searches: ISearches[];
 }
 const SearchBar: FC<IProps> = ({
   submitHandler,
@@ -22,8 +28,11 @@ const SearchBar: FC<IProps> = ({
   loading,
   numOfSuggestion,
   numOfCart,
+  searches,
 }) => {
   const keyword = useRef<HTMLInputElement>(null);
+  const searchFunc = (key: string) => {};
+  const deleteSearchKeys = (key: string) => {};
   return (
     <div className={style.searchBar}>
       <form className={style.form} id="form" action={submitHandler}>
@@ -91,6 +100,12 @@ const SearchBar: FC<IProps> = ({
           <span>{numOfCart}</span>
         </Link>
       </form>
+      <Suggestions
+        searchFunc={searchFunc}
+        deleteSearchKeys={deleteSearchKeys}
+        toggleSuggestion={toggleSuggestion}
+        searches={searches}
+      />
     </div>
   );
 };

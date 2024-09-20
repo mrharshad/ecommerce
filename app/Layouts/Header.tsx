@@ -144,6 +144,7 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
           loading={loading}
           numOfSuggestion={numOfSuggestion}
           numOfCart={numOfCart}
+          searches={searches}
         />
       </header>
     </>
