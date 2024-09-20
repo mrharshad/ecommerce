@@ -94,7 +94,6 @@ const Login = () => {
   };
   const forgotPassword = async () => {
     if ((reTryForgot && isPending(reTryForgot)) || alerts.length) return;
-    console.log("run ");
     const email = emailInput.current?.value.trim();
     if (!email) {
       return showWarning("please enter email");
@@ -110,7 +109,6 @@ const Login = () => {
       },
     });
     const { success, text, resReTryForget } = await user.json();
-    console.log("resReTryForget", resReTryForget);
     if (resReTryForget) {
       const newInfo = { holdOnVerification, reTryForgot: resReTryForget };
       localStorage.setItem(storeName, JSON.stringify(newInfo));

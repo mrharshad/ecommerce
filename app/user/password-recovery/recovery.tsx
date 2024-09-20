@@ -56,7 +56,6 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
   };
   const setPassword = async () => {
     if (alerts.length) return;
-    console.log("key", key);
     const password = (passwordRef.current as HTMLInputElement).value;
     const confPassValue = (confirmPassword.current as HTMLInputElement).value;
     if (password.length > 7 && confPassValue === password) {

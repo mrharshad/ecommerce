@@ -14,7 +14,6 @@ const Suggestions: FC<IProps> = ({
   deleteSearchKeys,
   searchFunc,
 }) => {
-  console.log("suggestions rerender");
   return (
     <div style={{ maxHeight: toggleSuggestion }} className={style.searchKeys}>
       {searches.map((obj, index) => {

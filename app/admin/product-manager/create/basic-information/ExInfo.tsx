@@ -1,11 +1,4 @@
-import React, {
-  ChangeEvent,
-  EventHandler,
-  FC,
-  memo,
-  MouseEvent,
-  useState,
-} from "react";
+import React, { ChangeEvent, FC, memo } from "react";
 import { IExInfosProps } from "./interface";
 import style from "./exInfo.module.css";
 const ExInfo: FC<IExInfosProps> = ({

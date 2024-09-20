@@ -4,7 +4,6 @@ import { NextRequest } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     let { category } = await req.json();
-    console.log("api called category", category);
     const categories: ICategoriesInfo[] = categoriesInfo;
 
     const resData = categories.find((obj) => obj._id == category);

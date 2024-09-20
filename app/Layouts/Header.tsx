@@ -46,7 +46,6 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
   const numOfSuggestion = suggestions.length;
   const keyName = search.key;
   const { fName } = data || {};
-  console.log("main header rerender");
   const capitalizeWords = useCallback((str: string): string => {
     return str.replace(/\b\w/g, function (txt) {
       return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
@@ -83,7 +82,6 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
 
   const topLevelKey = useCallback(
     (obj: IMainKeyChange): void => {
-      console.log("run top level key", obj);
       dispatch(mainKeyChange(obj));
     },
     [dispatch]
@@ -111,10 +109,8 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
   useEffect(() => {
     const { preKey, loading, preCountData, changing } = findSuggestion;
     if (!loading) return;
-    console.log("useEffect run changing", changing);
     if (changing)
       setTimeout(() => {
-        console.log("run setTimeout");
         dispatch(checkChangingKey());
       }, 2000);
     else dispatch(suggestionsGet(preKey));

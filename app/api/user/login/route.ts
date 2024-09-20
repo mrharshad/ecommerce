@@ -20,7 +20,6 @@ export async function PUT(req: NextRequest) {
       password: userEnter,
       searches: clientSearches,
     }: IRequest = await req.json();
-    console.log("login api run");
     const response = (res: ISendResponse) =>
       new Response(JSON.stringify(res), {
         status: 200,

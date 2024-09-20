@@ -24,7 +24,6 @@ export async function PUT(req: NextRequest) {
       key,
       searches: clientSearches,
     }: IRequest = await req.json();
-    console.log(password, email, key, clientSearches);
     dbConnect();
     const token = crypto.createHash("sha256").update(key).digest("hex");
     const {
@@ -49,7 +48,6 @@ export async function PUT(req: NextRequest) {
         redisCache = false;
       }
     }
-    console.log("redis data", findUser);
     if (findUser?.email && !findUser?._id)
       throw new Error("Invalid email and password");
     if (!findUser.email) {
@@ -57,7 +55,6 @@ export async function PUT(req: NextRequest) {
         { email },
         { canceled: 0, delivered: 0 }
       ).select("+password")) as IFetchUserData;
-      console.log("mongodb data");
       if (!findUser?._id) {
         if (redisCache) {
           try {
@@ -73,7 +70,6 @@ export async function PUT(req: NextRequest) {
     }
 
     const { _id, role, searches, tokens = {} } = findUser;
-    console.log("tokens", tokens);
     const tokenExpire = tokens.tokenExpire;
     if (
       tokens.token !== token ||
@@ -81,31 +77,23 @@ export async function PUT(req: NextRequest) {
       new Date(tokenExpire) < new Date()
     )
       throw new Error("token expired");
-    console.log("old password", findUser.password);
     findUser.password = await bcrypt.hash(password, 10);
-    console.log("new password", findUser.password);
     if (Array.isArray(clientSearches)) {
-      console.log("clientSearches", clientSearches);
-
       let userSearch = clientSearches.filter(
         ({ priority, byUser }) => byUser && priority
       );
-      console.log("userSearch 1", userSearch);
       for (let search of searches) {
         if (search.byUser && !userSearch.some((obj) => obj.key === search.key))
           userSearch.push(search as any);
       }
 
-      console.log("userSearch 2", userSearch);
       let autoSearch = clientSearches
         .filter(({ priority, byUser }) => !byUser && priority)
         .sort((a, b) => b.priority - a.priority);
-      console.log("autoSearch 1", autoSearch);
       for (let search of searches) {
         if (!search.byUser && !autoSearch.some((obj) => obj.key === search.key))
           autoSearch.push(search as any);
       }
-      console.log("autoSearch 2", autoSearch);
       findUser.searches = userSearch
         .slice(0, 10)
         .concat(autoSearch.slice(0, 5))
@@ -119,7 +107,6 @@ export async function PUT(req: NextRequest) {
           };
         }) as ISearches[];
     }
-    console.log("db searches", findUser.searches);
     findUser.tokens = {};
     const {
       password: newPassword,
@@ -136,7 +123,6 @@ export async function PUT(req: NextRequest) {
         },
       }
     );
-    console.log("db update", update);
     if (update.modifiedCount == 1) {
       if (isRedis) {
         try {
@@ -159,7 +145,6 @@ export async function PUT(req: NextRequest) {
           expiresIn: jwtExpireTime,
         }
       );
-      console.log("jwtToken", jwtToken);
       cookies().set({
         name: cookieName,
         value: jwtToken,
@@ -182,7 +167,6 @@ export async function PUT(req: NextRequest) {
       let newData: INewData = { ...findUser, searches: searchCaches };
 
       if (newData._doc) newData = newData._doc;
-      console.log("newData", newData);
       return new Response(
         JSON.stringify({
           success: true,

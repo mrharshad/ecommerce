@@ -15,7 +15,6 @@ export async function multipleImageDelete(public_ids: Array<string>) {
       notDeletedImg.push(i);
     }
   }
-  console.log("notDeletedImg", notDeletedImg);
   if (notDeletedImg.length) {
     const updateAdditionalInfo = await AdditionalInfo.updateOne(docId, {
       $push: {

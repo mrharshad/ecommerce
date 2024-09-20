@@ -56,7 +56,6 @@ export async function POST(req: Request) {
       area,
       searches,
     }: IRequest = await req.json();
-    console.log("api called");
     let [userName, domain] = email.toLowerCase().trim().split("@");
     if (userName.length < 3) {
       throw new Error("Enter valid email id");
@@ -79,13 +78,9 @@ export async function POST(req: Request) {
 
     dbConnect();
     if (!findUser?._id) {
-      console.log("api run 1");
       findUser = (await SignUpFirstStep.findById(email)) as ISignUpFirstStep;
       if (!findUser?._id) {
-        console.log("api run 2");
-
         const registeredUser = await User.findOne({ email });
-        console.log("api run 3");
 
         if (registeredUser) {
           throw new Error(`already has an account created`);

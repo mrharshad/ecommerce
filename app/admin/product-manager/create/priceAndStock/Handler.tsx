@@ -175,14 +175,12 @@ const PriceAndStock = () => {
       }
       const { _id, optionId, options } = variant;
 
-      console.log("updatedStocks", updatedStocks);
       const loc: Array<string> = [];
       for (let { state, districts } of updatedStocks) {
         for (let { name, stock } of districts) {
           loc.push(`${state}:${name}:${stock}`);
         }
       }
-      console.log("loc", loc);
       const newOptions = options.map((obj) => {
         if (obj._id === optionId) {
           return { _id: optionId, mrp, loc };

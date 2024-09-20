@@ -8,7 +8,6 @@ interface INavbarProp {
   numOfCart: number;
 }
 const Navbar: FC<INavbarProp> = ({ fName, numOfCart }) => {
-  console.log("navbar rerender");
   return (
     <>
       {" "}

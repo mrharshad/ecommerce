@@ -12,7 +12,6 @@ import { ITokens } from "@/interfaces/userServerSide";
 import { ICustomError } from "@/interfaces/clientAndServer";
 export async function PUT(req: NextRequest) {
   try {
-    console.log("forgot password api called");
     const response = (res: ISendResponse) =>
       new Response(JSON.stringify(res), {
         status: 200,
