@@ -1,5 +1,5 @@
 import { TCacheStatus } from "../interfaces/redis";
-
+console.log("protocol sentext problem");
 const env = process.env;
 const isDevelopment: boolean = env.NODE_ENV === "development";
 const redisUserCache: TCacheStatus = "enable";
