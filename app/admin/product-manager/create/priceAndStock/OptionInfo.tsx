@@ -130,12 +130,7 @@ const OptionInfo: FC<IOptionInfoProps> = ({
         <span> Option: {optionId}</span>
         <label htmlFor="mrp" className={style.updateMrp}>
           M.R.P :
-          <input
-            ref={mrpInput}
-            defaultValue={mrp || 29}
-            type="number"
-            min={29}
-          />
+          <input ref={mrpInput} defaultValue={mrp || 1} type="number" min={1} />
         </label>
       </div>
       <div className={style.stocksInfo}>

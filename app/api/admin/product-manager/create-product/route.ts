@@ -120,9 +120,7 @@ export async function POST(req: NextRequest) {
     const { discounts, options } = variants[0];
     const mrp = options[0].mrp;
     const discount = discounts[0].discount;
-    const price = (+(mrp - mrp * (discount / 100)).toFixed()).toLocaleString(
-      "en-IN"
-    );
+    const price = +(mrp - mrp * (discount / 100)).toFixed();
 
     try {
       findLastId.lastProductId += 1;
@@ -137,6 +135,7 @@ export async function POST(req: NextRequest) {
         exInfo: exInfo.map(({ key, value }) => `${key}:${value}`),
         thumbnail,
         price,
+        mrp: mrp.toLocaleString("en-IN"),
         discount,
         imgSetKey: imgSetKey || "",
         imageSets: imagesLinks,

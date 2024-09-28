@@ -25,7 +25,7 @@ const ProductName: FC<IProductNameProps> = ({ name, newProKeyFunc }) => {
         id="name"
         type="text"
         placeholder="Product Name..."
-        maxLength={75}
+        maxLength={100}
         minLength={10}
       />
     </form>

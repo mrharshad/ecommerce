@@ -12,7 +12,12 @@ import { useDispatch, useSelector } from "react-redux";
 
 import Link from "next/link";
 import { IRecoveryParams } from "./recoveryInterface";
-import { loginSuccess, mainKeyChange, newAlert } from "@/app/redux/UserSlice";
+import {
+  loginSuccess,
+  mainKeyChange,
+  newAlert,
+  newLoading,
+} from "@/app/redux/UserSlice";
 
 import { IRecoveryPasswordResponse } from "@/app/api/user/recovery-password/passwordInterface";
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
@@ -51,15 +56,13 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
       }
     }
   };
-  const loading = (value: boolean) => {
-    dispatch(mainKeyChange({ name: "loading", value }));
-  };
+
   const setPassword = async () => {
     if (alerts.length) return;
     const password = (passwordRef.current as HTMLInputElement).value;
     const confPassValue = (confirmPassword.current as HTMLInputElement).value;
     if (password.length > 7 && confPassValue === password) {
-      loading(true);
+      dispatch(newLoading("Recovery-Password"));
       const verify = await fetch(`/api/user/recovery-password`, {
         method: "PUT",
         body: JSON.stringify({
@@ -84,7 +87,7 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
         dispatch(
           newAlert({
             info: { text, type: "Error", duration: "4s" },
-            loading: false,
+            completed: "Recovery-Password",
           })
         );
       }

@@ -10,7 +10,6 @@ interface INavbarProp {
 const Navbar: FC<INavbarProp> = ({ fName, numOfCart }) => {
   return (
     <>
-      {" "}
       <input
         className={style.sideBarInput}
         type="checkbox"

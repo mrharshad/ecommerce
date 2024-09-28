@@ -1,4 +1,8 @@
-import { IFindSuggestion } from "../../interfaces/userClientSide";
+import {
+  IActive,
+  IFindSuggestion,
+  TMainKeys,
+} from "../../interfaces/userClientSide";
 
 export interface IMainKeyData {
   name: string;
@@ -12,7 +16,7 @@ export interface StateType {
 export type INameSuggest = Array<{ name: string; identity: number }>;
 
 export interface IMainKeyChange {
-  name: string;
+  name: TMainKeys;
   value: any;
 }
 
@@ -24,4 +28,13 @@ export interface IFetchingFailed {
   text: string;
   type?: "Success" | "Error" | "Message";
   duration?: "2s" | "3s" | "4s" | "5s";
+}
+
+export interface IVisitState {
+  [key: string]: any;
+}
+export interface IVisitPage {
+  name: IActive;
+  value?: boolean;
+  active: IActive;
 }

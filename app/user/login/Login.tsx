@@ -2,7 +2,7 @@
 import { FormEvent, useActionState, useEffect, useRef, useState } from "react";
 import style from "./login.module.css";
 import Link from "next/link";
-import { loginSuccess, newAlert } from "@/app/redux/UserSlice";
+import { loginSuccess, newAlert, newLoading } from "@/app/redux/UserSlice";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
@@ -20,10 +20,10 @@ const Login = () => {
   const passwordInput = useRef<HTMLInputElement | null>(null);
   const emailInput = useRef<HTMLInputElement | null>(null);
   const manageAlert = (info: IAlert, loading?: boolean) =>
-    dispatch(newAlert({ info, loading }));
+    dispatch(newAlert({ info, completed: "Login" }));
   const showWarning = (text: string) => manageAlert({ text, type: "Message" });
   const forgotRes = (info: IAlert) => {
-    dispatch(newAlert({ info, loading: false }));
+    dispatch(newAlert({ info, completed: "Login" }));
   };
   const isPending = (time: Date): boolean => {
     let milliseconds = new Date().getTime() - new Date(time).getTime();
@@ -45,14 +45,12 @@ const Login = () => {
   const storeName = "loginInfo";
   const [loginInfo, setLoginInfo] = useState<ILoginInfo>({});
   let { holdOnVerification, reTryForgot } = loginInfo;
-  const loadingManage = (value: boolean) => {
-    dispatch(mainKeyChange({ name: "loading", value }));
-  };
+
   const loginFunc = async (event: FormEvent) => {
     event.preventDefault();
     if ((holdOnVerification && isPending(holdOnVerification)) || alerts.length)
       return;
-    loadingManage(true);
+    dispatch(newLoading("Login"));
     const password = (passwordInput.current as HTMLInputElement).value;
     const email = (emailInput.current as HTMLInputElement).value;
     let user = await fetch(`/api/user/login`, {
@@ -87,7 +85,7 @@ const Login = () => {
       dispatch(
         newAlert({
           info: { text, type: "Error", duration: "4s" },
-          loading: false,
+          completed: "Login",
         })
       );
     }
@@ -98,7 +96,7 @@ const Login = () => {
     if (!email) {
       return showWarning("please enter email");
     }
-    loadingManage(true);
+    dispatch(newLoading("Login"));
     let user = await fetch(`/api/user/forgot-password`, {
       method: "PUT",
       body: JSON.stringify({
@@ -134,7 +132,7 @@ const Login = () => {
           Get access to your Orders, Wishlist, Cart, Delivery time and
           Recommendations
         </p>
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email">Email :</label>
         <input
           ref={emailInput}
           name="email"
@@ -143,7 +141,7 @@ const Login = () => {
           type="email"
           placeholder="enter name"
         />
-        <label htmlFor="password">Password </label>
+        <label htmlFor="password">Password :</label>
         <input
           ref={passwordInput}
           name="password"
@@ -164,7 +162,7 @@ const Login = () => {
           <Link href="/user/conditions"> Conditions of Use </Link> and
           <Link href="/user/privacy-policy"> Privacy Notice </Link>.
         </p>
-        <Link href="/user/sign-up">Create new account</Link>
+        <Link href="/user/sign-up">Create account</Link>
       </form>
     </section>
   );

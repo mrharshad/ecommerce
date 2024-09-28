@@ -291,7 +291,7 @@ export async function POST(req: Request) {
                 .slice(0, 5);
               const newSearches = userSearch
                 .concat(autoSearch)
-                .map(({ byUser, identity, key, update }) => {
+                .map(({ byUser, identity, key }) => {
                   return {
                     key,
                     byUser,
@@ -299,7 +299,6 @@ export async function POST(req: Request) {
                       typeof Number(identity) == "number"
                         ? String(identity)
                         : identity,
-                    update,
                   };
                 });
               const newData = {

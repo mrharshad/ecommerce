@@ -65,7 +65,7 @@
 
 .discounts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 130px);
+  grid-template-columns: repeat(auto-fit, 140px);
   gap: 20px 10px;
   width: 100%;
 }

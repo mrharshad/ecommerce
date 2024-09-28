@@ -1,56 +1,68 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-import { IAppMount, INewAlert } from "../Layouts/intereface";
+import { IAppMount, INewAlert } from "../Layouts/interface";
 
 import {
   IMainKeyChange,
   ISearchBarInput,
+  IVisitPage,
+  IVisitState,
   StateType,
 } from "./UserSliceInterface";
-import { getDistricts, suggestionsGet } from "./UserApiRequest";
+
+import {
+  fetchKeyProduct,
+  fetchRandom,
+  getDistricts,
+  suggestionsGet,
+} from "./UserApiRequest";
 
 import {
   ISearches,
   IFindSuggestion,
   IReduxUserData,
-  ISuggestions,
+  ISuggestion,
   IAlert,
   IReduxUser,
+  TPending,
 } from "../../interfaces/userClientSide";
-import { ILoginSuccess } from "../user/login/loginTypes";
 
+import { ILoginSuccess } from "../user/login/loginTypes";
+import { ISearchProduct } from "@/interfaces/productServerSide";
+import { suggestionLimit, suggestionPerReq } from "@/clientConfig";
+
+const initialFindSuggestion = {
+  preKey: "",
+  loading: false,
+  preCountData: undefined,
+  changing: null,
+};
 const initialState: IReduxUser = {
   token: null,
   alerts: [],
-  search: { key: "", page: 1, identity: "tOfP" },
   numOfCart: 0,
-  loading: false,
+  proLoading: false,
   toggleSuggestion: "0px",
   canceled: [],
   delivered: [],
   newOrder: [],
   suggestions: [],
-  suggestion: [],
+  storedSuggestions: [],
   districts: [],
   active: "other",
   home: { scrolled: 0 },
-  productInfo: { scrolled: 0 },
-  findSuggestion: {
-    preKey: "",
-    loading: false,
-    preCountData: undefined,
-    changing: null,
-  },
+  findSuggestion: initialFindSuggestion,
   searches: [],
-  dataEnd: false,
-  allData: [],
+  storedProducts: [],
   products: [],
-  categories: [],
-  page: 0,
   searchSort: "Popular",
   data: {} as IReduxUserData,
   device: "Mobile",
   nOfNOrder: 0,
+  loadings: [],
+  searchKey: "",
+  randomPage: 1,
+  categories: [],
 };
 
 const UserSlice = createSlice({
@@ -100,39 +112,43 @@ const UserSlice = createSlice({
     },
 
     newAlert: (state, action: PayloadAction<INewAlert>) => {
-      const { info, loading } = action.payload;
+      const { info, completed } = action.payload;
       state.alerts.push(info);
-      if (loading !== undefined) state.loading = loading;
+      if (completed !== undefined) {
+        state.loadings = state.loadings.filter(
+          (pending) => pending !== completed
+        );
+      }
     },
+
+    newLoading: (state, action: PayloadAction<TPending>) => {
+      state.loadings.push(action.payload);
+    },
+
     removeAlert: (state, action: PayloadAction<string>) => {
-      state.alerts.filter((alert) => alert.text !== action.payload);
+      const text = action.payload;
+      const alerts = state.alerts.filter((alert) => alert.text !== text);
+      state.alerts = alerts;
     },
-    position: (state, action) => {
-      const current = action.payload;
-      const active = state.active;
-      if (state.toggleSuggestion !== "0px") {
-        state.toggleSuggestion = "0px";
-      }
-      if (active !== "other" && active !== "productInfo") {
-        const oldP = state[active]?.scrolled;
-        if (
-          oldP + 500 < current ||
-          oldP > current + 500
-          //  &&
-          // oldP - 1000 < current
-        ) {
-          state[active].scrolled = current;
-        }
-      }
+
+    position: (state) => {
+      state.toggleSuggestion = "0px";
+      // const current = action.payload;
+      // const oldP = state.home.scrolled;
+      // if (oldP + 500 < current || oldP > current + 500) {
+      //   state.home.scrolled = current;
+      // }
     },
+
     searchBarInput: (state, action: PayloadAction<string>) => {
       const key = action.payload;
       const { loading, preKey, preCountData, changing } =
         state.findSuggestion as ISearchBarInput;
+      const storedProducts = state.storedProducts;
       if (key) {
         const regex = new RegExp(key, "i");
-        const suggestions = state.suggestions;
-        const tOfPS: ISuggestions[] = [];
+        const suggestions = state.storedSuggestions;
+        const tOfPS: ISuggestion[] = [];
         const names = suggestions.filter((obj) => {
           const { key, identity } = obj;
           if (regex.test(key)) {
@@ -140,10 +156,9 @@ const UserSlice = createSlice({
             else tOfPS.push(obj);
           }
         });
-        const newSuggestion = tOfPS.concat(names).slice(0, 10);
-
-        const allData = state.allData;
-        state.products = allData.filter((obj) => regex.test(obj.name));
+        const newSuggestion = tOfPS.concat(names).slice(0, suggestionLimit);
+        const products = storedProducts.filter((obj) => regex.test(obj.name));
+        state.products = products.length ? products : [...storedProducts];
 
         const findNew = {
           preKey: key,
@@ -153,53 +168,51 @@ const UserSlice = createSlice({
 
         const keyLength = key.length;
         const preKeyLength = preKey.length;
-
-        if (
-          !loading && key.includes(preKey) && preCountData === undefined
-            ? true
-            : preCountData >= 10
-        ) {
-          findNew.changing = null;
-          state.findSuggestion = findNew;
-        } else if (
-          !key.includes(preKey) &&
-          changing !== false &&
-          newSuggestion.length !== 10
-        ) {
-          findNew.changing = true;
-          state.findSuggestion = findNew;
+        const randomPage = state.randomPage;
+        if (randomPage) {
+          if (
+            !loading && key.includes(preKey) && preCountData === undefined
+              ? true
+              : preCountData === suggestionPerReq
+          ) {
+            findNew.changing = null;
+            state.findSuggestion = findNew;
+          } else if (
+            !key.includes(preKey) &&
+            changing !== false &&
+            newSuggestion.length !== suggestionLimit
+          ) {
+            findNew.changing = true;
+            state.findSuggestion = findNew;
+          }
+          if (changing === false && keyLength + 4 > preKeyLength) {
+            state.findSuggestion.loading = false;
+          }
         }
-
-        if (changing === false && keyLength + 4 > preKeyLength)
-          state.findSuggestion.loading = false;
+        state.suggestions = newSuggestion;
       } else {
-        const searches = state.searches;
-        const newSuggestion: ISuggestions[] = searches.flatMap((obj) => {
-          const { byUser, identity, key } = obj;
-          if (byUser) {
-            return { key, identity };
-          } else return [];
-        });
-        state.products = [];
-        state.suggestion = newSuggestion;
+        state.products = [...storedProducts];
+        state.suggestions = [];
         state.findSuggestion = {
-          preKey: "",
+          preKey,
           loading: false,
-          preCountData: undefined,
+          preCountData,
           changing: null,
         };
       }
     },
+
     checkChangingKey: (state) => {
       if (state.findSuggestion.loading) state.findSuggestion.changing = false;
     },
+
     loginSuccess: (state, action: PayloadAction<ILoginSuccess>) => {
       const { data, text, token } = action.payload;
       const { nOfNOrder, cartPro, searches } = data;
       state.token = token;
       state.data = data;
       state.alerts.push({ text, type: "Success", duration: "2s" });
-      state.loading = false;
+      state.loadings = state.loadings.filter((pending) => pending !== "Login");
       state.nOfNOrder = nOfNOrder || 0;
       state.numOfCart = Array.isArray(cartPro) ? cartPro.length : 0;
       state.searches = searches;
@@ -207,7 +220,7 @@ const UserSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getDistricts.pending, (state) => {
-      state.loading = true;
+      state.loadings = state.loadings.filter((pending) => pending !== "Login");
     });
 
     builder.addCase(getDistricts.fulfilled, (state, action) => {
@@ -217,11 +230,13 @@ const UserSlice = createSlice({
       } else {
         state.alerts.push(resAlert as IAlert);
       }
-      state.loading = false;
+      state.loadings = state.loadings.filter(
+        (pending) => pending !== "District"
+      );
     });
     builder.addCase(suggestionsGet.fulfilled, (state, action) => {
       const { success, searchKey, data = [] } = action.payload;
-      const { loading, preKey } = state.findSuggestion;
+      const { loading } = state.findSuggestion;
       const newSuggestion = {
         preKey: searchKey,
         loading: false,
@@ -230,17 +245,13 @@ const UserSlice = createSlice({
       };
       if (success) {
         const regex = new RegExp(searchKey, "i");
-        const convert = (data: ISuggestions) => JSON.stringify(data);
+        const convert = (data: ISuggestion) => JSON.stringify(data);
         const stored = state.suggestions.map(convert);
         const setValue = new Set(stored.concat(data.map(convert)));
-        const unique: ISuggestions[] = Array.from(setValue).map((obj) =>
+        const unique: ISuggestion[] = Array.from(setValue).map((obj) =>
           JSON.parse(obj)
         );
-        // for (let { key, identity } of data) {
-        //   if (!stored.some((obj) => obj.key === key))
-        //     stored.push({ key, identity });
-        // }
-        const tOfPS: ISuggestions[] = [];
+        const tOfPS: ISuggestion[] = [];
         const names = unique.filter((obj) => {
           const { key, identity } = obj;
           if (regex.test(key)) {
@@ -248,11 +259,50 @@ const UserSlice = createSlice({
             else tOfPS.push(obj);
           }
         });
-        if (newSuggestion.preCountData) state.suggestions = unique;
-        if (loading) state.suggestion = tOfPS.concat(names).slice(0, 10);
+        if (newSuggestion.preCountData) {
+          state.suggestions = unique;
+        }
+        if (loading) {
+          state.storedSuggestions = tOfPS
+            .concat(names)
+            .slice(0, suggestionLimit);
+        }
       }
 
       state.findSuggestion = newSuggestion;
+    });
+    builder.addCase(fetchRandom.pending, (state, action) => {
+      state.proLoading = true;
+    });
+
+    builder.addCase(fetchRandom.fulfilled, (state, action) => {
+      const { data, resPage, resSearches } = action.payload;
+      // console.log(" data, resPage, resSearches", data, resPage, resSearches);
+
+      const storedProducts = state.storedProducts;
+      // console.log("storedProducts", storedProducts);
+      state.randomPage = resPage || null;
+      state.searches = resSearches;
+      const unique: Array<ISearchProduct> = [];
+      data?.forEach((obj) => {
+        const _id = obj._id;
+        if (!storedProducts.some((obj) => obj._id === _id)) {
+          unique.push(obj);
+        }
+      });
+      console.log("unique", unique);
+      console.log("data", data);
+      state.products.push(...unique);
+      state.storedProducts.push(...unique);
+      state.proLoading = false;
+    });
+    builder.addCase(fetchKeyProduct.pending, (state, action) => {
+      state.proLoading = true;
+    });
+    builder.addCase(fetchKeyProduct.fulfilled, (state, action) => {
+      const { success, status, message, key, isSearched, resPage, data } =
+        action.payload;
+      state.proLoading = false;
     });
   },
 });
@@ -267,4 +317,5 @@ export const {
   searchBarInput,
   checkChangingKey,
   loginSuccess,
+  newLoading,
 } = UserSlice.actions;

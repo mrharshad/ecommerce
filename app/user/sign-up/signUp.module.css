@@ -10,7 +10,7 @@
   min-height: 100vh;
 }
 
-.container {
+.formContainer {
   color: white;
   display: flex;
   max-width: max(500px, 52vh);
@@ -21,42 +21,60 @@
   flex-direction: column;
 }
 
-.container > h1 {
+.formContainer > h1 {
   font-size: var(--twenty);
-  margin: 1em 0px 0.7em 0.7em;
+  margin-top: 0.7em;
+  margin-left: 0.5em;
 }
 
-.container > form {
+.formContainer > .container {
   display: flex;
   margin: 0.6em;
   row-gap: 0.4em;
   flex-direction: column;
+  max-height: 60svh;
+  overflow-y: scroll;
+  scrollbar-width: none;
 }
 
-.container > form label {
+.container ::-webkit-scrollbar {
+  display: none;
+}
+
+.container label {
   margin-top: 1em;
-  font-size: var(--fifteen);
+  font-size: small;
 }
 
-.container > form input {
+.container input {
   padding-left: 0.5em;
-  border-radius: 0.5em;
+  border-radius: 0.3em;
   height: max(26px, 2.6svh);
   font-size: var(--fifteen);
-  background-color: rgb(160, 170, 173);
+  background-color: #ffffff1a;
   transition: background-color 400ms ease-in-out;
+  padding-bottom: 3px;
+  border: none;
+  box-shadow: 1px 1px 0px 0px #ffffff47;
+  color: #b8b8b8;
+  outline: none;
+}
+.manageHeight {
+  padding-top: 5px;
+  padding-bottom: 10px;
 }
 
-.container > form input:focus {
-  background-color: gray;
+.container input:focus {
+  color: white;
+  background-color: rgb(255 255 255 / 20%);
 }
 
-.container > form input::placeholder {
+.container input::placeholder {
   font-size: 0.8em;
   padding-left: 0.2em;
 }
 
-.container > form > div {
+.container > div {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -83,10 +101,9 @@
   bottom: 5px;
   color: black;
   position: absolute;
+  color: white;
 }
-/* .area {
-  background-color: white !important;
-} */
+
 .gender p {
   font-size: var(--fifteen);
   display: flex;
@@ -98,31 +115,38 @@
   display: flex;
   margin-left: auto;
   align-items: center;
+  color: #b8b8b8;
 }
 
 .gender label input {
   margin-left: 10px;
+  box-shadow: none;
 }
 
 .birth > input {
   border-radius: 5px;
   width: 100%;
+  color: transparent;
 }
 
 .birth > input:focus {
-  background-color: #a0aaad !important;
+  opacity: 0;
 }
 
-.birth > span {
+.birth > label {
   position: absolute;
-  background-color: #a0aaad;
-  left: 5px;
-  bottom: 2px;
-  height: 80%;
+  height: max(26px, 2.6svh);
   display: inline-block;
-  width: calc(100% - 30px);
-  color: black;
-  text-align: center;
+  font-size: 14px;
+  color: #b8b8b8;
+  width: 99%;
+  background-color: rgb(255 255 255 / 10%);
+  border-radius: 3px;
+  left: 1px;
+  top: -14px;
+  padding-top: 6px;
+  box-shadow: 1px 1px 0px 0px #ffffff47;
+  padding-left: 5px;
 }
 .stateContainer > p {
   width: 45%;
@@ -131,63 +155,68 @@
   height: max(26px, 2.6svh);
   font-size: var(--fifteen);
   color: black;
-  background-color: #a0aaad;
   transition: background-color 400ms ease-in-out;
 }
-.container > form > .stateContainer > label {
+
+.stateContainer > label {
   width: 45%;
   margin-bottom: 0.3em;
   margin-top: 2em;
 }
 
-.container > form > .stateContainer > input {
+.stateContainer > input {
   width: 45%;
 }
 
-.container > form > .stateContainer > select {
+.stateContainer > select {
   width: 45%;
   padding-left: 0.5em;
   border-radius: 0.5em;
   height: max(26px, 2.6vh);
   font-size: var(--fifteen);
+  color: #b8b8b8;
+  background-color: rgb(255 255 255 / 10%);
   transition: background-color 400ms ease-in-out;
-  background-color: #a0aaad;
 }
 
-.container > form > button {
+.formContainer > button {
   margin: 15px auto var(--twenty) auto;
-  width: 40%;
-  height: max(40px, 4vh);
+  width: 35%;
+  max-width: 150px;
+  height: max(35px, 4.5vh);
   cursor: pointer;
   font-weight: 600;
-  font-size: var(--fifteen);
+  font-size: large;
   border: none;
   border-radius: 0.5em;
+  color: black;
 }
 
-.container > form > button:hover {
+.container > button:hover {
   scale: 1.1;
 }
 
-.firstStep {
+.formContainer {
   flex-direction: column;
 }
 
-.container .firstStep > button {
-  background: linear-gradient(to right top, #d2e5ff, #64cfdd);
+.formContainer > button {
+  background: linear-gradient(to right top, #8ebcff, #e5f1ff);
 }
 
-.container .firstStep > p {
+.formContainer > p {
   margin-bottom: 1.3em;
   font-size: var(--fifteen);
+  margin-left: 10px;
 }
 
-.container .firstStep > p a {
+.formContainer > p a {
   color: #74d3ff;
 }
 
 .checkMail {
-  height: 50px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   border-bottom: 1px solid;
 }
 
@@ -213,7 +242,10 @@
   border-bottom: none;
   outline: none;
 }
-
+.password {
+  padding-top: 5px;
+  padding-bottom: 10px;
+}
 .password::placeholder {
   font-size: 0.9em !important;
 }
@@ -224,21 +256,10 @@
 }
 
 @media screen and (max-width: 480px) {
-  .container {
+  .formContainer {
     width: 98%;
   }
-
-  .secondStep {
-    .identity {
-      font-size: medium;
-    }
-
-    .resend {
-      font-size: small;
-    }
-  }
-
-  .secondStep > p:nth-child(1) {
+  .formContainer > button {
     font-size: medium;
   }
 }

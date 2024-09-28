@@ -170,6 +170,7 @@
   width: 30px;
   position: absolute;
   left: -25px;
+  opacity: 0;
 }
 .searchKeys {
   z-index: 1;
@@ -225,6 +226,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
+  color: black;
+  font-size: 14px;
 }
 
 .cart {
@@ -235,7 +238,7 @@
 }
 .cart span {
   position: absolute;
-  top: 10%;
+  top: 5%;
   color: black;
   left: 43%;
 }
@@ -422,9 +425,9 @@
     width: max(268px, 86svw);
   }
   .searchKeys {
-    left: -40px;
+    left: -14svw;
     background-color: white;
-    width: 99svw;
+    width: 100svw;
   }
 
   .cart {
@@ -437,7 +440,9 @@
     margin-top: 2px;
     width: 100%;
   }
-
+  .searchKeys .deleteSvg {
+    margin-right: 0px;
+  }
   .filterLabel {
     right: 0px;
   }

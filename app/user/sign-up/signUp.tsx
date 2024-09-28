@@ -11,7 +11,12 @@ import style from "./signUp.module.css";
 import stateOfIndia from "@/static-data/stateOfIndia";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { loginSuccess, mainKeyChange, newAlert } from "@/app/redux/UserSlice";
+import {
+  loginSuccess,
+  mainKeyChange,
+  newAlert,
+  newLoading,
+} from "@/app/redux/UserSlice";
 import { getDistricts } from "@/app/redux/UserApiRequest";
 
 import Link from "next/link";
@@ -31,7 +36,7 @@ const initialData = {
 const SignUpComponent: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const defaultState = "Chhattisgarh";
-  const { alerts, searches, districts, loading } = useSelector(
+  const { alerts, searches, districts } = useSelector(
     (data: IReduxStoreData) => data.user
   );
 
@@ -56,9 +61,6 @@ const SignUpComponent: FC = () => {
     dispatch(newAlert({ info: { type: "Message", text } }));
   };
 
-  const processing = (value: boolean): void => {
-    dispatch(mainKeyChange({ name: "loading", value }));
-  };
   async function signUpFunction(formData: FormData) {
     if (alerts.length) return;
     if (reTry) {
@@ -99,7 +101,7 @@ const SignUpComponent: FC = () => {
     if (validCode && validCode === firstStep.validCode) {
       return showWarning("Enter New Verification Code");
     }
-    processing(true);
+    dispatch(newLoading("Sign-Up"));
 
     const useData: any = {
       fName: formData.get("fName"),
@@ -150,7 +152,7 @@ const SignUpComponent: FC = () => {
             duration: "5s",
             text,
           },
-          loading: false,
+          completed: "Sign-Up",
         })
       );
     }
@@ -219,11 +221,12 @@ const SignUpComponent: FC = () => {
 
   return (
     <section className={style.section}>
-      <div className={style.container}>
+      <form className={style.formContainer} action={signUpFunction}>
         <h1>Create Account</h1>
-        <form className={style.firstStep} action={signUpFunction}>
+        <div className={style.container}>
           <label htmlFor="fName">First Name</label>
           <input
+            className={style.manageHeight}
             defaultValue={firstStep.fName}
             required
             name="fName"
@@ -233,6 +236,7 @@ const SignUpComponent: FC = () => {
           />
           <label htmlFor="lName">Last Name (surname)</label>
           <input
+            className={style.manageHeight}
             defaultValue={firstStep.lName}
             required
             name="lName"
@@ -299,7 +303,9 @@ const SignUpComponent: FC = () => {
                 name="birth"
                 id="birth"
               />
-              <span>{birth?.textType}</span>
+              <label className={style.birthText} htmlFor="birth">
+                {birth?.textType}
+              </label>
             </div>
 
             <label htmlFor="state">State</label>
@@ -357,6 +363,7 @@ const SignUpComponent: FC = () => {
 
           <label htmlFor="address">Address</label>
           <input
+            className={style.manageHeight}
             defaultValue={firstStep.address}
             name="address"
             required
@@ -389,7 +396,6 @@ const SignUpComponent: FC = () => {
               />
             </label>
           </div>
-
           {numOfSendToken > 0 && (
             <>
               <div className={style.checkMail}>
@@ -436,14 +442,14 @@ const SignUpComponent: FC = () => {
               </label>
             </>
           )}
-          <button id="verify" type="submit">
-            Verify
-          </button>
-          <p>
-            Already have an account? <Link href="/user/login"> Login</Link>
-          </p>
-        </form>
-      </div>
+        </div>
+        <button id="verify" type="submit">
+          {numOfSendToken > 0 ? "Sign Up" : "Sign Up"}
+        </button>
+        <p>
+          Already have an account? <Link href="/user/login"> Login</Link>
+        </p>
+      </form>
     </section>
   );
 };

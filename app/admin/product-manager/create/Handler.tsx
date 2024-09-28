@@ -1,7 +1,7 @@
 "use client";
 import React, { FC, useCallback, useEffect, useMemo } from "react";
 import style from "./handler.module.css";
-import { AppDispatch, IReduxStoreData } from "@/app/redux/ReduxStore";
+import { AppDispatch } from "@/app/redux/ReduxStore";
 import { useDispatch, useSelector } from "react-redux";
 import { IMainValueUpdate, IReduxCreateData } from "./interface";
 import {

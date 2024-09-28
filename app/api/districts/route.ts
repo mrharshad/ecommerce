@@ -1,4 +1,4 @@
-import { IGetDistricts } from "@/app/redux/UserApiRequestTypes";
+import { IGetDistricts } from "@/app/redux/UserApiRequestInterface";
 import districts from "@/static-data/districtsOfStatesOfIndia";
 import { NextRequest } from "next/server";
 

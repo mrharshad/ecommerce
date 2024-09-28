@@ -1,4 +1,4 @@
-import { ISuggestions } from "@/interfaces/userClientSide";
+import { ISuggestion } from "@/interfaces/userClientSide";
 import searchProductsName from "@/static-data/searchProductsName";
 import searchTOfProduct from "@/static-data/searchTOfProduct";
 
@@ -14,7 +14,7 @@ export async function GET(req: Request, context: IContext) {
 
     const regex = new RegExp(searchKey, "i");
     const data = tOfPData
-      .flatMap<ISuggestions>((key) => {
+      .flatMap<ISuggestion>((key) => {
         if (regex.test(key) || searchKey.includes(key)) {
           return { key, identity: "tOfP" };
         } else return [];

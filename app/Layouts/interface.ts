@@ -1,4 +1,9 @@
-import { IAlert, IReduxUserData, ISearches } from "@/interfaces/userClientSide";
+import {
+  IAlert,
+  IReduxUserData,
+  ISearches,
+  TPending,
+} from "@/interfaces/userClientSide";
 
 export interface IUserAppUpdate extends IReduxUserData {
   searches: ISearches[];
@@ -6,7 +11,7 @@ export interface IUserAppUpdate extends IReduxUserData {
 
 export interface INewAlert {
   info: IAlert;
-  loading?: boolean;
+  completed?: TPending;
 }
 
 export interface IAppMount {
@@ -21,4 +26,10 @@ export interface HeaderProps extends IAppMount {
   //   height: number;
   //   alt: string;
   // }>;
+}
+
+export interface IUserAlert {
+  alerts: IAlert[];
+  removeAlert: (text: string) => void;
+  loading: Array<TPending>;
 }

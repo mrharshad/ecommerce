@@ -135,7 +135,7 @@ export async function PUT(req: NextRequest) {
         const newSearches = userSearch
           .slice(0, 10)
           .concat(autoSearch.slice(0, 5))
-          .map(({ byUser, identity, key, update }) => {
+          .map(({ byUser, identity, key }) => {
             return {
               key,
               byUser,
@@ -143,7 +143,6 @@ export async function PUT(req: NextRequest) {
                 typeof Number(identity) == "number"
                   ? String(identity)
                   : identity,
-              update,
             };
           });
         findUser.searches = newSearches as ISearches[];

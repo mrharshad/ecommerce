@@ -97,13 +97,12 @@ export async function PUT(req: NextRequest) {
       findUser.searches = userSearch
         .slice(0, 10)
         .concat(autoSearch.slice(0, 5))
-        .map(({ byUser, identity, key, update }) => {
+        .map(({ byUser, identity, key }) => {
           return {
             key,
             byUser,
             identity:
               typeof Number(identity) == "number" ? String(identity) : identity,
-            update,
           };
         }) as ISearches[];
     }

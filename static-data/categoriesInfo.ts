@@ -1,4 +1,13 @@
-import { faceCare } from "./commonExInfoData";
+import {
+  faceCare,
+  hairCare,
+  athletic,
+  chess,
+  badminton,
+  fitness,
+  showpiece,
+  bodyCare,
+} from "./commonExInfoData";
 export interface IExInfoData {
   key: string;
   required: boolean;
@@ -34,10 +43,7 @@ const categoriesInfo: Array<ICategoriesInfo> = [
     tOfProducts: [
       {
         tOfPName: "College Bag",
-        requiredCertificates: [
-          "Bureau of Indian Standards (BIS)",
-          "Drug Controller General of India (DCGI)",
-        ],
+        requiredCertificates: [],
         exInfoData: [
           { key: "Material", required: true, sameOrder: true },
           { key: "Country of Origin", required: false },
@@ -47,10 +53,7 @@ const categoriesInfo: Array<ICategoriesInfo> = [
       },
       {
         tOfPName: "Cap",
-        requiredCertificates: [
-          "Bureau of Indian Standards (BIS)",
-          "Drug Controller General of India (DCGI)",
-        ],
+        requiredCertificates: [],
         exInfoData: [
           { key: "Net Quantity", required: false, sameOrder: true },
           { key: "Container Type", required: false },
@@ -58,10 +61,7 @@ const categoriesInfo: Array<ICategoriesInfo> = [
       },
       {
         tOfPName: "Keychain",
-        requiredCertificates: [
-          "Bureau of Indian Standards (BIS)",
-          "Drug Controller General of India (DCGI)",
-        ],
+        requiredCertificates: [],
         exInfoData: [
           { key: "Country of Origin", required: false },
           { key: "Container Type", required: false },
@@ -70,10 +70,7 @@ const categoriesInfo: Array<ICategoriesInfo> = [
       },
       {
         tOfPName: "Wallets",
-        requiredCertificates: [
-          "Bureau of Indian Standards (BIS)",
-          "Drug Controller General of India (DCGI)",
-        ],
+        requiredCertificates: [],
         exInfoData: [
           { key: "Country of Origin", required: false },
           { key: "Container Type", required: false },
@@ -87,67 +84,54 @@ const categoriesInfo: Array<ICategoriesInfo> = [
     tOfProducts: [
       {
         tOfPName: "Sport A-L Socks",
-        requiredCertificates: [],
         exInfoData: [
           { key: "Material", required: true, sameOrder: true },
-          { key: "Container Type", required: false },
-          { key: "Net Quantity", required: false, sameOrder: true },
+          ...athletic,
         ],
+        requiredCertificates: [],
       },
       {
         tOfPName: "Sport K-L Socks",
+        exInfoData: [...athletic],
         requiredCertificates: [],
-        exInfoData: [
-          { key: "Net Quantity", required: false, sameOrder: true },
-          { key: "Container Type", required: false },
-        ],
       },
       {
-        tOfPName: "Marking Cone",
-        requiredCertificates: [],
+        tOfPName: "Marker Cones",
         exInfoData: [
-          { key: "Country of Origin", required: false },
-          { key: "Container Type", required: false },
-          { key: "Net Quantity", required: false, sameOrder: true },
+          { key: "Material", required: true, sameOrder: true },
+          ...athletic,
         ],
+        requiredCertificates: [],
       },
       {
         tOfPName: "Disc Cone",
-        requiredCertificates: [
-          "Bureau of Indian Standards (BIS)",
-          "Drug Controller General of India (DCGI)",
-        ],
-        exInfoData: [
-          { key: "Country of Origin", required: false },
-          { key: "Container Type", required: false },
-        ],
+        requiredCertificates: [],
+        exInfoData: [...athletic],
       },
       {
         tOfPName: "Ankle Support",
         requiredCertificates: [],
         exInfoData: [
-          { key: "Country of Origin", required: false },
-          { key: "Container Type", required: false },
+          { key: "Material", required: true, sameOrder: true },
+          { key: "Product Care", required: true, sameOrder: true },
+          { key: "Dimensions ", required: true, sameOrder: true },
+          ...athletic,
         ],
       },
       {
         tOfPName: "Knee Support",
-        requiredCertificates: [],
         exInfoData: [
-          { key: "Country of Origin", required: false },
-          { key: "Container Type", required: false },
+          { key: "Product Care", required: true, sameOrder: true },
+          { key: "Closure Type", required: true, sameOrder: true },
+          { key: "Dimensions", required: true, sameOrder: true },
+          ...athletic,
         ],
+        requiredCertificates: [],
       },
       {
         tOfPName: "Skipping Rope",
-        requiredCertificates: [
-          "Bureau of Indian Standards (BIS)",
-          "Drug Controller General of India (DCGI)",
-        ],
-        exInfoData: [
-          { key: "Country of Origin", required: false },
-          { key: "Container Type", required: false },
-        ],
+        exInfoData: [...athletic],
+        requiredCertificates: [],
       },
     ],
   },
@@ -180,6 +164,32 @@ const categoriesInfo: Array<ICategoriesInfo> = [
           { key: "Container Type", required: true },
           { key: "Quantity", required: false },
         ],
+      },
+    ],
+  },
+  {
+    _id: "Chess",
+    brands: [],
+    tOfProducts: [
+      {
+        tOfPName: "Chessboard",
+        exInfoData: [...chess],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Chess Pieces",
+        exInfoData: [...chess],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Chess Set",
+        exInfoData: [...chess],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Chess Clock",
+        exInfoData: [...chess],
+        requiredCertificates: [],
       },
     ],
   },
@@ -243,6 +253,102 @@ const categoriesInfo: Array<ICategoriesInfo> = [
   //     common: [],
   //   },
   // },
+
+  {
+    _id: "Badminton",
+    brands: ["NA", "Adidas", "Li-Ning", "Puma", "Yonex", "Vector X"],
+    tOfProducts: [
+      {
+        tOfPName: "Badminton Ball",
+        exInfoData: [...badminton],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Badminton Racket",
+        exInfoData: [...badminton],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Badminton Ball",
+        exInfoData: [...badminton],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Shuttlecock",
+        exInfoData: [...badminton],
+        requiredCertificates: [],
+      },
+    ],
+  },
+
+  {
+    _id: "Body Care",
+    brands: [
+      "Ancient Living",
+      "The Body Shop",
+      "Neutrogena",
+      "L'Oreal",
+      "Lakme",
+      "Himalaya Herbals",
+      "Cetaphil",
+      "Clinique",
+      "Clean & Clear",
+      "Nivea",
+      "Garnier",
+      "Olay",
+      "Ponds",
+      "Kiehl's",
+      "Forest Essentials",
+      "Lotus Herbals",
+      "Aveeno",
+    ],
+    tOfProducts: [
+      {
+        tOfPName: "Body Wash",
+        exInfoData: [...bodyCare],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Body Lotion",
+        exInfoData: [...bodyCare],
+        requiredCertificates: [],
+      },
+    ],
+  },
+
+  // "Car Accessories": {
+  //   tOfPS: ["Car Dashboard"],
+  //   brands: ["Godrej"],
+  //   keyValueD: {
+  //     common: ["Material"],
+  //   },
+  //   aInfo: {
+  //     common: ["Country of Origin"],
+  //   },
+  //   certificate: {
+  //     common: [],
+  //   },
+  // },
+  // Cricket: {
+  //   tOfPS: [
+  //     "Cricket Bat",
+  //     "Cricket Ball",
+  //     "Cricket Stump",
+  //     "Cricket Gloves",
+  //     "Cricket Abdominal Guard",
+  //     "Cricket Tennis Ball",
+  //   ],
+  //   brands: ["Adidas", "Puma", "Protect", "Sixit", "Vicky"],
+  //   keyValueD: {
+  //     common: ["Material", "Net Quantity"],
+  //   },
+  //   aInfo: {
+  //     common: ["Country of Origin", "Container Type"],
+  //   },
+  //   certificate: {
+  //     common: [],
+  //   },
+  // },
   {
     _id: "Face Care",
     brands: [
@@ -282,92 +388,6 @@ const categoriesInfo: Array<ICategoriesInfo> = [
       },
     ],
   },
-
-  // Badminton: {
-  //   tOfPS: [
-  //     "Badminton Ball",
-  //     "Badminton Racket",
-  //     "Badminton Accessories",
-  //     "Shuttlecock",
-  //   ],
-  //   brands: ["NA", "Adidas", "Li-Ning", "Puma", "Yonex", "Vector X"],
-  //   keyValueD: {
-  //     common: ["Material"],
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin"],
-  //   },
-  //   certificate: {
-  //     common: [],
-  //   },
-  // },
-
-  // "Body Care": {
-  //   tOfPS: ["Body Wash", "Body Lotion"],
-  //   brands: [
-  //     "Ancient Living",
-  //     "The Body Shop",
-  //     "Neutrogena",
-  //     "L'Oreal",
-  //     "Lakme",
-  //     "Himalaya Herbals",
-  //     "Cetaphil",
-  //     "Clinique",
-  //     "Clean & Clear",
-  //     "Nivea",
-  //     "Garnier",
-  //     "Olay",
-  //     "Ponds",
-  //     "Kiehl's",
-  //     "Forest Essentials",
-  //     "Lotus Herbals",
-  //     "Aveeno",
-  //   ],
-  //   keyValueD: {
-  //     common: ["Skin Type", "Net Quantity", "Age range"],
-  //     // "Face Cream": ["test 1", "test 2"],  isme kisi type ke product ka keyValue defrance kya hoga likh sakte hai
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin", "Maximum Use", "Container Type"],
-  //   },
-  //   certificate: {
-  //     common: [],
-  //   },
-  // },
-  // "Car Accessories": {
-  //   tOfPS: ["Car Dashboard"],
-  //   brands: ["Godrej"],
-  //   keyValueD: {
-  //     common: ["Material"],
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin"],
-  //   },
-  //   certificate: {
-  //     common: [],
-  //   },
-  // },
-  // Cricket: {
-  //   tOfPS: [
-  //     "Cricket Bat",
-  //     "Cricket Ball",
-  //     "Cricket Stump",
-  //     "Cricket Gloves",
-  //     "Cricket Abdominal Guard",
-  //     "Cricket Tennis Ball",
-  //   ],
-  //   brands: ["Adidas", "Puma", "Protect", "Sixit", "Vicky"],
-  //   keyValueD: {
-  //     common: ["Material", "Net Quantity"],
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin", "Container Type"],
-  //   },
-  //   certificate: {
-  //     common: [],
-  //   },
-  // },
-
   // "Home Appliances": {
   //   tOfPS: ["Air Freshener"],
   //   brands: ["Godrej"],
@@ -401,19 +421,17 @@ const categoriesInfo: Array<ICategoriesInfo> = [
   //   },
   // },
 
-  // "Hair Care": {
-  //   tOfPS: ["Shampoo"],
-  //   brands: ["Indulekha"],
-  //   keyValueD: {
-  //     common: ["Material"],
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin"],
-  //   },
-  //   certificate: {
-  //     common: [],
-  //   },
-  // },
+  {
+    _id: "Hair Care",
+    brands: ["Indulekha"],
+    tOfProducts: [
+      {
+        tOfPName: "Shampoo",
+        exInfoData: [...hairCare],
+        requiredCertificates: [],
+      },
+    ],
+  },
 
   // Skates: {
   //   tOfPS: [
@@ -434,41 +452,67 @@ const categoriesInfo: Array<ICategoriesInfo> = [
   //     common: [],
   //   },
   // },
-  // Fitness: {
-  //   tOfPS: [
-  //     "Pushup Equipment",
-  //     "Tools For Abs",
-  //     "Weight Machine For Body",
-  //     "Protein Shaker",
-  //     "Exercise Ball",
-  //     "Fitness Gloves",
-  //     "Wrist Band",
-  //     "Strengthener",
-  //     "Yoga Mat",
-  //     "Massage Roller",
-  //     "Resistance Band",
-  //     "Kettlebell",
-  //   ],
-  //   brands: [
-  //     "NA",
-  //     "Vector X",
-  //     "SUVARNA",
-  //     "Champs Fighter",
-  //     "Morex",
-  //     "Mikado",
-  //   ],
-  //   keyValueD: {
-  //     common: ["Material"],
-  //     "Weight Machine For Body": ["Warranty"],
-  //     "Protein Shaker": ["Capacity", "Product Dimensions"],
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin"],
-  //   },
-  //   certificate: {
-  //     common: [],
-  //   },
-  // },
+  {
+    _id: "Fitness",
+    brands: ["NA", "Vector X", "SUVARNA", "Champs Fighter", "Morex", "Mikado"],
+    tOfProducts: [
+      {
+        tOfPName: "Abs Exercise Equipment",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Weight Machine For Body",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Protein Shaker",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Exercise Ball",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Fitness Gloves",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Wrist Band",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Strengthener",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Yoga Mat",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Massage Roller",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Resistance Band",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Kettlebell",
+        exInfoData: [...fitness],
+        requiredCertificates: [],
+      },
+    ],
+  },
 
   // Kitchen: {
   //   tOfPS: ["For Egg", "For Serving", "For Food Storage"],
@@ -505,40 +549,74 @@ const categoriesInfo: Array<ICategoriesInfo> = [
   //     common: [],
   //   },
   // },
-  // Sports: {
-  //   tOfPS: [
-  //     "Chess Coins",
-  //     "Chess Set",
-  //     "Carrom Coins",
-  //     "Flying Disc",
-  //     "Basketball",
-  //     "Volleyball",
-  //     "Ball Pump",
-  //   ],
-  //   brands: ["NA", "Techno Galaxy", "Mikado", "Magic", "Vinex", "Nivia"],
-  //   keyValueD: {
-  //     common: ["Material"],
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin"],
-  //   },
-  //   certificate: {
-  //     common: [],
-  //   },
-  // },
-  // Showpiece: {
-  //   tOfPS: ["Energizing Art"],
-  //   brands: ["NA", "Xtore", "Global Grabbers"],
-  //   keyValueD: {
-  //     common: ["Material"],
-  //   },
-  //   aInfo: {
-  //     common: ["Country of Origin"],
-  //   },
-  //   certificate: {
-  //     common: [],
-  //   },
-  // },
+  {
+    _id: "Showpiece",
+    brands: ["NA", "Xtore", "Global Grabbers"],
+    tOfProducts: [
+      {
+        tOfPName: "Good Luck",
+        exInfoData: [...showpiece],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Vases",
+        exInfoData: [...showpiece],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Wall Art",
+        exInfoData: [...showpiece],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Mini Sculptures",
+        exInfoData: [...showpiece],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Lanterns/Candle Holders",
+        exInfoData: [...showpiece],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Tradition Showpiece",
+        exInfoData: [...showpiece],
+        requiredCertificates: [],
+      },
+    ],
+  },
+
+  {
+    _id: "Sports",
+    brands: ["NA", "Techno Galaxy", "Mikado", "Magic", "Vinex", "Nivia"],
+    tOfProducts: [
+      // {
+      //   tOfPName: "Carrom Coins",
+      //   exInfoData: [...sports],
+      //   requiredCertificates: [],
+      // },
+      // {
+      //   tOfPName: "Flying Disc",
+      //   exInfoData: [...sports],
+      //   requiredCertificates: [],
+      // },
+      // {
+      //   tOfPName: "Basketball",
+      //   exInfoData: [...sports],
+      //   requiredCertificates: [],
+      // },
+      // {
+      //   tOfPName: "Volleyball",
+      //   exInfoData: [...sports],
+      //   requiredCertificates: [],
+      // },
+      // {
+      //   tOfPName: "Ball Pump",
+      //   exInfoData: [...sports],
+      //   requiredCertificates: [],
+      // },
+    ],
+  },
 ];
 
 export default categoriesInfo;

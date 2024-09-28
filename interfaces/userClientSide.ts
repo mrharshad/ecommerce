@@ -1,13 +1,14 @@
 import { ISearchProduct } from "./productServerSide";
+
 import { IAuthorizedUser } from "./userServerSide";
 
 export type IDevice = "Desktop" | "Tab" | "Mobile";
 
-export type IActive = "productInfo" | "home" | "other";
+export type IActive = "singlePro" | "home" | "other";
 
-export interface ICategories {
-  name: string;
-  tOfPS: string[];
+export interface ICategory {
+  key: string;
+  page: number | null;
 }
 
 export type ISearchSort =
@@ -19,22 +20,16 @@ export type ISearchSort =
   | "Discount";
 export type ISearchesIdentity = "tOfP" | "name" | number;
 
-export type ISuggestions = { key: string; identity: ISearchesIdentity };
+export type ISuggestion = { key: string; identity: ISearchesIdentity };
 
 export type IToggleSuggestion = "0px" | "1000px";
 
 export interface ISearches {
   key: string;
   byUser: boolean;
-  update: Date;
   priority: number;
   identity: "tOfP" | "name" | number;
-  cached?: Array<{ sorted: ISearchSort; page: number | null }>;
-}
-export interface ISearch {
-  key: string;
-  page: null | number;
-  identity: "tOfP" | "name" | number;
+  cached: Array<{ sorted: ISearchSort; page: number | null }>;
 }
 
 export interface IFindSuggestion {
@@ -59,44 +54,72 @@ export interface IReduxUserData
   searches: Array<{
     key: string;
     byUser: boolean;
-    update: Date;
     priority: number;
     identity: "tOfP" | "name" | number;
-    cached?: Array<{ sorted: ISearchSort; page: number | null }>;
+    cached: Array<{ sorted: ISearchSort; page: number | null }>;
   }>;
 }
-export interface IPageInfo {
+export interface IHome {
   scrolled: number;
 }
+export type TPending =
+  | "Component"
+  | "Search-Product"
+  | "Delete-Product"
+  | "Category"
+  | "Create-Product"
+  | "Login"
+  | "District"
+  | "Recovery-Password"
+  | "Sign-Up";
 export interface IReduxUser {
   data: IReduxUserData;
   token: string | null;
   numOfCart: number;
-  search: {
-    key: string;
-    page: null | number;
-    identity: "tOfP" | "name" | number;
-  };
-  searches: ISearches[];
+  searchKey: string;
+  searches: Array<ISearches>;
   searchSort: ISearchSort;
   toggleSuggestion: IToggleSuggestion;
-  page: number | null;
-  loading: boolean;
-  suggestions: ISuggestions[];
-  suggestion: ISuggestions[];
+  storedSuggestions: ISuggestion[];
+  suggestions: ISuggestion[];
   districts: string[];
   alerts: IAlert[];
   findSuggestion: IFindSuggestion;
-  dataEnd: boolean;
-  categories: ICategories[];
   newOrder: string[];
   canceled: string[];
   delivered: string[];
   device: "Desktop" | "Tab" | "Mobile";
   nOfNOrder: number;
-  active: IActive;
-  home: IPageInfo;
-  productInfo: IPageInfo;
-  allData: ISearchProduct[];
+  storedProducts: ISearchProduct[];
   products: ISearchProduct[];
+  proLoading: boolean;
+  loadings: Array<TPending>;
+  active: IActive;
+  home: IHome;
+  randomPage: number | null;
+  categories: Array<ICategory>;
 }
+
+export type TMainKeys =
+  | "data"
+  | "token"
+  | "numOfCart"
+  | "searchKey"
+  | "searches"
+  | "searchSort"
+  | "toggleSuggestion"
+  | "storedSuggestions"
+  | "suggestions"
+  | "districts"
+  | "findSuggestion"
+  | "newOrder"
+  | "canceled"
+  | "delivered"
+  | "device"
+  | "nOfNOrder"
+  | "storedProducts"
+  | "products"
+  | "proLoading"
+  | "active"
+  | "home"
+  | "randomPage";

@@ -61,8 +61,9 @@ export interface ISearchProduct {
   exInfo: string[]; // key:value
   thumbnail: string;
   popular?: number;
-  price: string;
+  price: number;
   discount: number;
+  mrp: string;
 }
 export interface ISingleProduct extends ISearchProduct {
   imgSetKey: string; // length = max:15

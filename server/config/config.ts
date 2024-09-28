@@ -1,5 +1,5 @@
 import { TCacheStatus } from "../interfaces/redis";
-console.log("protocol sentext problem");
+
 const env = process.env;
 const isDevelopment: boolean = env.NODE_ENV === "development";
 const redisUserCache: TCacheStatus = "enable";
@@ -39,5 +39,9 @@ const _config = {
   smtpPassword: env.SMTP_PASSWORD,
   smtpHost: env.SMTP_HOST,
   smtpPort: env.SMTP_PORT,
+
+  // -------------- Api Data Limits ------------
+  productPerReq: Number(env.PRODUCT_PER_REQ),
+  suggestionPerReq: Number(env.SUGGESTION_PER_REQ),
 };
 export default Object.freeze(_config);

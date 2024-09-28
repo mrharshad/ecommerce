@@ -10,7 +10,6 @@ export interface ISearches {
   identity: string | "tOfP" | "name";
   key: string;
   byUser: boolean;
-  update: Date;
 }
 
 export interface ITokens {
@@ -67,7 +66,6 @@ export interface IAuthorizedUser {
     identity: string | "tOfP" | "name";
     key: string;
     byUser: boolean;
-    update: Date;
   }>;
   canceled: ICanceled[];
   delivered: IDelivered[];
