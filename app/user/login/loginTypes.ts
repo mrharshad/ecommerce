@@ -5,11 +5,6 @@ export interface ILoginInfo {
   reTryForgot?: Date;
 }
 
-export interface ILoginSuccess {
-  text: string;
-  data: IReduxUserData;
-  token: string;
-}
 export interface ILoginResponse {
   success: boolean;
   text: string;

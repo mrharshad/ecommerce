@@ -2,7 +2,7 @@ import { ISearchProduct } from "./productServerSide";
 
 import { IAuthorizedUser } from "./userServerSide";
 
-export type IDevice = "Desktop" | "Tab" | "Mobile";
+export type TDevice = "Desktop" | "Tab" | "Mobile";
 
 export type IActive = "singlePro" | "home" | "other";
 
@@ -11,25 +11,29 @@ export interface ICategory {
   page: number | null;
 }
 
-export type ISearchSort =
+export type TSearchSort =
   | "Low to High"
   | "High to Low"
   | "Popular"
   | "New Arrivals"
   | "Rating"
   | "Discount";
-export type ISearchesIdentity = "tOfP" | "name" | number;
+export type TSearchesIdentity = "category" | "tOfP" | "name" | number;
 
-export type ISuggestion = { key: string; identity: ISearchesIdentity };
+export interface ISearchesCached {
+  page: number | null;
+  sorted: TSearchSort;
+}
+export type ISuggestion = { key: string; identity: TSearchesIdentity };
 
 export type IToggleSuggestion = "0px" | "1000px";
 
 export interface ISearches {
   key: string;
+  identity: "category" | "tOfP" | "name" | number;
   byUser: boolean;
   priority: number;
-  identity: "tOfP" | "name" | number;
-  cached: Array<{ sorted: ISearchSort; page: number | null }>;
+  cached: Array<{ sorted: TSearchSort; page: number | null }>;
 }
 
 export interface IFindSuggestion {
@@ -47,18 +51,17 @@ export interface IAlert {
   text: string;
   duration?: "2s" | "3s" | "4s" | "5s";
 }
-export interface ICartPro {}
-export interface IReduxUserData
-  extends Omit<IAuthorizedUser, "searches" | "cartPro"> {
-  cartPro: ICartPro[];
+
+export interface IReduxUserData extends Omit<IAuthorizedUser, "searches"> {
   searches: Array<{
     key: string;
     byUser: boolean;
     priority: number;
-    identity: "tOfP" | "name" | number;
-    cached: Array<{ sorted: ISearchSort; page: number | null }>;
+    identity: "category" | "tOfP" | "name" | number;
+    cached: Array<{ sorted: TSearchSort; page: number | null }>;
   }>;
 }
+
 export interface IHome {
   scrolled: number;
 }
@@ -72,13 +75,14 @@ export type TPending =
   | "District"
   | "Recovery-Password"
   | "Sign-Up";
+
 export interface IReduxUser {
   data: IReduxUserData;
   token: string | null;
   numOfCart: number;
   searchKey: string;
   searches: Array<ISearches>;
-  searchSort: ISearchSort;
+  searchSort: TSearchSort;
   toggleSuggestion: IToggleSuggestion;
   storedSuggestions: ISuggestion[];
   suggestions: ISuggestion[];
@@ -95,9 +99,8 @@ export interface IReduxUser {
   proLoading: boolean;
   loadings: Array<TPending>;
   active: IActive;
-  home: IHome;
+
   randomPage: number | null;
-  categories: Array<ICategory>;
 }
 
 export type TMainKeys =
@@ -121,5 +124,4 @@ export type TMainKeys =
   | "products"
   | "proLoading"
   | "active"
-  | "home"
   | "randomPage";

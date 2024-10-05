@@ -1,10 +1,14 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  IDeleteSearch,
+  IDeleteSearchRes,
   IFetchKeyProduct,
   IFetchKeyProductRes,
   IFetchRandom,
   IFetchRandomRes,
   IGetDistricts,
+  ISetNewSearches,
+  ISetNewSearchesRes,
   ISuggestionsGetRes,
 } from "./UserApiRequestInterface";
 
@@ -43,6 +47,34 @@ export const fetchKeyProduct = createAsyncThunk(
   async (query: IFetchKeyProduct): Promise<IFetchKeyProductRes> => {
     const request = await fetch(`/api/product/key-search`, {
       method: "PUT",
+      body: JSON.stringify(query),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await request.json();
+  }
+);
+
+export const setNewSearches = createAsyncThunk(
+  "setNewSearches",
+  async (query: ISetNewSearches): Promise<ISetNewSearchesRes> => {
+    const request = await fetch(`/api/admin/user/searches`, {
+      method: "PATCH",
+      body: JSON.stringify(query),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await request.json();
+  }
+);
+
+export const deleteSearch = createAsyncThunk(
+  "deleteSearch",
+  async (query: IDeleteSearch): Promise<IDeleteSearchRes> => {
+    const request = await fetch(`/api/admin/user/search-delete`, {
+      method: "DELETE",
       body: JSON.stringify(query),
       headers: {
         "Content-Type": "application/json",

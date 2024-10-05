@@ -80,6 +80,7 @@ const userSchema = new Schema<IDBUser>({
   bYear: Number,
   searches: [
     {
+      _id: false,
       key: String,
       byUser: Boolean,
       identity: String,

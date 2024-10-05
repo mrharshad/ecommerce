@@ -1,7 +1,9 @@
 import {
   IActive,
   IFindSuggestion,
+  IReduxUserData,
   TMainKeys,
+  TPending,
 } from "../../interfaces/userClientSide";
 
 export interface IMainKeyData {
@@ -33,8 +35,16 @@ export interface IFetchingFailed {
 export interface IVisitState {
   [key: string]: any;
 }
+
 export interface IVisitPage {
   name: IActive;
   value?: boolean;
   active: IActive;
+}
+
+export interface IAuthenticated {
+  text: string;
+  data: IReduxUserData;
+  token: string;
+  completed: TPending;
 }

@@ -16,12 +16,7 @@ const Navbar: FC<INavbarProp> = ({ fName, numOfCart }) => {
         name="sideBarBtn"
         id="sideBarBtn"
       />
-      <input
-        className={style.filterInput}
-        type="checkbox"
-        name="sortBy"
-        id="sortBy"
-      />
+
       <label className={style.dropBox} htmlFor="sideBarBtn"></label>
       <nav id="nav">
         <Link href="/">

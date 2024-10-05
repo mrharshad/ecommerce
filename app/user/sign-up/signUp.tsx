@@ -11,12 +11,7 @@ import style from "./signUp.module.css";
 import stateOfIndia from "@/static-data/stateOfIndia";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  loginSuccess,
-  mainKeyChange,
-  newAlert,
-  newLoading,
-} from "@/app/redux/UserSlice";
+import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 import { getDistricts } from "@/app/redux/UserApiRequest";
 
 import Link from "next/link";
@@ -129,22 +124,7 @@ const SignUpComponent: FC = () => {
     const { success, text, numOfSendToken, data, token }: IClientResponse =
       await request.json();
 
-    if (text === "already has an account created")
-      return setTimeout(() => router.replace("/user/login"), 3000);
-
-    if (request.status == 201) {
-      localStorage.removeItem("newAccount");
-      localStorage.removeItem("Searches");
-      router.replace("/");
-
-      dispatch(loginSuccess({ text, data, token }));
-    } else {
-      if (text.includes("Try After")) {
-        useData.reTry = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      }
-      useData.numOfSendToken = numOfSendToken + 1;
-      localStorage.setItem("newAccount", JSON.stringify(useData));
-      setFirstStep(useData);
+    const showAlert = () => {
       dispatch(
         newAlert({
           info: {
@@ -155,6 +135,26 @@ const SignUpComponent: FC = () => {
           completed: "Sign-Up",
         })
       );
+    };
+    if (text === "already has an account created") {
+      showAlert();
+      return setTimeout(() => router.replace("/user/login"), 3000);
+    }
+
+    if (request.status == 201) {
+      localStorage.removeItem("newAccount");
+      localStorage.removeItem("Searches");
+
+      router.replace("/");
+      dispatch(authenticated({ text, data, token, completed: "Sign-Up" }));
+    } else {
+      if (text.includes("Try After")) {
+        useData.reTry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      }
+      useData.numOfSendToken = numOfSendToken + 1;
+      localStorage.setItem("newAccount", JSON.stringify(useData));
+      setFirstStep(useData);
+      showAlert();
     }
   }
   useEffect(() => {
@@ -286,7 +286,13 @@ const SignUpComponent: FC = () => {
             />
 
             <div className={style.birth}>
+              <label className={style.birthText} htmlFor="birth">
+                {birth?.textType}
+              </label>
               <input
+                type="date"
+                name="birth"
+                id="birth"
                 max={`${currentYear - 4}-01-01`}
                 min={`${currentYear - 80}-01-01`}
                 required
@@ -299,13 +305,7 @@ const SignUpComponent: FC = () => {
                     dateType: value,
                   });
                 }}
-                type="date"
-                name="birth"
-                id="birth"
               />
-              <label className={style.birthText} htmlFor="birth">
-                {birth?.textType}
-              </label>
             </div>
 
             <label htmlFor="state">State</label>

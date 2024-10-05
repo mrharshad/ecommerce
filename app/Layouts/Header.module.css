@@ -105,7 +105,6 @@
 
 .form svg {
   cursor: pointer;
-
   border-radius: 0px 5px 5px 0px;
 }
 
@@ -170,8 +169,8 @@
   width: 30px;
   position: absolute;
   left: -25px;
-  opacity: 0;
 }
+
 .searchKeys {
   z-index: 1;
   position: absolute;
@@ -249,16 +248,14 @@
   z-index: 5;
   position: fixed;
   top: 7px;
-  width: 40px;
-  right: 7px;
+  width: 45px;
+  right: 0px;
   display: flex;
   background-color: #000;
 }
 .filterLabel svg {
   height: max(4vh, 40px);
   width: 30px;
-  margin-left: auto;
-  margin-right: 2px;
 }
 .sortBy {
   position: fixed;
@@ -274,33 +271,32 @@
   overflow: hidden;
   transition: max-height ease-in-out 0.3s;
   box-shadow: inset 0px 0px 0px 1px black;
-}
-.sortBy p:nth-child(1) {
-  font-weight: 600;
-  display: flex;
-}
-.sortBy p span {
-  margin: auto 0px auto auto;
-  font-size: small;
+  border-radius: 5px;
 }
 
 .sortBy > span {
-  cursor: pointer;
   font-size: 14px;
-  border-top: 1px solid;
+  margin-top: 5px;
+  padding-left: 5px;
+  background-color: #8b8b8b2b;
 }
-.sortBy p:last-child {
-  height: 25px;
-  width: 50%;
-  margin-left: auto;
-  font-size: 12px;
-  text-align: center;
+
+.sortBy > span:last-child {
+  margin-bottom: 5px;
+}
+.sortBy p {
+  font-size: 11px;
   color: red;
+  font-weight: 600;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  width: fit-content;
+  margin-left: auto;
   cursor: pointer;
 }
 @media only screen and (min-width: 480px) {
   .sortBy > span:hover {
-    scale: 0.9;
+    background-color: #3598d32b;
   }
 
   .filterLabel:hover ~ .sortBy {
@@ -444,7 +440,11 @@
     margin-right: 0px;
   }
   .filterLabel {
-    right: 0px;
+    width: 40px;
+  }
+  .filterLabel svg {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .filterInput:checked ~ .sortBy {

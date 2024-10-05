@@ -1,4 +1,5 @@
-export type IServerSearchesIdentity = string | "tOfP" | "name";
+export type TSearchesIdentity = string | "tOfP" | "name";
+
 export type TRoles = "User" | "Product-Manager";
 
 export interface IJwtTokenValue {
@@ -60,20 +61,17 @@ export interface IAuthorizedUser {
   bDate: number;
   bMonth: number;
   bYear: number;
-  cartPro: ICartPro[];
   nOfNOrder: number;
   searches: Array<{
     identity: string | "tOfP" | "name";
     key: string;
     byUser: boolean;
   }>;
-  canceled: ICanceled[];
-  delivered: IDelivered[];
+  cartPro: ICartPro[];
 }
-export default interface IDBUser extends IAuthorizedUser {
-  password: string;
-  mobileNo: number;
+export interface IAuthentication extends IAuthorizedUser {
   role: TRoles[];
+  password: string;
   tokens: {
     token?: string;
     tokenExpire?: Date;
@@ -83,5 +81,10 @@ export default interface IDBUser extends IAuthorizedUser {
     holdOnVerification?: Date;
   };
   issues: IIssues;
+}
+export default interface IDBUser extends IAuthentication {
+  delivered: IDelivered[];
+  canceled: ICanceled[];
+  mobileNo: number;
   createdAt: Date;
 }

@@ -5,7 +5,7 @@ import StoreProvider from "./redux/store-provider";
 import Header from "./Layouts/Header";
 import config from "@/server/config/config";
 import { cookies } from "next/headers";
-import { ICartPro, IReduxUserData } from "@/interfaces/userClientSide";
+import { IReduxUserData } from "@/interfaces/userClientSide";
 import Footer from "./Layouts/Footer";
 
 const { fDomainName, cookieName, bHost, bProtocol } = config;
@@ -28,7 +28,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = cookies();
   let value = cookieStore.get(cookieName)?.value;
-  let userData = { cartPro: [] as ICartPro[] } as IReduxUserData;
+  let userData = {} as IReduxUserData;
   if (value) {
     const req = await fetch(
       `${bProtocol}${bHost}/api/admin/user/data/${value}

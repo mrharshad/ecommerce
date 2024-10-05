@@ -3,17 +3,18 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { IAppMount, INewAlert } from "../Layouts/interface";
 
 import {
+  IAuthenticated,
   IMainKeyChange,
   ISearchBarInput,
-  IVisitPage,
-  IVisitState,
   StateType,
 } from "./UserSliceInterface";
 
 import {
+  deleteSearch,
   fetchKeyProduct,
   fetchRandom,
   getDistricts,
+  setNewSearches,
   suggestionsGet,
 } from "./UserApiRequest";
 
@@ -25,11 +26,16 @@ import {
   IAlert,
   IReduxUser,
   TPending,
+  TDevice,
 } from "../../interfaces/userClientSide";
 
-import { ILoginSuccess } from "../user/login/loginTypes";
 import { ISearchProduct } from "@/interfaces/productServerSide";
-import { suggestionLimit, suggestionPerReq } from "@/clientConfig";
+import {
+  searchesLocal,
+  suggestionLimit,
+  suggestionPerReq,
+} from "@/clientConfig";
+import { ICartPro } from "@/interfaces/userServerSide";
 
 const initialFindSuggestion = {
   preKey: "",
@@ -50,19 +56,17 @@ const initialState: IReduxUser = {
   storedSuggestions: [],
   districts: [],
   active: "other",
-  home: { scrolled: 0 },
   findSuggestion: initialFindSuggestion,
   searches: [],
   storedProducts: [],
   products: [],
   searchSort: "Popular",
   data: {} as IReduxUserData,
-  device: "Mobile",
+  device: "" as TDevice,
   nOfNOrder: 0,
   loadings: [],
   searchKey: "",
   randomPage: 1,
-  categories: [],
 };
 
 const UserSlice = createSlice({
@@ -73,6 +77,7 @@ const UserSlice = createSlice({
       const localData = (name: string): any => {
         try {
           let data = JSON.parse(localStorage.getItem(name) as string);
+
           return Array.isArray(data) ? data : [];
         } catch (err) {
           return [];
@@ -80,10 +85,12 @@ const UserSlice = createSlice({
       };
       const { initialToken, userData }: IAppMount = action.payload;
       const { cartPro, nOfNOrder, searches } = userData;
-      state.data = userData;
+      state.data = initialToken
+        ? userData
+        : ({ cartPro: [] as ICartPro[] } as IReduxUserData);
       state.nOfNOrder = nOfNOrder || 0;
       state.numOfCart = cartPro?.length || 0;
-      state.searches = (initialToken ? searches : localData("Searches")).map(
+      state.searches = (initialToken ? searches : localData(searchesLocal)).map(
         ({ identity, ...obj }: ISearches) => {
           return {
             ...obj,
@@ -103,12 +110,13 @@ const UserSlice = createSlice({
           ? "Tab"
           : "Desktop";
     },
+
     mainKeyChange: (
       state: StateType,
-      action: PayloadAction<IMainKeyChange>
+      action: PayloadAction<IMainKeyChange[]>
     ) => {
-      const { name, value } = action.payload;
-      state[name] = value;
+      const keys = action.payload;
+      for (let { name, value } of keys) state[name] = value;
     },
 
     newAlert: (state, action: PayloadAction<INewAlert>) => {
@@ -141,22 +149,36 @@ const UserSlice = createSlice({
     },
 
     searchBarInput: (state, action: PayloadAction<string>) => {
+      const {
+        findSuggestion,
+        storedProducts,
+        randomPage,
+        storedSuggestions,
+        searches,
+      } = state;
       const key = action.payload;
       const { loading, preKey, preCountData, changing } =
-        state.findSuggestion as ISearchBarInput;
-      const storedProducts = state.storedProducts;
+        findSuggestion as ISearchBarInput;
+
       if (key) {
         const regex = new RegExp(key, "i");
-        const suggestions = state.storedSuggestions;
-        const tOfPS: ISuggestion[] = [];
-        const names = suggestions.filter((obj) => {
+        const searchHistory = searches.flatMap((obj) => {
           const { key, identity } = obj;
           if (regex.test(key)) {
-            if (identity == "name") return obj;
-            else tOfPS.push(obj);
+            return { key, identity };
+          } else return [];
+        });
+        const tOfPS: ISuggestion[] = [];
+        const others = storedSuggestions.filter((obj) => {
+          const { key, identity } = obj;
+          if (searchHistory.some((history) => history.key === key)) return;
+          if (regex.test(key)) {
+            if (identity == "tOfP") tOfPS.push(obj);
+            else return obj;
           }
         });
-        const newSuggestion = tOfPS.concat(names).slice(0, suggestionLimit);
+
+        const newSuggestion = [...searchHistory, ...tOfPS, ...others];
         const products = storedProducts.filter((obj) => regex.test(obj.name));
         state.products = products.length ? products : [...storedProducts];
 
@@ -166,27 +188,24 @@ const UserSlice = createSlice({
           loading: true,
         } as IFindSuggestion;
 
-        const keyLength = key.length;
-        const preKeyLength = preKey.length;
-        const randomPage = state.randomPage;
         if (randomPage) {
           if (
-            !loading && key.includes(preKey) && preCountData === undefined
+            !loading &&
+            key.includes(preKey) &&
+            key !== preKey &&
+            (preCountData === undefined
               ? true
-              : preCountData === suggestionPerReq
+              : preCountData === suggestionPerReq)
           ) {
             findNew.changing = null;
             state.findSuggestion = findNew;
           } else if (
             !key.includes(preKey) &&
             changing !== false &&
-            newSuggestion.length !== suggestionLimit
+            newSuggestion.length < suggestionLimit
           ) {
             findNew.changing = true;
             state.findSuggestion = findNew;
-          }
-          if (changing === false && keyLength + 4 > preKeyLength) {
-            state.findSuggestion.loading = false;
           }
         }
         state.suggestions = newSuggestion;
@@ -203,16 +222,18 @@ const UserSlice = createSlice({
     },
 
     checkChangingKey: (state) => {
-      if (state.findSuggestion.loading) state.findSuggestion.changing = false;
+      state.findSuggestion.changing = false;
     },
 
-    loginSuccess: (state, action: PayloadAction<ILoginSuccess>) => {
-      const { data, text, token } = action.payload;
+    authenticated: (state, action: PayloadAction<IAuthenticated>) => {
+      const { data, text, token, completed } = action.payload;
       const { nOfNOrder, cartPro, searches } = data;
       state.token = token;
       state.data = data;
       state.alerts.push({ text, type: "Success", duration: "2s" });
-      state.loadings = state.loadings.filter((pending) => pending !== "Login");
+      state.loadings = state.loadings.filter(
+        (pending) => pending !== completed
+      );
       state.nOfNOrder = nOfNOrder || 0;
       state.numOfCart = Array.isArray(cartPro) ? cartPro.length : 0;
       state.searches = searches;
@@ -235,8 +256,10 @@ const UserSlice = createSlice({
       );
     });
     builder.addCase(suggestionsGet.fulfilled, (state, action) => {
-      const { success, searchKey, data = [] } = action.payload;
-      const { loading } = state.findSuggestion;
+      const { success, searchKey, data } = action.payload;
+
+      const { findSuggestion, storedSuggestions, suggestions } = state;
+      const { loading } = findSuggestion;
       const newSuggestion = {
         preKey: searchKey,
         loading: false,
@@ -244,65 +267,132 @@ const UserSlice = createSlice({
         preCountData: data.length,
       };
       if (success) {
-        const regex = new RegExp(searchKey, "i");
-        const convert = (data: ISuggestion) => JSON.stringify(data);
-        const stored = state.suggestions.map(convert);
-        const setValue = new Set(stored.concat(data.map(convert)));
-        const unique: ISuggestion[] = Array.from(setValue).map((obj) =>
-          JSON.parse(obj)
-        );
-        const tOfPS: ISuggestion[] = [];
-        const names = unique.filter((obj) => {
-          const { key, identity } = obj;
-          if (regex.test(key)) {
-            if (identity == "name") return obj;
-            else tOfPS.push(obj);
+        if (newSuggestion.preCountData) {
+          const keys = suggestions.map((obj) => obj.key);
+          state.suggestions = [
+            ...data.filter((obj) => !keys.includes(obj.key)),
+            ...suggestions,
+          ];
+        }
+        const unique = data.flatMap((newSuggestion) => {
+          const { key } = newSuggestion;
+          if (storedSuggestions.some((obj) => obj.key === key)) {
+            return [];
+          } else {
+            return newSuggestion;
           }
         });
-        if (newSuggestion.preCountData) {
-          state.suggestions = unique;
-        }
-        if (loading) {
-          state.storedSuggestions = tOfPS
-            .concat(names)
-            .slice(0, suggestionLimit);
-        }
+        state.storedSuggestions.push(...unique);
       }
 
       state.findSuggestion = newSuggestion;
     });
-    builder.addCase(fetchRandom.pending, (state, action) => {
+    builder.addCase(fetchRandom.pending, (state) => {
       state.proLoading = true;
     });
 
     builder.addCase(fetchRandom.fulfilled, (state, action) => {
-      const { data, resPage, resSearches } = action.payload;
-      // console.log(" data, resPage, resSearches", data, resPage, resSearches);
+      const { success, message, data, resPage, resSearches } = action.payload;
+      state.proLoading = false;
+      const { storedProducts, searchKey } = state;
+      if (success) {
+        state.randomPage = resPage;
+        state.searches = resSearches;
 
-      const storedProducts = state.storedProducts;
-      // console.log("storedProducts", storedProducts);
-      state.randomPage = resPage || null;
-      state.searches = resSearches;
-      const unique: Array<ISearchProduct> = [];
-      data?.forEach((obj) => {
-        const _id = obj._id;
-        if (!storedProducts.some((obj) => obj._id === _id)) {
-          unique.push(obj);
+        const unique: Array<ISearchProduct> = [];
+        data?.forEach((obj) => {
+          const _id = obj._id;
+          if (!storedProducts.some((obj) => obj._id === _id)) {
+            unique.push(obj);
+          }
+        });
+
+        if (!searchKey) {
+          state.products.push(...unique);
         }
-      });
-      console.log("unique", unique);
-      console.log("data", data);
-      state.products.push(...unique);
-      state.storedProducts.push(...unique);
-      state.proLoading = false;
+        state.storedProducts.push(...unique);
+      } else {
+        state.alerts.push({ text: message, type: "Error", duration: "5s" });
+      }
     });
-    builder.addCase(fetchKeyProduct.pending, (state, action) => {
-      state.proLoading = true;
-    });
+
     builder.addCase(fetchKeyProduct.fulfilled, (state, action) => {
-      const { success, status, message, key, isSearched, resPage, data } =
-        action.payload;
+      const {
+        success,
+        message,
+        key: resKey,
+        resPage,
+        identity,
+        data,
+      } = action.payload;
       state.proLoading = false;
+
+      if (success) {
+        const { searches, storedProducts, searchSort } = state;
+        const unique: Array<ISearchProduct> = [];
+        data?.forEach((obj) => {
+          const _id = obj._id;
+          if (!storedProducts.some((obj) => obj._id === _id)) {
+            unique.push(obj);
+          }
+        });
+        state.products.push(...unique);
+        state.storedProducts.push(...unique);
+        let searchDoc = {} as ISearches;
+        const findSearch = searches.find((obj) => obj.key === resKey);
+        if (findSearch) {
+          const { priority, cached } = findSearch;
+          searchDoc = {
+            ...findSearch,
+            priority: priority + 1,
+            cached: [
+              ...cached.filter((info) => info.sorted !== searchSort),
+              { page: resPage, sorted: searchSort },
+            ],
+          };
+        } else {
+          searchDoc = {
+            key: resKey,
+            byUser: true,
+            identity,
+            priority: 1,
+            cached: [{ page: resPage, sorted: searchSort }],
+          };
+        }
+        state.searches = [
+          searchDoc,
+          ...searches.filter((obj) => obj.key !== resKey),
+        ];
+      } else {
+        state.alerts.push({ text: message, type: "Error", duration: "5s" });
+      }
+    });
+
+    builder.addCase(setNewSearches.fulfilled, (state, action) => {
+      const { message, success } = action.payload;
+      if (!success) {
+        state.alerts.push({ text: message, type: "Error", duration: "4s" });
+      }
+      if (message === "Search history is invalid") {
+        state.searches = [];
+      }
+    });
+
+    builder.addCase(deleteSearch.fulfilled, (state, action) => {
+      const { message, success, removedSearch } = action.payload;
+      console.log(
+        "message, success, removedSearch ",
+        message,
+        success,
+        removedSearch
+      );
+      if (!success) {
+        state.alerts.push(
+          { text: message, type: "Error", duration: "5s" },
+          { text: `could not delete ${removedSearch.key} key`, type: "Error" }
+        );
+        state.searches.unshift(removedSearch);
+      }
     });
   },
 });
@@ -316,6 +406,6 @@ export const {
   position,
   searchBarInput,
   checkChangingKey,
-  loginSuccess,
+  authenticated,
   newLoading,
 } = UserSlice.actions;

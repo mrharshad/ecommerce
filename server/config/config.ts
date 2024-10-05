@@ -2,14 +2,22 @@ import { TCacheStatus } from "../interfaces/redis";
 
 const env = process.env;
 const isDevelopment: boolean = env.NODE_ENV === "development";
+
+// ------------------ Redis -----------------
+// `user:${_id}` JSON.stringify(findUser)
 const redisUserCache: TCacheStatus = "enable";
+const redisUserExpire: number = 86400;
+
 const redisOrdersCache: TCacheStatus = "enable";
 const redisProductsCache: TCacheStatus = "enable";
+const redisProductExpire: number = 86400;
 const redisSignUpCache: TCacheStatus = "enable";
 const cookieExpire = Number(env.COOKIE_EXPIRE);
 const _config = {
   redisUserCache,
+  redisUserExpire,
   redisProductsCache,
+  redisProductExpire,
   redisOrdersCache,
   redisSignUpCache,
   fDomainName: env.F_Domain_NAME as string,
@@ -43,5 +51,7 @@ const _config = {
   // -------------- Api Data Limits ------------
   productPerReq: Number(env.PRODUCT_PER_REQ),
   suggestionPerReq: Number(env.SUGGESTION_PER_REQ),
+  searchesQty: Number(env.SEARCHES_QTY),
+  interestedSearch: Number(env.INTERESTED_SEARCH),
 };
 export default Object.freeze(_config);

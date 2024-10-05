@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import style from "./page.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, IReduxStoreData } from "./redux/ReduxStore";
-import { checkChangingKey, position } from "./redux/UserSlice";
+import { checkChangingKey, mainKeyChange, position } from "./redux/UserSlice";
 import {
   fetchKeyProduct,
   fetchRandom,
@@ -11,12 +11,13 @@ import {
 } from "./redux/UserApiRequest";
 import { useRouter } from "next/navigation";
 import SearchProduct from "./utils/SearchProduct";
-import dynamic from "next/dynamic";
+
 import Observer from "./utils/Observer";
 import { ISearches } from "@/interfaces/userClientSide";
+import { IMainKeyChange } from "./redux/UserSliceInterface";
+import { ISearchProduct } from "@/interfaces/productServerSide";
 
 export default function Home() {
-  console.log("Home Page re-render");
   const dispatch = useDispatch<AppDispatch>();
   const skeleton = [
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
@@ -24,31 +25,17 @@ export default function Home() {
   ];
   const router = useRouter();
   const {
-    data,
-    numOfCart,
     searchKey,
     searchSort,
-    toggleSuggestion,
     proLoading,
-    newOrder,
-    suggestions,
-    alerts,
-    token,
     products,
     findSuggestion,
     searches,
     storedSuggestions,
-    loadings,
-    home,
     randomPage,
     storedProducts,
   } = useSelector((data: IReduxStoreData) => data.user);
-  console.log("random page", randomPage);
-  console.log("products", products.length);
   const numOfProducts = products.length;
-  // console.log("findSuggestion", findSuggestion);
-  // console.log("suggestions", suggestions);
-  // console.log("storedSuggestions", storedSuggestions);
   const fetchRandomProducts = () => {
     dispatch(
       fetchRandom({
@@ -57,19 +44,30 @@ export default function Home() {
       })
     );
   };
+
   const keyProductFetch = () => {
+    if (!searchKey && numOfProducts === storedProducts.length) return;
+
     const lowerCase = searchKey.toLowerCase();
-    const findSearch =
-      searches.find((obj) => obj.key.toLowerCase() == lowerCase) ||
-      ({} as ISearches);
-    let isSearched = false;
-    let { key, cached, identity = "name" } = findSearch;
-    let page: undefined | number = undefined;
+    const findSearch = searchKey
+      ? searches.find((obj) => obj.key == searchKey)
+      : ({} as ISearches);
+
+    let { key, cached, identity = "name" } = findSearch || ({} as ISearches);
+
+    let page: null | number = 1;
     if (key) {
-      const fetchedPage = cached.find((obj) => obj.sorted === searchSort)?.page;
-      isSearched = true;
-      if (fetchedPage === null) return;
-      page = fetchedPage;
+      const nullCheck = cached.some((obj) => obj.page === null);
+      if (nullCheck) {
+        page = null;
+      } else {
+        const fetchedPage = cached.find(
+          (obj) => obj.sorted === searchSort
+        )?.page;
+        if (fetchedPage !== undefined) {
+          page = fetchedPage;
+        }
+      }
     } else {
       const findSuggestion = storedSuggestions.find(
         (obj) => obj.key.toLowerCase() === lowerCase
@@ -79,15 +77,73 @@ export default function Home() {
         identity = findSuggestion.identity;
       }
     }
-    fetchKeyProduct({
-      isSearched,
-      key: key || lowerCase,
-      identity,
-      page: page || 1,
-    });
+    if (Number(identity)) {
+      return router.push(
+        `/product/?_id=${identity}&k=${key.replace(/ /g, "-")}`
+      );
+    }
+
+    key = key || searchKey;
+
+    let data: Array<ISearchProduct> = [];
+    const regex = new RegExp(lowerCase, "i");
+    let filterFunction;
+    switch (identity) {
+      case "tOfP":
+        filterFunction = (obj: ISearchProduct) => obj.tOfP === key;
+        break;
+      case "category":
+        filterFunction = (obj: ISearchProduct) => obj.category === key;
+        break;
+      default:
+        filterFunction = (obj: ISearchProduct) => regex.test(obj.name);
+    }
+    data = storedProducts.filter(filterFunction);
+    let sortingFunction;
+    switch (searchSort) {
+      case "Discount":
+        sortingFunction = (a: ISearchProduct, b: ISearchProduct) =>
+          b.discount - a.discount;
+        break;
+      case "High to Low":
+        sortingFunction = (a: ISearchProduct, b: ISearchProduct) =>
+          b.price - a.price;
+        break;
+      case "Low to High":
+        sortingFunction = (a: ISearchProduct, b: ISearchProduct) =>
+          a.price - b.price;
+        break;
+      case "Rating":
+        sortingFunction = (a: ISearchProduct, b: ISearchProduct) =>
+          b.price - a.price;
+        break;
+      case "New Arrivals":
+        sortingFunction = (a: ISearchProduct, b: ISearchProduct) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        break;
+      default:
+        sortingFunction = (a: ISearchProduct, b: ISearchProduct) =>
+          b.popular || 0 - (a.popular || 0);
+    }
+
+    data = data.sort(sortingFunction);
+    const keys: Array<IMainKeyChange> = [{ name: "products", value: data }];
+
+    if (page && key && randomPage) {
+      keys.push({ name: "proLoading", value: true });
+      dispatch(
+        fetchKeyProduct({
+          key,
+          identity,
+          page,
+          searchSort,
+        })
+      );
+    }
+    dispatch(mainKeyChange(keys));
   };
+
   const scrolledFetch = () => {
-    console.log("scrolledFetch", products.length);
     if (
       proLoading ||
       !randomPage ||
@@ -100,6 +156,7 @@ export default function Home() {
       fetchRandomProducts();
     }
   };
+
   useEffect(() => {
     const { preKey, loading, changing } = findSuggestion;
     if (!loading) return;
@@ -113,7 +170,7 @@ export default function Home() {
   }, [findSuggestion, dispatch]);
 
   useEffect(() => {
-    const { scrollTo, addEventListener } = window;
+    const { addEventListener } = window;
     // scrollTo({
 
     //   top: scrolled,
@@ -122,18 +179,14 @@ export default function Home() {
     // });
 
     const scrollHandler = () => {
-      console.log("scrolled");
       dispatch(position());
     };
     addEventListener("scroll", scrollHandler);
 
-    if (!products.length) {
-      fetchRandomProducts();
-    }
     // return () => {
     //   removeEventListener("scroll", scrollHandler);
     // };
-  }, []);
+  }, [dispatch]);
 
   return (
     <main id="mainContent" className={style.container}>
@@ -154,11 +207,18 @@ export default function Home() {
               </div>
             </div>
           ))}
-        {!numOfProducts && searchKey ? (
+        {!numOfProducts && searchKey && !proLoading ? (
           <p className={style.notFound}>Product Not Found</p>
         ) : null}
       </section>
-      <Observer scrolledFetch={scrolledFetch} />
+      <Observer
+        keyProductFetch={keyProductFetch}
+        scrolledFetch={scrolledFetch}
+        searchSort={searchSort}
+        searchKey={searchKey}
+        fetchRandomProducts={fetchRandomProducts}
+        numOfProducts={numOfProducts}
+      />
     </main>
   );
 }

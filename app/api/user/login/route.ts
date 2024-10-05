@@ -5,21 +5,31 @@ import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
-import { IFetchUserData, INewData, IRequest, ISendResponse } from "./interface";
+import { INewData, IRequest, ISendResponse } from "./interface";
 import config from "@/server/config/config";
 
 import errors from "@/server/utils/errorHandler";
-import { ISearches as ISearchesClientSide } from "@/interfaces/userClientSide";
-import { IJwtInfo, ISearches } from "@/interfaces/userServerSide";
+import {
+  ISearches as ISearchesClientSide,
+  TSearchesIdentity,
+} from "@/interfaces/userClientSide";
+import {
+  IAuthentication,
+  IAuthorizedUser,
+  IJwtInfo,
+  ISearches,
+} from "@/interfaces/userServerSide";
 import { ICustomError } from "@/interfaces/clientAndServer";
+import { authentication, authorizedUser } from "@/server/utils/userProjection";
 // apply api - /user/login
 export async function PUT(req: NextRequest) {
   try {
     const {
       email,
       password: userEnter,
-      searches: clientSearches,
+      searches: clientSearches = [],
     }: IRequest = await req.json();
+
     const response = (res: ISendResponse) =>
       new Response(JSON.stringify(res), {
         status: 200,
@@ -30,14 +40,18 @@ export async function PUT(req: NextRequest) {
       jwtExpireTime,
       cookieName,
       cookieExpire,
+      redisUserExpire,
+      interestedSearch,
+      searchesQty,
     } = config;
     let redisCache = redisUserCache === "enable";
     let isRedis = false;
     dbConnect();
-    let findUser = {} as IFetchUserData;
+    let findUser = {} as IAuthentication;
     if (redisCache) {
       try {
         let result = await client.get(`email:${email}`);
+
         if (result) {
           findUser = JSON.parse(result);
           isRedis = true;
@@ -50,11 +64,9 @@ export async function PUT(req: NextRequest) {
       throw new Error("Invalid email and password");
     }
     if (!findUser.email) {
-      findUser = (await User.findOne(
-        { email },
-        { canceled: 0, delivered: 0 }
-      ).select("+password")) as IFetchUserData;
-
+      findUser = (await User.findOne({ email }, authentication).select(
+        "+password"
+      )) as IAuthentication;
       if (!findUser?._id) {
         if (redisCache) {
           try {
@@ -75,7 +87,7 @@ export async function PUT(req: NextRequest) {
       password,
       searches,
       tokens = {},
-    } = findUser as IFetchUserData;
+    } = findUser as IAuthentication;
 
     let { holdOnVerification, verificationFailed = 0 } = tokens;
 
@@ -98,6 +110,7 @@ export async function PUT(req: NextRequest) {
             );
           } catch {}
         }
+
         return response({
           success: false,
           text: `Try After ${pendingHours && `${pendingHours} hours`} ${
@@ -110,44 +123,44 @@ export async function PUT(req: NextRequest) {
 
     const verification = await bcrypt.compare(userEnter, password as string);
     if (verification) {
-      if (Array.isArray(clientSearches)) {
-        let userSearch = clientSearches.filter(
-          ({ priority, byUser }) => byUser && priority
-        );
-        for (let search of searches) {
-          if (
-            search.byUser &&
-            !userSearch.some((obj) => obj.key === search.key)
-          )
-            userSearch.push(search as any);
+      const userSearch: Array<ISearches> = [];
+      const clientInterested = clientSearches.filter(
+        ({ byUser, identity, key }) => {
+          const obj = { byUser, identity: String(identity), key };
+          if (identity !== "category") {
+            if (byUser) {
+              userSearch.push(obj);
+            } else {
+              return obj;
+            }
+          }
         }
+      );
 
-        let autoSearch = clientSearches
-          .filter(({ priority, byUser }) => !byUser && priority)
-          .sort((a, b) => b.priority - a.priority);
-        for (let search of searches) {
-          if (
-            !search.byUser &&
-            !autoSearch.some((obj) => obj.key === search.key)
-          )
-            autoSearch.push(search as any);
+      clientInterested.sort((a, b) => b.priority - a.priority);
+
+      const interested: ISearches[] = clientInterested.map(
+        ({ byUser, identity, key }) => {
+          return { key, identity: String(identity), byUser };
         }
-        const newSearches = userSearch
-          .slice(0, 10)
-          .concat(autoSearch.slice(0, 5))
-          .map(({ byUser, identity, key }) => {
-            return {
-              key,
-              byUser,
-              identity:
-                typeof Number(identity) == "number"
-                  ? String(identity)
-                  : identity,
-            };
-          });
-        findUser.searches = newSearches as ISearches[];
+      );
+      for (let search of searches) {
+        const key = search.key;
+        if (search.byUser) {
+          if (!userSearch.some((obj) => obj.key === key)) {
+            userSearch.push(search);
+          }
+        } else {
+          if (!interested.some((obj) => obj.key === key)) {
+            interested.push(search);
+          }
+        }
       }
-      findUser.tokens = {};
+
+      let newDBSearches: ISearches[] = [
+        ...userSearch.slice(0, searchesQty),
+        ...interested.slice(0, interestedSearch),
+      ];
 
       const jwtInfo: IJwtInfo = { _id, role };
       const newJwtToken = Jwt.sign(jwtInfo, jwtSecretCode, {
@@ -158,12 +171,72 @@ export async function PUT(req: NextRequest) {
           await client.del(`email:${email}`);
         } catch {}
       }
+      const updatedValue = (await User.findByIdAndUpdate(
+        _id,
+        {
+          $set: { tokens: {}, searches: newDBSearches },
+        },
+        { new: true, projection: authorizedUser }
+      )) as IAuthorizedUser;
+
+      const {
+        bDate,
+        bMonth,
+        bYear,
+        cartPro,
+        fName,
+        lName,
+        location,
+        searches: updatedSearches,
+        gender,
+        nOfNOrder,
+      } = updatedValue;
+      const authentication: IAuthentication = {
+        _id,
+        email,
+        bDate,
+        bMonth,
+        bYear,
+        cartPro,
+        fName,
+        gender,
+        lName,
+        location,
+        nOfNOrder,
+        searches: updatedSearches,
+        password,
+        tokens: {},
+        role,
+      };
+
+      if (!updatedValue) throw new Error("Data Base Error");
 
       if (redisCache) {
         try {
-          await client.setEx(`user:${_id}`, 86400, JSON.stringify(findUser));
+          await client.setEx(
+            `user:${_id}`,
+            redisUserExpire,
+            JSON.stringify(authentication)
+          );
         } catch (err) {}
       }
+      const newSearchesClientSide: ISearchesClientSide[] = [...clientSearches];
+
+      updatedSearches.forEach(({ byUser, identity, key }) => {
+        if (
+          !clientSearches.find((obj) => {
+            obj.key === key;
+          })
+        ) {
+          newSearchesClientSide.push({
+            key,
+            identity: (Number(identity) || identity) as TSearchesIdentity,
+            byUser,
+            priority: 1,
+            cached: [{ page: 1, sorted: "Popular" }],
+          });
+        }
+      });
       cookies().set({
         name: cookieName,
         value: newJwtToken,
@@ -172,26 +245,11 @@ export async function PUT(req: NextRequest) {
         path: "/", // all path
       });
 
-      delete findUser.password;
-      const searchCaches = findUser.searches.map((search) => {
-        if (typeof Number(search.identity) === "number") {
-          return search;
-        } else {
-          const findCache = clientSearches.find(
-            ({ key, cached }) => key === search.key && cached
-          );
-          if (findCache) return findCache;
-          else return { ...search, cached: [{ page: 1, sorted: "Popular" }] };
-        }
-      }) as ISearchesClientSide[];
-      let newData: INewData = { ...findUser } as any;
-      if (newData._doc) newData = newData._doc;
-
       return response({
         success: true,
         text: "login successful",
         token: newJwtToken,
-        data: { ...newData, searches: searchCaches },
+        data: { ...authentication, searches: newSearchesClientSide },
       });
     } else {
       if (verificationFailed === 3) {
@@ -201,16 +259,19 @@ export async function PUT(req: NextRequest) {
         tokens.verificationFailed = verificationFailed + 1;
         if (holdOnVerification) delete tokens.holdOnVerification;
       }
+
       findUser.tokens = tokens;
+
       const tokenUpdateInDB = async () => {
         const update = await User.updateOne(
           { _id },
           {
-            $set: { tokens: findUser.tokens, searches: findUser.searches },
+            $set: { tokens: findUser.tokens },
           }
         );
         if (!update.modifiedCount) throw new Error("Data Base Error");
       };
+
       if (redisCache) {
         try {
           await client.setEx(`email:${email}`, 86400, JSON.stringify(findUser));

@@ -1,104 +1,102 @@
-.single {
-  .ratingReviews {
-    display: flex;
-    font-size: 90%;
-    font-weight: 600;
-    height: 6%;
+.ratingReviews {
+  display: flex;
+  font-size: 90%;
+  font-weight: 600;
+  height: 6%;
 
-    .rating {
-      margin-left: auto;
-      display: flex;
-      position: relative;
-    }
-
-    .rating span {
-      color: gold;
-      overflow-x: hidden;
-      white-space: nowrap;
-      display: inline-block;
-      position: absolute;
-    }
-  }
-
-  .name {
-    color: grey;
-    font-weight: 600;
-    font-size: 13px;
-    height: 14%;
-    overflow: hidden;
-  }
-
-  .imgCover {
-    display: flex;
-    height: 35%;
-  }
-
-  .img {
-    margin: auto;
-    width: fit-content;
-    height: fit-content;
-    max-height: 100%;
-    max-width: 100%;
-    border-radius: 5%;
-  }
-
-  .priceDiv {
-    display: flex;
-    flex-wrap: wrap;
-    height: fit-content;
-
-    height: 24%;
-  }
-
-  .charges {
-    font-size: 14px;
-    display: flex;
-    width: 100%;
-  }
-
-  .charges span {
-    margin-bottom: 3px;
-    margin-top: 3px;
-  }
-
-  .charges span:last-child {
+  .rating {
     margin-left: auto;
-  }
-
-  .currentPrice {
-    font-weight: 700;
-    font-size: larger;
-  }
-
-  .currentPrice span {
-    color: gray;
-  }
-
-  .mrp {
-    font-size: 14px;
-    margin: auto 0px auto 5%;
-  }
-
-  .mrp span {
-    text-decoration: line-through;
-  }
-
-  .discount {
-    margin: auto 0px auto auto;
-    background-color: #c4eeff;
-    border-radius: 5%;
-    padding-left: 1%;
-    font-weight: bold;
-    font-size: small;
-    padding-right: 1%;
-  }
-
-  .options {
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    height: 20%;
+    position: relative;
   }
+
+  .rating span {
+    color: gold;
+    overflow-x: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    position: absolute;
+  }
+}
+.name {
+  color: grey;
+  font-weight: 600;
+  font-size: 13px;
+  height: 14%;
+  overflow: hidden;
+}
+
+.imgCover {
+  display: flex;
+  height: 35%;
+}
+
+.img {
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+  max-height: 100%;
+  max-width: 100%;
+  border-radius: 5%;
+}
+
+.priceDiv {
+  display: flex;
+  flex-wrap: wrap;
+  height: fit-content;
+
+  height: 24%;
+}
+
+.charges {
+  font-size: 14px;
+  display: flex;
+  width: 100%;
+}
+
+.charges span {
+  margin-bottom: 3px;
+  margin-top: 3px;
+}
+
+.charges span:last-child {
+  margin-left: auto;
+}
+
+.currentPrice {
+  font-weight: 700;
+  font-size: larger;
+}
+
+.currentPrice span {
+  color: gray;
+}
+
+.mrp {
+  font-size: 14px;
+  margin: auto 0px auto 5%;
+}
+
+.mrp span {
+  text-decoration: line-through;
+}
+
+.discount {
+  margin: auto 0px auto auto;
+  background-color: #c4eeff;
+  border-radius: 5%;
+  padding-left: 1%;
+  font-weight: bold;
+  font-size: small;
+  padding-right: 1%;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 20%;
+  font-size: 13px;
 }
 
 .options p {
@@ -108,7 +106,6 @@
   text-overflow: ellipsis;
   height: 26%;
   white-space: nowrap;
-  font-size: 13px;
   border-top-left-radius: 2px;
   border-bottom-left-radius: 2px;
   padding-left: 1%;
@@ -116,11 +113,11 @@
   overflow: hidden;
 }
 
-.single:hover {
+.container:hover {
   scale: 1.01;
 }
 @media screen and (max-width: 480px) {
-  .single {
+  .container {
     justify-content: space-between;
     position: relative;
     font-size: 14px;
@@ -129,63 +126,63 @@
     display: grid;
     grid-template-columns: 38% 60%;
     grid-template-rows: 10% 20% 25% 45%;
+  }
+  .name {
+    grid-column: 1/-1;
+    font-size: 13px;
+    height: 100%;
+    overflow-x: hidden;
+  }
 
-    .name {
-      grid-column: 1/-1;
-      font-size: 14px;
-      height: 100%;
-      overflow-x: hidden;
+  .ratingReviews {
+    grid-column: 1/-1;
+    align-items: center;
+    height: 100%;
+
+    .review {
+      margin-left: auto;
     }
 
-    .ratingReviews {
-      grid-column: 1/-1;
-      align-items: center;
-      height: 100%;
-
-      .review {
-        margin-left: auto;
-      }
-
-      .rating {
-        margin-left: 20px;
-        font-size: 15px;
-      }
-
-      .rating span {
-        overflow-y: hidden;
-      }
+    .rating {
+      margin-left: 20px;
+      font-size: 15px;
     }
 
-    .priceDiv {
-      grid-row: 3/4;
-      .discount {
-        top: 0px;
-        left: 0px;
-        position: absolute;
-      }
+    .rating span {
+      overflow-y: hidden;
     }
+  }
 
-    .charges {
-      font-size: 90%;
+  .priceDiv {
+    grid-row: 3/4;
+    .discount {
+      top: 0px;
+      left: 0px;
+      position: absolute;
     }
+  }
 
-    .imgCover {
-      grid-row: 3/-1;
-      height: 90%;
-      grid-column: 1/2;
-    }
+  .charges {
+    font-size: 90%;
+  }
 
-    .currentPrice {
-      font-size: large;
-    }
+  .imgCover {
+    grid-row: 3/-1;
+    height: 90%;
+    grid-column: 1/2;
+  }
 
-    .mrp {
-      font-size: small;
-    }
+  .currentPrice {
+    font-size: large;
+  }
 
-    .options {
-      height: 85%;
-      grid-row: 4/5;
-    }
+  .mrp {
+    font-size: small;
+  }
+
+  .options {
+    height: 85%;
+    grid-row: 4/5;
+    font-size: 12px;
   }
 }

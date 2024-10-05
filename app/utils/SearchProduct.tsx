@@ -5,25 +5,12 @@ import React, { FC, memo } from "react";
 import Image from "next/image";
 
 const SearchProduct: FC<{ data: ISearchProduct }> = ({ data }) => {
-  const {
-    _id,
-    brand,
-    category,
-    discount,
-    exInfo,
-    name,
-    price,
-    rating,
-    sold,
-    tOfP,
-    thumbnail,
-    popular,
-    mrp,
-  } = data;
+  const { _id, discount, exInfo, name, price, rating, sold, thumbnail, mrp } =
+    data;
   const [first, second, third] = exInfo;
   return (
     <Link
-      className={style.single}
+      className={style.container}
       prefetch={false}
       key={_id}
       href={`/product/?_id=${_id}&k=${name.replace(/ /g, "-")}`}
@@ -32,7 +19,8 @@ const SearchProduct: FC<{ data: ISearchProduct }> = ({ data }) => {
         <p className={style.review}>Sold: {sold}</p>
 
         <p className={style.rating}>
-          <span style={{ width: `${rating * 20.2}%` }}>★ ★ ★ ★ ★</span>★ ★ ★ ★ ★
+          <span style={{ width: `${rating || 4 * 20.3}%` }}>★ ★ ★ ★ ★</span>★ ★
+          ★ ★ ★
         </p>
       </div>
 

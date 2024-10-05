@@ -2,7 +2,7 @@
 import { FormEvent, useActionState, useEffect, useRef, useState } from "react";
 import style from "./login.module.css";
 import Link from "next/link";
-import { loginSuccess, newAlert, newLoading } from "@/app/redux/UserSlice";
+import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
@@ -69,7 +69,7 @@ const Login = () => {
       resInfo as ILoginResponse;
     if (success) {
       localStorage.removeItem(storeName);
-      dispatch(loginSuccess({ text, data, token }));
+      dispatch(authenticated({ text, data, token, completed: "Login" }));
       setTimeout(() => {
         router.replace("/");
       }, 2000);

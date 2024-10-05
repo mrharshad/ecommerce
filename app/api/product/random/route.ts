@@ -3,86 +3,35 @@ import {
   IFetchRandomRes,
 } from "@/app/redux/UserApiRequestInterface";
 import { ISearchProduct } from "@/interfaces/productServerSide";
-
+import { TSearchesIdentity } from "@/interfaces/userClientSide";
 import config from "@/server/config/config";
 import dbConnect from "@/server/config/dbConnect";
+import client from "@/server/config/redisConnect";
 import Product from "@/server/models/productModels";
+import { searchProduct } from "@/server/utils/productProjection";
+
 import { NextRequest } from "next/server";
-const { productPerReq } = config;
+const { productPerReq, redisProductExpire, redisProductsCache } = config;
 export async function PUT(req: NextRequest) {
   try {
+    let caching = redisProductsCache === "enable";
     let { page, searches } = (await req.json()) as IFetchRandom;
-    console.log("Random api page, searches", page, searches);
     page = Number(page);
     if (!Array.isArray(searches)) {
       searches = [];
     }
     const data: Array<ISearchProduct> = [];
-
     dbConnect();
-    const findData = async (prePage: number, key?: string) => {
-      let valueData: Array<ISearchProduct> = [];
-      const skipIndex = (prePage - 1) * productPerReq;
-      // try {
-      //   valueData = await client.lrange(
-      //     `${key}:${value}`,
-      //     skipIndex,
-      //     skipIndex + limit - 1
-      //   );
-      // } catch (err) {}
 
-      let dataQty = valueData.length;
+    const cachedSearches = searches.filter(
+      ({ identity, cached }) =>
+        (identity === "category" || identity === "tOfP") &&
+        cached.some((obj) => obj.page)
+    );
+    const numOfCached = cachedSearches.length;
 
-      if (!dataQty) {
-        valueData = await Product.find(
-          {
-            [key ? "tOfP" : "name"]: key || {
-              $regex: "",
-            },
-          },
-          {
-            _id: 1,
-            brand: 1,
-            category: 1,
-            discount: 1,
-            exInfo: 1,
-            name: 1,
-            price: 1,
-            rating: 1,
-            sold: 1,
-            thumbnail: 1,
-            tOfP: 1,
-            popular: 1,
-            mrp: 1,
-          }
-        )
-          .sort({ [key ? "sold" : "popular"]: -1, _id: 1 })
-          .skip(skipIndex)
-          .limit(productPerReq)
-          .exec();
-        dataQty = valueData.length;
-
-        if (dataQty > 0) {
-          // try {
-          //   if (currentPage == 1) {
-          //     await client.rpush(`${key}:${value}`, ...valueData);
-          //   } else {
-          //     await client.rpushx(`${key}:${value}`, ...valueData);
-          //     await client.expire(`${key}:${value}`, 86400); //86400
-          //   }
-          // } catch (err) {}
-        }
-      }
-      if (dataQty > 0) {
-        data.push(...valueData);
-      }
-      return dataQty === productPerReq ? prePage + 1 : null;
-    };
-
-    const intTofPLength = searches.length;
-
-    if (intTofPLength) {
-      searches.sort((a, b) => {
+    if (numOfCached) {
+      cachedSearches.sort((a, b) => {
         const pageA =
           a.cached.find((obj) => obj.sorted === "Popular")?.page || 0;
         const pageB =
@@ -90,28 +39,96 @@ export async function PUT(req: NextRequest) {
         return pageA - pageB; // Ascending order
       });
     }
+    const findData = async (
+      prePage: number,
+      identity: TSearchesIdentity,
+      key?: string
+    ) => {
+      let valueData: Array<ISearchProduct> = [];
+      const skipIndex = (prePage - 1) * productPerReq;
+      const redisKey = key ? `${identity}:${key}` : `random:product`;
+      if (caching) {
+        try {
+          valueData = (await client.lRange(
+            redisKey,
+            skipIndex,
+            skipIndex + productPerReq - 1
+          )) as any;
+        } catch (err) {
+          caching = false;
+        }
+      }
+      let dataQty = valueData.length;
+
+      if (dataQty) {
+        valueData = valueData.map((obj) => JSON.parse(obj as any));
+      } else {
+        valueData = await Product.find(
+          {
+            [identity]: key || {
+              $regex: "",
+            },
+          },
+          searchProduct
+        )
+          .sort({ [key ? "sold" : "popular"]: -1, _id: 1 })
+          .skip(skipIndex)
+          .limit(productPerReq)
+          .exec();
+        dataQty = valueData.length;
+
+        if (dataQty > 0 && caching) {
+          try {
+            if (prePage === 1) {
+              await client.lPush(
+                redisKey,
+                valueData.map((obj) => JSON.stringify(obj))
+              );
+              await client.expire(redisKey, redisProductExpire);
+            } else {
+              await client.rPushX(
+                redisKey,
+                valueData.map((obj) => JSON.stringify(obj))
+              );
+            }
+          } catch (err) {}
+        }
+      }
+      if (dataQty > 0) {
+        data.push(...valueData);
+      }
+
+      return dataQty === productPerReq ? prePage + 1 : null;
+    };
+
     let loop = 0;
     while (loop < productPerReq) {
-      const { cached, key } = searches[loop] || {};
-      const previousPage = cached?.find(
-        (obj) => obj.sorted === "Popular"
-      )?.page;
-      if (previousPage) {
-        const nextPage = await findData(previousPage, key);
+      const { cached = [], key, identity } = cachedSearches[loop] || {};
+      const prePage = cached.find((obj) => obj.sorted === "Popular")?.page;
 
-        searches[loop].cached = [
-          ...cached.filter((obj) => obj.sorted !== "Popular"),
-          { sorted: "Popular", page: nextPage },
+      if (!key || data.length >= productPerReq) break;
+
+      if (prePage) {
+        const nextPage = await findData(prePage, identity, key);
+
+        const index = searches.findIndex((obj) => obj.key === key);
+        searches[index].cached = [
+          ...cached.map((obj) => {
+            if (obj.sorted === "Popular") {
+              return { ...obj, page: nextPage };
+            } else {
+              return obj;
+            }
+          }),
         ];
-      } else {
-        page = await findData(page);
       }
-      if (data.length >= productPerReq || page == null) {
-        break;
-      }
+
       loop++;
     }
 
+    if (page && data.length < productPerReq) {
+      page = await findData(page, "name");
+    }
     return new Response(
       JSON.stringify({
         success: true,

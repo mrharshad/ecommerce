@@ -3,18 +3,6 @@ import config from "../config/config";
 import { IJwtTokenValue, TRoles } from "@/interfaces/userServerSide";
 const { jwtSecretCode } = config;
 
-function getJwtInfo(token: string | null) {
-  if (token) {
-    try {
-      return verify(token, jwtSecretCode) as IJwtTokenValue;
-    } catch {
-      return false;
-    }
-  } else {
-    return false;
-  }
-}
-
 function verifyRole(token: string | null, roleType: TRoles) {
   if (token) {
     try {
@@ -28,4 +16,4 @@ function verifyRole(token: string | null, roleType: TRoles) {
   }
 }
 
-export { getJwtInfo, verifyRole };
+export { verifyRole };

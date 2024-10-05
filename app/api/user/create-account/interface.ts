@@ -1,5 +1,6 @@
 import { IClientResponse } from "@/app/user/sign-up/interface";
-import { ISearches } from "@/interfaces/userClientSide";
+import { IReduxUserData, ISearches } from "@/interfaces/userClientSide";
+import { IAuthorizedUser } from "@/interfaces/userServerSide";
 
 export interface IResData {
   userData: IClientResponse;
@@ -27,6 +28,6 @@ export interface ISignUpResponse {
   success: boolean;
   text: string;
   numOfSendToken: number;
-  data?: any;
+  data: IReduxUserData;
   token?: string;
 }

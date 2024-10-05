@@ -11,7 +11,7 @@ import SearchFilter from "./SearchFilter";
 
 import {
   appMount,
-  position,
+  newAlert,
   removeAlert,
   searchBarInput,
 } from "../redux/UserSlice";
@@ -20,11 +20,14 @@ import { mainKeyChange } from "../redux/UserSlice";
 import { AppDispatch, IReduxStoreData } from "../redux/ReduxStore";
 import UserAlerts from "./UserAlert";
 import {
-  ISearchesIdentity,
-  ISearchSort,
+  TSearchesIdentity,
+  TSearchSort,
 } from "../../interfaces/userClientSide";
 import Suggestions from "./Suggestions";
 import Link from "next/link";
+import { searchesLocal } from "@/clientConfig";
+
+import { deleteSearch, setNewSearches } from "../redux/UserApiRequest";
 
 const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -36,20 +39,18 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
     searchSort,
     toggleSuggestion,
     proLoading,
-    newOrder,
     suggestions,
     alerts,
     token,
-    products,
     findSuggestion,
     searches,
-    storedSuggestions,
     loadings,
+    device,
   } = useSelector((data: IReduxStoreData) => data.user);
 
-  const numOfSuggestion = suggestions.length;
+  const { loading } = findSuggestion;
+  const { fName } = data;
 
-  const { fName } = data || {};
   const capitalizeWords = useCallback((str: string): string => {
     return str.replace(/\b\w/g, function (txt) {
       return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();
@@ -57,66 +58,97 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
   }, []);
 
   const changeSort = useCallback(
-    (newSort: ISearchSort) => {
-      if (searchSort !== newSort) {
-        // searchFunc(undefined, newSort);
-      }
+    (value: TSearchSort) => {
+      dispatch(mainKeyChange([{ name: "searchSort", value }]));
     },
-    [searchSort]
+    [dispatch]
   );
 
-  const inputChange = useCallback(
-    (e: FormEvent<HTMLInputElement>) => {
-      const value = (e.target as HTMLInputElement).value.trim();
-      const key = capitalizeWords(value);
-      const length = key.length;
-      if (length >= 4 || length === 0) {
-        router.push("/");
-        dispatch(searchBarInput(key));
-      }
-    },
-    [capitalizeWords, dispatch, router]
-  );
+  const inputChange = (e: FormEvent<HTMLInputElement>) => {
+    const value = (e.target as HTMLInputElement).value.trim();
+    const key = capitalizeWords(value);
+    const length = key.length;
+    if (length >= 4 || length === 0) {
+      dispatch(searchBarInput(key));
+      router.push("/");
+    }
+  };
 
   const topLevelKey = useCallback(
     (obj: IMainKeyChange): void => {
-      dispatch(mainKeyChange(obj));
+      dispatch(mainKeyChange([obj]));
     },
     [dispatch]
   );
 
-  const submitHandler = useCallback((formData: FormData) => {
-    const value = formData.get("searchBarInput") as string;
-
-    // searchFunc();
-  }, []);
-
-  useEffect(() => {
-    dispatch(appMount({ userData, initialToken }));
-    let inputElement = document.getElementById("searchInput");
-
-    inputElement?.addEventListener("focusout", function () {
-      dispatch(mainKeyChange({ name: "toggleSuggestion", value: "0px" }));
-    });
-  }, [dispatch, initialToken, userData]);
+  const submitHandler = (formData: FormData) => {
+    const value = capitalizeWords(
+      formData.get("searchBarInput") as string
+    ).trim();
+    const length = value.length;
+    if (loading) {
+      return dispatch(
+        newAlert({
+          info: { text: "Wait until you receive suggestions", type: "Message" },
+        })
+      );
+    }
+    if (length >= 4 || length === 0) {
+      dispatch(mainKeyChange([{ name: "searchKey", value }]));
+    } else {
+      dispatch(
+        newAlert({
+          info: {
+            text: "Please enter at least 4 characters",
+            type: "Message",
+          },
+        })
+      );
+    }
+  };
 
   const keyword = useRef<HTMLInputElement>(null);
+
   const searchFunc = useCallback(
-    (identity: ISearchesIdentity, key: string) => {
+    (identity: TSearchesIdentity, key: string) => {
       if (typeof identity === "number") {
         router.push(`/product/?_id=${identity}&k=${key.replace(/ /g, "-")}`);
       } else {
-        dispatch(mainKeyChange({ name: "searchKey", value: key }));
+        router.push("/");
+        (keyword.current as HTMLInputElement).value = key;
+        dispatch(mainKeyChange([{ name: "searchKey", value: key }]));
       }
     },
-    [dispatch]
+    [dispatch, router]
   );
-  const deleteSearchKeys = useCallback((key: string) => {}, []);
+
+  const deleteSearchKeys = useCallback(
+    (key: string) => {
+      if (searchKey === key) {
+        (keyword.current as HTMLInputElement).value = "";
+        dispatch(searchBarInput(""));
+        dispatch(mainKeyChange([{ name: "searchKey", value: "" }]));
+      }
+      const newSearches = searches.filter((obj) => obj.key !== key);
+      if (token) {
+        dispatch(deleteSearch({ token, searches, key }));
+      }
+      dispatch(
+        mainKeyChange([
+          { name: "searches", value: newSearches },
+          { name: "toggleSuggestion", value: "1000px" },
+        ])
+      );
+    },
+    [searches, searchKey, token]
+  );
+
   const removeAlertFunc = useCallback(
     (text: string) => {
       dispatch(removeAlert(text));
       const login = ["token is invalid", "token is expired"];
       if (login.includes(text)) {
+        dispatch(mainKeyChange([{ name: "token", value: null }]));
         router.push("/user/login");
       } else if (text === "reload") {
         window.location.reload();
@@ -124,7 +156,28 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
     },
     [dispatch, router]
   );
-  console.log("toggleSuggestion", toggleSuggestion);
+
+  useEffect(() => {
+    if (device) {
+      localStorage.setItem(searchesLocal, JSON.stringify(searches));
+    }
+    const findPriority = searches.some(({ priority }) =>
+      Number.isInteger(priority / 2)
+    );
+
+    if (findPriority && token) {
+      dispatch(setNewSearches({ token, searches }));
+    }
+  }, [searches, dispatch]);
+
+  useEffect(() => {
+    dispatch(appMount({ userData, initialToken }));
+    let inputElement = document.getElementById("searchInput");
+
+    inputElement?.addEventListener("focusout", function () {
+      dispatch(mainKeyChange([{ name: "toggleSuggestion", value: "0px" }]));
+    });
+  }, [dispatch]);
   return (
     <>
       <UserAlerts
@@ -168,11 +221,7 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
               <button className={style.button} type="submit">
                 <svg viewBox="0 0 24 24">
                   <path
-                    fill={
-                      proLoading || findSuggestion.loading
-                        ? "#FF0000"
-                        : "#FFFFFF"
-                    }
+                    fill={proLoading || loading ? "#FF0000" : "#FFFFFF"}
                     d="M0 0h24v24H0V0z"
                   ></path>
                   <path
@@ -183,8 +232,13 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
               </button>
 
               <svg
-                style={{ opacity: numOfSuggestion ? "10" : "0px" }}
                 className={style.searchCancel}
+                onClick={() => {
+                  (keyword.current as HTMLInputElement).value = "";
+                  dispatch(searchBarInput(""));
+                  dispatch(mainKeyChange([{ name: "searchKey", value: "" }]));
+                }}
+                style={{ display: searchKey ? "unset" : "none" }}
                 viewBox="0 0 24 24"
                 id="Close"
               >

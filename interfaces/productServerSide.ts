@@ -64,6 +64,7 @@ export interface ISearchProduct {
   price: number;
   discount: number;
   mrp: string;
+  createdAt: Date;
 }
 export interface ISingleProduct extends ISearchProduct {
   imgSetKey: string; // length = max:15
@@ -107,7 +108,6 @@ export interface ISingleProduct extends ISearchProduct {
     delivered: string;
   }>;
   popular: number;
-  createdAt: Date;
 }
 
 export interface IDBProduct extends ISingleProduct {}

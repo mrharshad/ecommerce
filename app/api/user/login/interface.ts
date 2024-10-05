@@ -10,12 +10,6 @@ export interface IRequest {
   searches: ISearchesClientSide[];
 }
 
-export interface IFetchUserData extends IAuthorizedUser {
-  password?: string;
-  tokens: ITokens;
-  role: Array<TRoles>;
-}
-
 export interface IResponseUserData extends IReduxUserData {
   tokens: ITokens;
 }

@@ -2,8 +2,9 @@ import { IServerResponse } from "@/interfaces/clientAndServer";
 import {
   IAlert,
   ISearches,
-  ISearchesIdentity,
   ISuggestion,
+  TSearchesIdentity,
+  TSearchSort,
 } from "../../interfaces/userClientSide";
 import { ISearchProduct } from "@/interfaces/productServerSide";
 
@@ -31,15 +32,33 @@ export interface IFetchRandomRes extends IServerResponse {
 }
 
 export interface IFetchKeyProduct {
-  isSearched: boolean;
   key: string;
   page: number;
-  identity: ISearchesIdentity;
+  identity: TSearchesIdentity;
+  searchSort: TSearchSort;
 }
 
 export interface IFetchKeyProductRes extends IServerResponse {
   resPage: number | null;
   data: Array<ISearchProduct>;
   key: string;
-  isSearched: boolean;
+  identity: TSearchesIdentity;
+}
+export interface ISetNewSearches {
+  token: string;
+  searches: Array<ISearches>;
+}
+
+export interface ISetNewSearchesRes extends Omit<IServerResponse, "message"> {
+  message: "Search history is invalid" | string;
+}
+
+export interface IDeleteSearch {
+  token: string;
+  key: string;
+  searches: Array<ISearches>;
+}
+
+export interface IDeleteSearchRes extends IServerResponse {
+  removedSearch: ISearches;
 }

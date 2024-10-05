@@ -3,9 +3,9 @@ import React, { FC, memo } from "react";
 import style from "./Header.module.css";
 import {
   ISearches,
-  ISearchesIdentity,
   ISuggestion,
   IToggleSuggestion,
+  TSearchesIdentity,
 } from "@/interfaces/userClientSide";
 
 interface INewSuggestions extends ISuggestion {
@@ -13,12 +13,12 @@ interface INewSuggestions extends ISuggestion {
 }
 interface IProps {
   toggleSuggestion: IToggleSuggestion;
-  searchFunc: (identity: ISearchesIdentity, key: string) => void;
+  searchFunc: (identity: TSearchesIdentity, key: string) => void;
   deleteSearchKeys: (key: string) => void;
   suggestions: Array<INewSuggestions>;
   searches: Array<ISearches>;
 }
-
+import { suggestionLimit } from "@/clientConfig";
 const Suggestions: FC<IProps> = ({
   toggleSuggestion,
   suggestions,
@@ -28,8 +28,9 @@ const Suggestions: FC<IProps> = ({
 }) => {
   return (
     <div style={{ maxHeight: toggleSuggestion }} className={style.searchKeys}>
-      {(suggestions.length ? suggestions : searches).map(
-        ({ key, byUser, identity }, index) => {
+      {(suggestions.length ? suggestions : searches)
+        .slice(0, suggestionLimit)
+        .map(({ key, byUser, identity }, index) => {
           return (
             <div key={index}>
               <svg>
@@ -56,8 +57,7 @@ const Suggestions: FC<IProps> = ({
               )}
             </div>
           );
-        }
-      )}
+        })}
     </div>
   );
 };

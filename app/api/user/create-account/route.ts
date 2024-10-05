@@ -11,13 +11,14 @@ import { IRequest, ISignUpResponse, TTokenStatus } from "./interface";
 import config from "@/server/config/config";
 import ISignUpFirstStep from "@/server/models/signUpType";
 
-import IDBUser from "@/interfaces/userServerSide";
+import IDBUser, {
+  IAuthentication,
+  IAuthorizedUser,
+  ISearches,
+} from "@/interfaces/userServerSide";
 import { IValidToken } from "@/app/user/sign-up/interface";
+import { IReduxUserData } from "@/interfaces/userClientSide";
 
-interface INewData extends IDBUser {
-  token?: string;
-  password: any;
-}
 // apply api - /user/sign-up
 export async function POST(req: Request) {
   try {
@@ -33,6 +34,9 @@ export async function POST(req: Request) {
       smtpPort,
       cookieName,
       cookieExpire,
+      searchesQty,
+      interestedSearch,
+      redisUserExpire,
     } = config;
     const response = (res: ISignUpResponse, status: number): Response => {
       return new Response(JSON.stringify(res), {
@@ -54,13 +58,13 @@ export async function POST(req: Request) {
       district,
       state,
       area,
-      searches,
+      searches = [],
     }: IRequest = await req.json();
-    let [userName, domain] = email.toLowerCase().trim().split("@");
-    if (userName.length < 3) {
+    let [mailId, domain] = email.toLowerCase().trim().split("@");
+    if (mailId.length < 3) {
       throw new Error("Enter valid email id");
     }
-    email = userName + "@gmail.com";
+    email = mailId + "@gmail.com";
     const { dateType } = birth;
     let findUser = {} as ISignUpFirstStep;
     // let isRedis = "mongodb"; // jab redis kv ka use krenge to mongodb ki jagha par redis likhenge
@@ -280,34 +284,42 @@ export async function POST(req: Request) {
             try {
               findLastId.lastUserId += 1;
               const [bYear, bMonth, bDate] = dateType.split("-");
-              searches = searches?.length ? searches : [];
-              let userSearch = searches
-                .filter(({ priority, byUser }) => byUser && priority)
-                .slice(0, 10);
+              const userSearch: Array<ISearches> = [];
 
-              let autoSearch = searches
-                .filter(({ priority, byUser }) => !byUser && priority)
+              const clientInterested = searches.filter(
+                ({ byUser, identity, key }) => {
+                  const obj = { byUser, identity: String(identity), key };
+                  if (identity !== "category") {
+                    if (byUser) {
+                      userSearch.push(obj);
+                    } else {
+                      return obj;
+                    }
+                  }
+                }
+              );
+
+              clientInterested
                 .sort((a, b) => b.priority - a.priority)
-                .slice(0, 5);
-              const newSearches = userSearch
-                .concat(autoSearch)
-                .map(({ byUser, identity, key }) => {
-                  return {
-                    key,
-                    byUser,
-                    identity:
-                      typeof Number(identity) == "number"
-                        ? String(identity)
-                        : identity,
-                  };
-                });
-              const newData = {
+                .slice(0, interestedSearch);
+
+              const interested: ISearches[] = clientInterested.map(
+                ({ cached, priority, ...obj }) => obj as ISearches
+              );
+              const newSearches = [
+                ...userSearch.slice(0, searchesQty),
+                ...interested,
+              ];
+              const authorizedUser: IAuthorizedUser = {
                 _id: findLastId.lastUserId,
                 fName,
                 lName,
-                password: hashedPassword,
                 email: storedToken.email,
-                mobileNo: Number(mobileNo),
+                bDate: Number(bDate),
+                bMonth: Number(bMonth),
+                bYear: Number(bYear),
+                gender,
+                searches: newSearches,
                 location: [
                   {
                     _id: Date.now() as any,
@@ -318,16 +330,24 @@ export async function POST(req: Request) {
                     area,
                   },
                 ],
+                nOfNOrder: 0,
+                cartPro: [],
+              };
+              const authentication: IAuthentication = {
+                ...authorizedUser,
+                password: hashedPassword,
                 role: ["User"],
-                bDate: Number(bDate),
-                bMonth: Number(bMonth),
-                bYear: Number(bYear),
-                gender,
-                searches: newSearches,
                 tokens: {},
                 issues: {},
-                createdAt: Date.now() as any,
-              } as INewData;
+              };
+
+              const newData: IDBUser = {
+                ...authentication,
+                mobileNo: Number(mobileNo),
+                canceled: [],
+                delivered: [],
+                createdAt: new Date(),
+              };
 
               const createData = await User.create(newData);
               const jwtToken = Jwt.sign(
@@ -351,8 +371,7 @@ export async function POST(req: Request) {
                 path: "/", // all path
               });
               await manageToken(findUser, "delete");
-              newData.token = jwtToken;
-              delete newData.password;
+
               newData.cartPro = [];
               newData.location = createData.location;
               newData.createdAt = createData.createdAt;
@@ -361,8 +380,8 @@ export async function POST(req: Request) {
                 try {
                   await client.setEx(
                     `user:${findLastId.lastUserId}`,
-                    86400,
-                    JSON.stringify(newData)
+                    redisUserExpire,
+                    JSON.stringify(authentication)
                   );
                 } catch (err) {}
               }
@@ -370,7 +389,7 @@ export async function POST(req: Request) {
                 {
                   success: true,
                   text: "Account created successfully ",
-                  data: newData,
+                  data: { ...authorizedUser, searches },
                   token: jwtToken,
                   numOfSendToken: 0,
                 },
@@ -391,6 +410,7 @@ export async function POST(req: Request) {
                 numOfSendToken,
                 text: `Verification code is incorrect new code sent to ${email}`,
                 success: true,
+                data: {} as IReduxUserData,
               },
               200
             );
@@ -410,6 +430,7 @@ export async function POST(req: Request) {
           success: true,
           numOfSendToken,
           text: `Token has expired New code sent to ${email}`,
+          data: {} as IReduxUserData,
         },
         200
       );
@@ -424,6 +445,7 @@ export async function POST(req: Request) {
         success: true,
         numOfSendToken: 1,
         text: `The verification code has been sent to ${email}`,
+        data: {} as IReduxUserData,
       },
       200
     );
