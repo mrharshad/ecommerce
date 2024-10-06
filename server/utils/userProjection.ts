@@ -16,6 +16,7 @@ export const authentication: Record<keyof IAuthentication, 1> = {
   searches: 1,
   tokens: 1,
   role: 1,
+  issues: 1,
 };
 
 export const authorizedUser: Record<keyof IAuthorizedUser, 1> = {

@@ -12,12 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import Link from "next/link";
 import { IRecoveryParams } from "./recoveryInterface";
-import {
-  loginSuccess,
-  mainKeyChange,
-  newAlert,
-  newLoading,
-} from "@/app/redux/UserSlice";
+import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 
 import { IRecoveryPasswordResponse } from "@/app/api/user/recovery-password/passwordInterface";
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
@@ -81,7 +76,9 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
 
       if (success) {
         localStorage.removeItem("loginInfo");
-        dispatch(loginSuccess({ text, token, data }));
+        dispatch(
+          authenticated({ text, token, data, completed: "Recovery-Password" })
+        );
         router.replace("/");
       } else {
         dispatch(

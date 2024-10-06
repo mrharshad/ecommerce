@@ -12,8 +12,8 @@ import User from "@/server/models/userModels";
 import errors from "@/server/utils/errorHandler";
 
 import { ICustomError } from "@/interfaces/clientAndServer";
-import { ISearches } from "@/interfaces/userServerSide";
-import { IFetchUserData, INewData } from "../login/interface";
+import { IAuthentication, ISearches } from "@/interfaces/userServerSide";
+import { INewData } from "../login/interface";
 
 // apply api - /user/password-recovery
 export async function PUT(req: NextRequest) {
@@ -35,7 +35,7 @@ export async function PUT(req: NextRequest) {
     } = config;
     let redisCache = redisUserCache === "enable";
     let isRedis = false;
-    let findUser = {} as IFetchUserData;
+    let findUser = {} as IAuthentication;
 
     if (redisCache) {
       try {
@@ -54,7 +54,7 @@ export async function PUT(req: NextRequest) {
       findUser = (await User.findOne(
         { email },
         { canceled: 0, delivered: 0 }
-      ).select("+password")) as IFetchUserData;
+      ).select("+password")) as IAuthentication;
       if (!findUser?._id) {
         if (redisCache) {
           try {
@@ -133,7 +133,7 @@ export async function PUT(req: NextRequest) {
           await client.setEx(`user:${_id}`, 86400, JSON.stringify(findUser));
         } catch (err) {}
       }
-      delete findUser.password;
+      // delete findUser.password
       const jwtToken = Jwt.sign(
         {
           _id,

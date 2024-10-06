@@ -176,8 +176,8 @@ export async function PUT(req: NextRequest) {
         {
           $set: { tokens: {}, searches: newDBSearches },
         },
-        { new: true, projection: authorizedUser }
-      )) as IAuthorizedUser;
+        { new: true, projection: authentication }
+      )) as IAuthentication;
 
       const {
         bDate,
@@ -190,8 +190,9 @@ export async function PUT(req: NextRequest) {
         searches: updatedSearches,
         gender,
         nOfNOrder,
+        issues,
       } = updatedValue;
-      const authentication: IAuthentication = {
+      const authorizedData: IAuthorizedUser = {
         _id,
         email,
         bDate,
@@ -204,9 +205,13 @@ export async function PUT(req: NextRequest) {
         location,
         nOfNOrder,
         searches: updatedSearches,
+      };
+      const authenticationData: IAuthentication = {
+        ...authorizedData,
         password,
         tokens: {},
         role,
+        issues,
       };
 
       if (!updatedValue) throw new Error("Data Base Error");
@@ -216,7 +221,7 @@ export async function PUT(req: NextRequest) {
           await client.setEx(
             `user:${_id}`,
             redisUserExpire,
-            JSON.stringify(authentication)
+            JSON.stringify(authenticationData)
           );
         } catch (err) {}
       }
@@ -249,7 +254,7 @@ export async function PUT(req: NextRequest) {
         success: true,
         text: "login successful",
         token: newJwtToken,
-        data: { ...authentication, searches: newSearchesClientSide },
+        data: { ...authorizedData, searches: newSearchesClientSide },
       });
     } else {
       if (verificationFailed === 3) {
