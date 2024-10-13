@@ -6,12 +6,19 @@ import client from "@/server/config/redisConnect";
 import Product from "@/server/models/productModels";
 import { singleProduct } from "@/server/utils/productProjection";
 import { IGetProductRes } from "@/app/product/interface";
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  context: {
+    params: {
+      _id: string;
+    };
+  }
+) {
   try {
     console.log("single product api called");
     const { redisSingleProCache, redisSingleProExpire } = config;
-    const searchParams = req.nextUrl.searchParams;
-    const _id = +(searchParams.get("_id") as string);
+    console.log("_id type", typeof context.params._id);
+    const _id = +(context.params._id as string);
     let data = {} as ISingleProduct;
     let cache: boolean | null = redisSingleProCache === "enable";
     const redisUrl = `single:${_id}`;

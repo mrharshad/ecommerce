@@ -45,12 +45,9 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
     if (!productId) {
       notFound();
     }
-    const request = await fetch(
-      `${bProtocol}${bHost}/api/product/single?_id=${_id}`,
-      {
-        cache: "no-cache",
-      }
-    );
+    const request = await fetch(`${bProtocol}${bHost}/api/product/${_id}`, {
+      cache: "no-cache",
+    });
 
     const { success, data, message } = (await request.json()) as IGetProductRes;
 
