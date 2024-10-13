@@ -14,6 +14,7 @@ import Images from "./Images";
 
 const page: FC<IProps> = async ({ params, searchParams }) => {
   try {
+    const Handler = dynamic(() => import("./Handler"), { ssr: false });
     const {
       districtMinTime,
       districtMaxTime,
@@ -34,16 +35,12 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       ? JSON.parse(location)
       : {};
 
-    const Handler = dynamic(() => import("./Handler"), { ssr: false });
-
     const { bProtocol, bHost } = config;
     const { _id, k, o, v } = searchParams;
     const productId = Number(_id);
     const selectedOption = Number(o) || 0;
 
     const selectedVariant = Number(v) || 0;
-
-    console.log("req id", _id, !Number(_id));
 
     if (!productId) {
       notFound();

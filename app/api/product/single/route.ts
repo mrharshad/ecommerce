@@ -8,6 +8,7 @@ import { singleProduct } from "@/server/utils/productProjection";
 import { IGetProductRes } from "@/app/product/interface";
 export async function GET(req: NextRequest) {
   try {
+    console.log("single product api called");
     const { redisSingleProCache, redisSingleProExpire } = config;
     const searchParams = req.nextUrl.searchParams;
     const _id = +(searchParams.get("_id") as string);
@@ -51,6 +52,7 @@ export async function GET(req: NextRequest) {
     );
   } catch (err) {
     if (err instanceof Error) {
+      console.log("single product api error ", err.message);
       return new Response(
         JSON.stringify({
           success: false,
