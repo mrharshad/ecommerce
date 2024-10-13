@@ -1,3 +1,4 @@
+import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
 import { IClientResponse } from "@/app/user/sign-up/interface";
 import { IReduxUserData, ISearches } from "@/interfaces/userClientSide";
 import { IAuthorizedUser } from "@/interfaces/userServerSide";
@@ -28,6 +29,6 @@ export interface ISignUpResponse {
   success: boolean;
   text: string;
   numOfSendToken: number;
-  data: IReduxUserData;
+  data: IAuthenticatedUserData;
   token?: string;
 }

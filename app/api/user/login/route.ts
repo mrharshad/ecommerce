@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
-import { INewData, IRequest, ISendResponse } from "./interface";
+import { IRequest, ISendResponse } from "./interface";
 import config from "@/server/config/config";
 
 import errors from "@/server/utils/errorHandler";
@@ -21,9 +21,11 @@ import {
 } from "@/interfaces/userServerSide";
 import { ICustomError } from "@/interfaces/clientAndServer";
 import { authentication, authorizedUser } from "@/server/utils/userProjection";
+import { locationCookieName } from "@/server/utils/cookies";
 // apply api - /user/login
 export async function PUT(req: NextRequest) {
   try {
+    const cookie = cookies();
     const {
       email,
       password: userEnter,
@@ -72,7 +74,7 @@ export async function PUT(req: NextRequest) {
           try {
             await client.setEx(
               `email:${email}`,
-              86400,
+              redisUserExpire,
               JSON.stringify({ email })
             );
           } catch {}
@@ -163,9 +165,7 @@ export async function PUT(req: NextRequest) {
       ];
 
       const jwtInfo: IJwtInfo = { _id, role };
-      const newJwtToken = Jwt.sign(jwtInfo, jwtSecretCode, {
-        expiresIn: jwtExpireTime,
-      });
+
       if (isRedis) {
         try {
           await client.del(`email:${email}`);
@@ -228,11 +228,7 @@ export async function PUT(req: NextRequest) {
       const newSearchesClientSide: ISearchesClientSide[] = [...clientSearches];
 
       updatedSearches.forEach(({ byUser, identity, key }) => {
-        if (
-          !clientSearches.find((obj) => {
-            obj.key === key;
-          })
-        ) {
+        if (!clientSearches.find((obj) => obj.key === key)) {
           newSearchesClientSide.push({
             key,
             identity: (Number(identity) || identity) as TSearchesIdentity,
@@ -242,12 +238,21 @@ export async function PUT(req: NextRequest) {
           });
         }
       });
-      cookies().set({
+      const newJwtToken = Jwt.sign(jwtInfo, jwtSecretCode, {
+        expiresIn: jwtExpireTime,
+      });
+
+      cookie.set({
+        name: locationCookieName,
+        value: JSON.stringify(location[0]),
+      });
+
+      cookie.set({
         name: cookieName,
         value: newJwtToken,
-        expires: new Date(Date.now() + cookieExpire * 24 * 60 * 60 * 1000), // 2023-06-28T08:19:14.768Z  iss prakar ka data leta hai
+        expires: new Date(Date.now() + cookieExpire * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        path: "/", // all path
+        path: "/",
       });
 
       return response({

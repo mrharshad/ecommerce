@@ -20,12 +20,12 @@ export interface IImages {
 export interface IReviews {
   // jo comment nhi kiya unka bhi info auto matic 4 rating set ho jaiga
   _id: number;
-  name: string;
+  name: string; // fName
   state: string;
   district: string;
   rating: number; // automatic 4
   comment?: string;
-  delivered: string; // delivered date
+  delivered: string; // delivered date // 12 September 2024
 }
 export interface IImage {
   _id: string;
@@ -37,19 +37,22 @@ export interface IImageSets {
   created: string;
 }
 
-// export interface IThumbnail {
-//   url: string;
-//   _id: string;
-//   update: string; // 17-02-24
-// }
-interface ICertificates {
+export interface ICertificates {
   _id: string;
   // publicId: string;
   image: string;
   added: string; //17-02-24
   verified: boolean;
 }
-export interface ISearchProduct {
+
+interface IEasyAccess {
+  price: number;
+  discount: number;
+  mrp: string;
+  thumbnail: string;
+}
+
+export interface ISearchProduct extends IEasyAccess {
   _id: number;
   name: string; // length = min:10 max:75
   brand: string; // length = min:2 max:20
@@ -59,14 +62,12 @@ export interface ISearchProduct {
   rating: number;
   sold: number;
   exInfo: string[]; // key:value
-  thumbnail: string;
   popular?: number;
-  price: number;
-  discount: number;
-  mrp: string;
   createdAt: Date;
 }
-export interface ISingleProduct extends ISearchProduct {
+
+export interface ISingleProduct
+  extends Omit<ISearchProduct, "price" | "mrp" | "discount" | "thumbnail"> {
   imgSetKey: string; // length = max:15
   imageSets: Array<{
     _id: string;
@@ -107,7 +108,6 @@ export interface ISingleProduct extends ISearchProduct {
     comment?: string;
     delivered: string;
   }>;
-  popular: number;
 }
 
-export interface IDBProduct extends ISingleProduct {}
+export interface IDBProduct extends IEasyAccess, ISingleProduct {}

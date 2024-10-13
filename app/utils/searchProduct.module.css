@@ -43,23 +43,20 @@
 .priceDiv {
   display: flex;
   flex-wrap: wrap;
-  height: fit-content;
-
-  height: 24%;
+  height: 17%;
 }
 
 .charges {
   font-size: 14px;
   display: flex;
   width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .charges span {
   margin-bottom: 3px;
   margin-top: 3px;
-}
-
-.charges span:last-child {
   margin-left: auto;
 }
 
@@ -94,39 +91,35 @@
 .options {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  height: 20%;
   font-size: 13px;
+  row-gap: 3px;
 }
 
 .options p {
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: 7%;
-  text-overflow: ellipsis;
-  height: 26%;
-  white-space: nowrap;
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-  padding-left: 1%;
-  background: linear-gradient(45deg, #d7d7d7, #00000000);
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  column-gap: 5px;
 }
 
+.options p span:first-child {
+  white-space: nowrap;
+  background: #80808024;
+  padding-left: 3px;
+  border-radius: 3px;
+  padding-right: 3px;
+  font-size: 12px;
+}
+.options p span:last-child {
+  scrollbar-width: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-left: auto;
+}
 .container:hover {
   scale: 1.01;
 }
 @media screen and (max-width: 480px) {
-  .container {
-    justify-content: space-between;
-    position: relative;
-    font-size: 14px;
-    height: 200px;
-    width: 97%;
-    display: grid;
-    grid-template-columns: 38% 60%;
-    grid-template-rows: 10% 20% 25% 45%;
-  }
   .name {
     grid-column: 1/-1;
     font-size: 13px;
@@ -168,7 +161,7 @@
 
   .imgCover {
     grid-row: 3/-1;
-    height: 90%;
+    height: 100%;
     grid-column: 1/2;
   }
 
@@ -181,8 +174,9 @@
   }
 
   .options {
-    height: 85%;
     grid-row: 4/5;
     font-size: 12px;
+    margin-top: auto;
+    row-gap: 5px;
   }
 }

@@ -9,6 +9,7 @@ import React, {
 import { INewSet } from "./interface";
 import style from "./newSet.module.css";
 import Image from "next/image";
+import { imageSetImages } from "../../config";
 
 const NewSet: FC<INewSet> = ({
   imageSets,
@@ -47,7 +48,7 @@ const NewSet: FC<INewSet> = ({
     const diffElement = difference.current as HTMLInputElement;
 
     const _id = diffElement.value.trim();
-    if (totalSelected > 4 || totalSelected < 1 || _id.length < 1) {
+    if (totalSelected > imageSetImages || totalSelected < 1 || _id.length < 1) {
       return showAlert({
         text: "Please check images quantity & difference",
         type: "Message",

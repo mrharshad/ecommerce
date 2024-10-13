@@ -12,6 +12,7 @@ import SearchFilter from "./SearchFilter";
 import {
   appMount,
   newAlert,
+  hideSuggestion,
   removeAlert,
   searchBarInput,
 } from "../redux/UserSlice";
@@ -25,7 +26,7 @@ import {
 } from "../../interfaces/userClientSide";
 import Suggestions from "./Suggestions";
 import Link from "next/link";
-import { searchesLocal } from "@/clientConfig";
+import { searchesLocal, storeByPriority } from "@/clientConfig";
 
 import { deleteSearch, setNewSearches } from "../redux/UserApiRequest";
 
@@ -46,6 +47,7 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
     searches,
     loadings,
     device,
+    viewedPro,
   } = useSelector((data: IReduxStoreData) => data.user);
 
   const { loading } = findSuggestion;
@@ -87,23 +89,24 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
     ).trim();
     const length = value.length;
     if (loading) {
-      return dispatch(
+      dispatch(
         newAlert({
           info: { text: "Wait until you receive suggestions", type: "Message" },
         })
       );
-    }
-    if (length >= 4 || length === 0) {
-      dispatch(mainKeyChange([{ name: "searchKey", value }]));
     } else {
-      dispatch(
-        newAlert({
-          info: {
-            text: "Please enter at least 4 characters",
-            type: "Message",
-          },
-        })
-      );
+      if (length >= 4 || length === 0) {
+        dispatch(mainKeyChange([{ name: "searchKey", value }]));
+      } else {
+        dispatch(
+          newAlert({
+            info: {
+              text: "Please enter at least 4 characters",
+              type: "Message",
+            },
+          })
+        );
+      }
     }
   };
 
@@ -162,7 +165,7 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
       localStorage.setItem(searchesLocal, JSON.stringify(searches));
     }
     const findPriority = searches.some(({ priority }) =>
-      Number.isInteger(priority / 2)
+      Number.isInteger(priority / storeByPriority)
     );
 
     if (findPriority && token) {
@@ -171,12 +174,26 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
   }, [searches, dispatch]);
 
   useEffect(() => {
+    const categories: { [key: string]: number } = {};
+    const tOfProducts: { [key: string]: number } = {};
+    viewedPro.forEach(({ tOf, category }) => {
+      categories[category] = categories[category] + 1 || 1;
+      tOfProducts[category] = tOfProducts[category] + 1 || 1;
+    });
+    console.log("tOfProducts", tOfProducts);
+    console.log("categories", categories);
+    console.log("viewedPro", viewedPro);
+  }, [viewedPro]);
+
+  useEffect(() => {
     dispatch(appMount({ userData, initialToken }));
     let inputElement = document.getElementById("searchInput");
+    function hideSuggestionHandler() {
+      dispatch(hideSuggestion());
+    }
+    inputElement?.addEventListener("focusout", hideSuggestionHandler);
 
-    inputElement?.addEventListener("focusout", function () {
-      dispatch(mainKeyChange([{ name: "toggleSuggestion", value: "0px" }]));
-    });
+    addEventListener("scroll", hideSuggestionHandler);
   }, [dispatch]);
   return (
     <>
@@ -220,13 +237,10 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
             <div>
               <button className={style.button} type="submit">
                 <svg viewBox="0 0 24 24">
-                  <path
-                    fill={proLoading || loading ? "#FF0000" : "#FFFFFF"}
-                    d="M0 0h24v24H0V0z"
-                  ></path>
+                  <path fill="#FFFFFF" d="M0 0h24v24H0V0z"></path>
                   <path
                     d="M15.5 14h-.79l-.28-.27c1.2-1.4 1.82-3.31 1.48-5.34-.47-2.78-2.79-5-5.59-5.34-4.23-.52-7.79 3.04-7.27 7.27.34 2.8 2.56 5.12 5.34 5.59 2.03.34 3.94-.28 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-                    fill="#000000"
+                    fill={proLoading || loading ? "#17e7e7" : "#000000"}
                   ></path>
                 </svg>
               </button>

@@ -1,11 +1,5 @@
 "use client";
-import React, {
-  FC,
-  FormEvent,
-  MutableRefObject,
-  useRef,
-  useState,
-} from "react";
+import React, { FC, FormEvent, MutableRefObject, useRef } from "react";
 import style from "./recovery.module.css";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,8 +8,9 @@ import Link from "next/link";
 import { IRecoveryParams } from "./recoveryInterface";
 import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 
-import { IRecoveryPasswordResponse } from "@/app/api/user/recovery-password/passwordInterface";
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
+import { INewPasswordRes } from "./interface";
+
 const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
   const dispatch = useDispatch();
   const { alerts, searches, districts } = useSelector(
@@ -58,7 +53,7 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
     const confPassValue = (confirmPassword.current as HTMLInputElement).value;
     if (password.length > 7 && confPassValue === password) {
       dispatch(newLoading("Recovery-Password"));
-      const verify = await fetch(`/api/user/recovery-password`, {
+      const verify = await fetch(`/api/admin/user/new-password`, {
         method: "PUT",
         body: JSON.stringify({
           password,
@@ -71,19 +66,23 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
         },
       });
 
-      const { success, text, token, data }: IRecoveryPasswordResponse =
+      const { success, message, token, data }: INewPasswordRes =
         await verify.json();
 
       if (success) {
-        localStorage.removeItem("loginInfo");
         dispatch(
-          authenticated({ text, token, data, completed: "Recovery-Password" })
+          authenticated({
+            text: message,
+            token,
+            data,
+            completed: "Recovery-Password",
+          })
         );
         router.replace("/");
       } else {
         dispatch(
           newAlert({
-            info: { text, type: "Error", duration: "4s" },
+            info: { text: message, type: "Error", duration: "4s" },
             completed: "Recovery-Password",
           })
         );

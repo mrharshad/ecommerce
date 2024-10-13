@@ -352,6 +352,10 @@ const categoriesInfo: Array<ICategoriesInfo> = [
   {
     _id: "Face Care",
     brands: [
+      "Aveeno",
+      "Bio-Oil",
+      "DOT & KEY",
+      "FoxTale",
       "The Body Shop",
       "Neutrogena",
       "L'Oreal",
@@ -366,7 +370,6 @@ const categoriesInfo: Array<ICategoriesInfo> = [
       "Kiehl's",
       "Forest Essentials",
       "Lotus Herbals",
-      "Aveeno",
       "Globus Naturals",
       "Simple",
     ],
@@ -383,6 +386,11 @@ const categoriesInfo: Array<ICategoriesInfo> = [
       },
       {
         tOfPName: "Face Scrub",
+        exInfoData: [...faceCare],
+        requiredCertificates: [],
+      },
+      {
+        tOfPName: "Face Serum",
         exInfoData: [...faceCare],
         requiredCertificates: [],
       },

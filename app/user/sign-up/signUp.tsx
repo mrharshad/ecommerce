@@ -56,7 +56,7 @@ const SignUpComponent: FC = () => {
     dispatch(newAlert({ info: { type: "Message", text } }));
   };
 
-  async function signUpFunction(formData: FormData) {
+  async function signUpFunction(formData: FormData): Promise<any> {
     if (alerts.length) return;
     if (reTry) {
       const pendingTime = new Date(reTry);

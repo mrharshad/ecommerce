@@ -1,6 +1,6 @@
 import { IAuthentication, IAuthorizedUser } from "@/interfaces/userServerSide";
 
-export const authentication: Record<keyof IAuthentication, 1> = {
+export const authentication: Record<keyof IAuthentication, 1> = Object.freeze({
   _id: 1,
   email: 1,
   fName: 1,
@@ -17,9 +17,9 @@ export const authentication: Record<keyof IAuthentication, 1> = {
   tokens: 1,
   role: 1,
   issues: 1,
-};
+});
 
-export const authorizedUser: Record<keyof IAuthorizedUser, 1> = {
+export const authorizedUser: Record<keyof IAuthorizedUser, 1> = Object.freeze({
   _id: 1,
   email: 1,
   fName: 1,
@@ -32,4 +32,4 @@ export const authorizedUser: Record<keyof IAuthorizedUser, 1> = {
   cartPro: 1,
   nOfNOrder: 1,
   searches: 1,
-};
+});

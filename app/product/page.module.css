@@ -1,0 +1,488 @@
+.section {
+  display: grid;
+  padding: 5px;
+  flex-wrap: wrap;
+  grid-template-columns: 2fr 2fr 1fr;
+  grid-template-rows: min-content 50px 30px 250px;
+  column-gap: 10px;
+}
+
+.section h1 {
+  grid-column: 1/-1;
+  grid-row: 1/2;
+}
+.firstDiv {
+  grid-column: 2/-1;
+  gap: 5px;
+  grid-row: 2 / 3;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+
+  .rating {
+    position: relative;
+    display: flex;
+    margin-left: 20px;
+  }
+  .review {
+    font-size: large;
+  }
+}
+
+.rating span {
+  display: inline-block;
+  overflow-x: hidden;
+  white-space: nowrap;
+  position: absolute;
+  color: gold;
+}
+.secondDiv {
+  font-size: 14px;
+  grid-column: 2/-1;
+  grid-row: 4/5;
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  flex-wrap: wrap;
+  height: fit-content;
+}
+.stock {
+  font-weight: bold;
+}
+.delivery {
+  font-weight: bold;
+  width: 100%;
+}
+
+.delivery span {
+  font-weight: normal;
+  color: green;
+}
+.minOrder {
+  width: 100%;
+}
+.minOrder span {
+  color: orange;
+}
+.lowStock {
+  color: orange;
+  font-weight: bold;
+  border-radius: 5px;
+  font-size: small;
+  width: 100%;
+  margin-top: 8px;
+}
+.price {
+  display: flex;
+  column-gap: 10px;
+  scrollbar-width: none;
+  align-items: center;
+  height: fit-content;
+  font-weight: 700;
+  width: 100%;
+  margin-bottom: auto;
+}
+
+.current span {
+  position: absolute;
+  left: 0px;
+  top: 3px;
+  font-size: medium;
+}
+.current {
+  position: relative;
+  padding-left: 10px;
+  font-size: x-large;
+}
+.discount {
+  font-size: larger;
+  color: #cc0c39;
+}
+.mrp {
+  margin-left: 5%;
+}
+.mrp span {
+  text-decoration: line-through;
+}
+.allOptions {
+  display: flex;
+  overflow-y: auto;
+  scrollbar-width: none;
+  align-items: center;
+}
+.allOptions ::-webkit-scrollbar {
+  display: none;
+}
+.allOptions div {
+  display: flex;
+  column-gap: 10px;
+  align-items: center;
+  height: fit-content;
+}
+.options {
+  font-size: small;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 5px;
+  min-width: fit-content;
+  height: fit-content;
+  padding-left: 2px;
+  row-gap: 3px;
+}
+.options > p {
+  font-weight: bold;
+  width: 100%;
+}
+.options a {
+  padding: 2px 6px;
+  min-width: 50px;
+  border-radius: 3px;
+  text-align: center;
+  background-color: lightgray;
+}
+#discounts div span {
+  background-color: lightgray;
+  border-right: 1px solid;
+  border-left: 1px solid;
+  padding-right: 3px;
+  padding-left: 3px;
+}
+.productInfo {
+  color: lightgray;
+  grid-row: 5;
+  grid-column: 1/-1;
+  border-radius: 10px;
+  padding: 0px 3px 10px 5px;
+
+  .productInfoText {
+    text-align: center;
+    font-weight: 600;
+    margin-top: 50px;
+  }
+
+  .pairInfo {
+    border-top: max(1px, 0.2vh) solid #303030c5;
+    display: flex;
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    gap: 1em;
+
+    .key {
+      border-radius: 5px;
+      background-color: #ffffff12;
+    }
+  }
+  .description {
+    margin-top: 10px;
+    white-space: pre-wrap;
+  }
+}
+.certificate {
+  margin-top: 20px;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: inset 0px 0px 3px 0px white;
+}
+.certificate p {
+  font-weight: bold;
+  margin-bottom: auto;
+  width: 100%;
+}
+.certificate img {
+  width: fit-content;
+  height: fit-content;
+  max-width: 100%;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+.productInfoText {
+  color: black;
+}
+.reviewContainer {
+  grid-row: 8;
+  grid-column: 1/-1;
+  max-height: 1000px;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  background: linear-gradient(to bottom, white, #8a8a8a, #3a3a3a, black);
+}
+
+.reviewsHeading {
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.ratingInPercent {
+  grid-template-columns: 1fr 1fr 1fr;
+  box-shadow: inset 0px 0px 0.3em 0px white;
+  border-radius: 5px;
+  width: 340px;
+  margin: 20px auto 20px 20px;
+  display: grid;
+  grid-auto-rows: 30px;
+  align-items: center;
+  padding: 5px;
+  border: 1px solid rebeccapurple;
+}
+
+.ratingInPercent > span {
+  grid-row: 1/6;
+  grid-column: 1/2;
+  font-size: xx-large;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ratingInPercent > p {
+  text-wrap: nowrap;
+  grid-column: 2/4;
+  display: grid;
+  grid-template-columns: 35px max-content max-content;
+  font-size: small;
+  align-items: center;
+  column-gap: 5px;
+}
+
+.ratingInPercent > p span {
+  margin: 5px;
+  border: 1px solid aquamarine;
+  width: 120px;
+  height: 20px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.noReviews {
+  text-align: center;
+  margin-top: 1em;
+  font-size: 1.2em;
+}
+.reviews {
+  .review {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: max(20px, 1.8vw);
+    color: white;
+    padding-left: 5px;
+
+    .name {
+      font-weight: bold;
+      font-style: italic;
+      margin-right: 1em;
+    }
+
+    .star {
+      font-size: 20px;
+      color: gold;
+      margin-right: 0.5em;
+      display: flex;
+      justify-content: center;
+    }
+
+    .star span {
+      overflow-x: hidden;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    .comment {
+      line-height: 1.3em;
+      word-break: break-word;
+      word-spacing: 0.2em;
+    }
+  }
+}
+
+@media only screen and (max-width: 650px) {
+  .pairInfo {
+    .key {
+      padding-left: 2px;
+      width: 40%;
+      min-width: 40%;
+    }
+  }
+}
+
+@media only screen and (min-width: 480px) {
+  .section {
+    grid-template-rows: min-content 50px 30px 220px;
+  }
+  .productInfo {
+    grid-column: 1/-1;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(to bottom, transparent, black, black);
+
+    .productInfoText {
+      font-size: larger;
+      margin-bottom: 30px;
+    }
+
+    .pairInfo {
+      padding-left: 5px;
+      .key {
+        width: max(300px, 32vh);
+        font-size: max(16px, 1.7vh);
+        min-width: max(300px, 32vh);
+      }
+
+      .value {
+        font-size: max(14px, 1.5vh);
+      }
+    }
+  }
+
+  .description {
+    order: 1;
+  }
+  .additionDiv {
+    display: flex;
+    flex-wrap: wrap;
+    .pairInfo {
+      width: 100%;
+    }
+    .certificate {
+      margin-left: 10px;
+      margin-top: auto;
+      height: 350px;
+    }
+    .certificate img {
+      margin-right: 10px;
+    }
+    .certificate img {
+      max-height: 90%;
+    }
+  }
+  .reviewsHeading {
+    font-size: max(20px, 2.1vh);
+  }
+
+  .reviews {
+    margin: 1em auto 2em 1em;
+
+    .review {
+      .name {
+        font-size: max(15px, 1.6vh);
+      }
+
+      .reviewCreated {
+        font-size: max(15px, 1.6vh);
+      }
+
+      .comment {
+        width: 100%;
+        font-size: max(13px, 1.5vh);
+        margin-left: 4.5em;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .section {
+    font-size: 15px;
+  }
+  .section > h1 {
+    font-size: 18px;
+  }
+  .firstDiv {
+    grid-column: 1/-1;
+    grid-row: 5;
+  }
+
+  .firstDiv {
+    .review {
+      padding-top: 5px;
+    }
+    justify-content: space-between;
+  }
+  .secondDiv {
+    grid-column: 1/-1;
+    grid-row: 6;
+  }
+  .mrp span {
+    font-size: small;
+  }
+  .allOptions {
+    margin-top: 10px;
+  }
+
+  .productInfo {
+    background: linear-gradient(to bottom, transparent, black, black, black);
+    grid-row: 8;
+    grid-column: 1/-1;
+  }
+  .reviewContainer {
+    .review {
+      box-shadow: inset 1px -1px 2px 0px black;
+    }
+    grid-row: 11;
+    grid-column: 1/-1;
+  }
+  .additionDiv {
+    overflow-y: scroll;
+    scrollbar-width: none;
+    transition: all 1s ease-in-out;
+  }
+
+  .additionDiv::-webkit-scrollbar {
+    display: none;
+  }
+  .additionDiv {
+    max-height: 0px;
+  }
+  .certificate {
+    flex-direction: column;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+  .certificate p {
+    font-size: large;
+  }
+  .productInfoText {
+    margin-bottom: 30px;
+    font-size: large;
+  }
+
+  .ratingInPercent {
+    margin-left: auto;
+    width: 97%;
+  }
+
+  .ratingInPercent > p {
+    min-width: 220px;
+  }
+  .reviews {
+    .review {
+      justify-content: space-between;
+      padding-right: 5px;
+
+      padding-bottom: 5px;
+      .name {
+        font-size: 14px;
+        max-width: 25%;
+        text-wrap: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+      }
+      .star {
+        font-size: 17px;
+      }
+      .comment {
+        font-size: small;
+        padding-left: 5px;
+      }
+
+      .reviewCreated {
+        font-size: small;
+      }
+    }
+  }
+}

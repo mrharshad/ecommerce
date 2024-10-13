@@ -1,7 +1,8 @@
+import { IAuthorizedUser, TDataKeyChange } from "@/interfaces/userServerSide";
 import {
   IActive,
   IFindSuggestion,
-  IReduxUserData,
+  ISearches,
   TMainKeys,
   TPending,
 } from "../../interfaces/userClientSide";
@@ -19,6 +20,11 @@ export type INameSuggest = Array<{ name: string; identity: number }>;
 
 export interface IMainKeyChange {
   name: TMainKeys;
+  value: any;
+}
+
+export interface IDataKeyChange {
+  name: TDataKeyChange;
   value: any;
 }
 
@@ -42,9 +48,14 @@ export interface IVisitPage {
   active: IActive;
 }
 
+export interface IAuthenticatedUserData
+  extends Omit<IAuthorizedUser, "searches"> {
+  searches: Array<ISearches>;
+}
+
 export interface IAuthenticated {
   text: string;
-  data: IReduxUserData;
+  data: IAuthenticatedUserData;
   token: string;
   completed: TPending;
 }

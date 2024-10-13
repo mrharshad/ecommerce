@@ -49,11 +49,11 @@ export async function PUT(req: NextRequest) {
       const redisKey = key ? `${identity}:${key}` : `random:product`;
       if (caching) {
         try {
-          valueData = (await client.lRange(
-            redisKey,
-            skipIndex,
-            skipIndex + productPerReq - 1
-          )) as any;
+          // valueData = (await client.lRange(
+          //   redisKey,
+          //   skipIndex,
+          //   skipIndex + productPerReq - 1
+          // )) as any;
         } catch (err) {
           caching = false;
         }
@@ -94,8 +94,14 @@ export async function PUT(req: NextRequest) {
           } catch (err) {}
         }
       }
+
       if (dataQty > 0) {
-        data.push(...valueData);
+        if (identity === "name") {
+          const ids = data.map(({ _id }) => _id);
+          data.push(...valueData.filter((pro) => !ids.includes(pro._id)));
+        } else {
+          data.push(...valueData);
+        }
       }
 
       return dataQty === productPerReq ? prePage + 1 : null;
@@ -129,6 +135,7 @@ export async function PUT(req: NextRequest) {
     if (page && data.length < productPerReq) {
       page = await findData(page, "name");
     }
+
     return new Response(
       JSON.stringify({
         success: true,

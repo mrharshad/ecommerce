@@ -1,0 +1,92 @@
+.secondContainer {
+  grid-row: 3;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto auto;
+  grid-column: 2/-1;
+
+  .free {
+    font-weight: bold;
+    color: green;
+    margin-right: auto;
+  }
+  .addToCart {
+    border-radius: 3px;
+  }
+}
+
+.secondContainer button {
+  width: fit-content;
+  padding: 5px 15px;
+  height: fit-content;
+  display: inline-block;
+}
+
+.proContainer {
+  grid-column: 1/-1;
+  margin-top: 20px;
+}
+.proContainer > p {
+  width: 100%;
+  font-size: large;
+  font-style: italic;
+  font-weight: bold;
+  padding-left: 5px;
+  color: black;
+}
+.products {
+  display: flex;
+  overflow-x: auto;
+  padding: 5px;
+  column-gap: 10px;
+}
+
+.products > a {
+  min-width: 250px;
+  width: 250px;
+  transition: scale 300ms ease-in-out;
+  box-shadow: 0 0 5px 0px black;
+  padding: 5px;
+  border-radius: 5px;
+  height: 300px;
+  display: flex;
+  row-gap: 5px;
+  flex-direction: column;
+  background-color: white;
+}
+@media only screen and (max-width: 480px) {
+  .secondContainer {
+    grid-row: 7;
+    grid-column: 1/-1;
+    .pinCode p span {
+      font-size: small;
+    }
+
+    .free {
+      margin-top: 20px;
+    }
+    .addToCart {
+      margin-left: auto;
+      margin-top: 20px;
+    }
+  }
+
+  .proContainer > div {
+    scrollbar-width: none;
+    min-width: 100%;
+  }
+  .proContainer > div::-webkit-scrollbar {
+    display: none;
+  }
+  .products > a {
+    justify-content: space-between;
+    position: relative;
+    font-size: 14px;
+    height: 200px;
+    width: 100%;
+    min-width: 97%;
+    display: grid;
+    grid-template-columns: 38% 60%;
+    grid-template-rows: 10% 20% 17% 45%;
+  }
+}

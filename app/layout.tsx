@@ -5,15 +5,17 @@ import StoreProvider from "./redux/store-provider";
 import Header from "./Layouts/Header";
 import config from "@/server/config/config";
 import { cookies } from "next/headers";
-import { IReduxUserData } from "@/interfaces/userClientSide";
+
 import Footer from "./Layouts/Footer";
+
+import { IAuthorizedUser } from "@/interfaces/userServerSide";
 
 const { fDomainName, cookieName, bHost, bProtocol } = config;
 const inter = Inter({ subsets: ["latin"] });
-interface IFetch {
+export interface IFetch {
   success: boolean;
   text: string;
-  data: IReduxUserData;
+  data: IAuthorizedUser;
 }
 
 export const metadata: Metadata = {
@@ -28,12 +30,17 @@ export default async function RootLayout({
 }>) {
   const cookieStore = cookies();
   let value = cookieStore.get(cookieName)?.value;
-  let userData = {} as IReduxUserData;
+  let userData = {} as IAuthorizedUser;
   if (value) {
     const req = await fetch(
       `${bProtocol}${bHost}/api/admin/user/data/${value}
         `,
-      { cache: "no-cache" }
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-cache",
+      }
       // { next: { revalidate: 21600 } }
     );
     const { success, text, data }: IFetch = await req.json();

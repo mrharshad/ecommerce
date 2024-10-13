@@ -40,7 +40,6 @@ export const faceCare = [
   { key: "Age Range", required: true, sameOrder: true },
   { key: "Benefits", required: true, sameOrder: true },
   { key: "Skin Type", required: true, sameOrder: true },
-  { key: "Item Weight", required: true },
   { key: "Active Ingredients", required: true },
   { key: "Special Feature", required: false },
   { key: "Manufacturer", required: true },
@@ -48,6 +47,7 @@ export const faceCare = [
   { key: "Item Form", required: false },
   { key: "Container Type", required: false },
   { key: "Item Dimensions LxWxH", required: false },
+  { key: "Item Weight", required: false },
 ];
 
 export const fitness = [
@@ -70,11 +70,12 @@ export const hairCare = [
 
 export const showpiece = [
   { key: "Material", required: true, sameOrder: true },
-  { key: "Item Weight", required: true, sameOrder: true },
+
   { key: "Dimensions", required: true, sameOrder: true },
   { key: "Occasion", required: false },
   { key: "Recommended Uses For Product", required: true, sameOrder: true },
   { key: "Special Feature", required: true, sameOrder: true },
   { key: "Country of Origin", required: true },
   { key: "Age Range", required: false },
+  { key: "Item Weight", required: false, sameOrder: true },
 ];

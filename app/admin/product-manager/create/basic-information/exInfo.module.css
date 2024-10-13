@@ -81,7 +81,7 @@
   font-size: small;
   text-wrap: nowrap;
   text-overflow: ellipsis;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .info div {
   grid-column: 2/3;

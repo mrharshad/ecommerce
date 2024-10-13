@@ -8,6 +8,10 @@ const SearchProduct: FC<{ data: ISearchProduct }> = ({ data }) => {
   const { _id, discount, exInfo, name, price, rating, sold, thumbnail, mrp } =
     data;
   const [first, second, third] = exInfo;
+  const [fKey, fValue] = first.split(":");
+  const [sKey, sValue] = second.split(":");
+  const [tKey, tValue] = third.split(":");
+
   return (
     <Link
       className={style.container}
@@ -54,9 +58,18 @@ const SearchProduct: FC<{ data: ISearchProduct }> = ({ data }) => {
         )}
       </div>
       <div className={style.options}>
-        <p>{first}</p>
-        <p>{second}</p>
-        <p>{third}</p>
+        <p>
+          <span>{fKey}</span>
+          <span>{fValue}</span>
+        </p>
+        <p>
+          <span>{sKey}</span>
+          <span>{sValue}</span>
+        </p>
+        <p>
+          <span>{tKey}</span>
+          <span>{tValue}</span>
+        </p>
       </div>
     </Link>
   );

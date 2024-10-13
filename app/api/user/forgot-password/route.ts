@@ -10,6 +10,7 @@ import errors from "@/server/utils/errorHandler";
 import User from "@/server/models/userModels";
 import { ITokens } from "@/interfaces/userServerSide";
 import { ICustomError } from "@/interfaces/clientAndServer";
+import { authentication } from "@/server/utils/userProjection";
 export async function PUT(req: NextRequest) {
   try {
     const response = (res: ISendResponse) =>
@@ -23,7 +24,7 @@ export async function PUT(req: NextRequest) {
 
     let { email } = await req.json();
     dbConnect();
-    let [userName, domain] = email.trim().split("@");
+    let [userName, domain = ""] = email.trim().split("@");
     domain = domain.toLowerCase();
     if (domain !== "gmail.com") {
       throw new Error("Use username@gmail.com to sign up");
@@ -45,10 +46,9 @@ export async function PUT(req: NextRequest) {
       throw new Error("Invalid email and password");
     }
     if (!findUser.email) {
-      findUser = (await User.findOne(
-        { email },
-        { canceled: 0, delivered: 0 }
-      ).select("+password")) as IFindUser;
+      findUser = (await User.findOne({ email }, authentication).select(
+        "+password"
+      )) as IFindUser;
       if (!findUser?._id) {
         if (redisCache) {
           try {

@@ -1,0 +1,97 @@
+.firstContainer {
+  border-radius: 10px;
+  display: flex;
+  grid-column: 1;
+  grid-row: 2/-1;
+  margin-top: 10px;
+  max-width: 100%;
+  align-items: center;
+  position: relative;
+}
+
+.images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 99%;
+  width: 30%;
+  row-gap: 2%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  min-width: 100px;
+}
+.images::-webkit-scrollbar {
+  display: none;
+}
+.images div {
+  display: flex;
+  justify-content: center;
+  border-radius: 5px;
+  -webkit-tap-highlight-color: transparent;
+}
+.images div:active {
+  outline: none;
+  box-shadow: none;
+  background: none;
+}
+.images div:focus {
+  outline: none;
+  box-shadow: none;
+  background: none;
+}
+.unSelectedImg {
+  padding: 5px 0px 5px 0px;
+  border: 1px solid black;
+  cursor: pointer;
+  height: 30%;
+  width: 90px;
+  align-items: center;
+}
+
+.images div img {
+  width: fit-content;
+  height: fit-content;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.selectedImg {
+  padding: 0.3em;
+  width: fit-content;
+  border-radius: 1em;
+  max-width: 70%;
+  height: 100%;
+  max-height: 100%;
+  position: absolute;
+  right: 0px;
+  transition: height 1s ease;
+}
+
+@media only screen and (max-width: 480px) {
+  .firstContainer {
+    grid-column: 1/2;
+    grid-row: 2/-1;
+    padding: 5px;
+    grid-column: 1/-1;
+    box-shadow: 0px 0px 3px 0px black;
+  }
+  .images {
+    width: 20%;
+    margin-right: auto;
+    min-width: 80px;
+  }
+
+  .images div {
+    min-width: 70px;
+    width: 100%;
+    padding: 5px;
+  }
+
+  .selectedImg {
+    max-width: 75%;
+    max-height: 95%;
+  }
+  .selectedImg img {
+    margin-right: auto;
+  }
+}

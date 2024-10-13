@@ -21,7 +21,12 @@ export interface ITokens {
   holdOnToken?: Date;
   holdOnVerification?: Date;
 }
-export interface ICartPro {}
+export interface ICartPro {
+  _id: number;
+  variant: string;
+  option: string;
+  added: Date;
+}
 export interface INewOrder {
   name: string;
 }
@@ -39,6 +44,7 @@ export interface ILocation {
   district: string;
   area: string;
 }
+
 export interface IJwtInfo {
   _id: number;
   role: TRoles[];
@@ -67,7 +73,7 @@ export interface IAuthorizedUser {
     key: string;
     byUser: boolean;
   }>;
-  cartPro: ICartPro[];
+  cartPro: Array<{ _id: number; variant: string; option: string; added: Date }>;
 }
 export interface IAuthentication extends IAuthorizedUser {
   role: TRoles[];
@@ -88,3 +94,10 @@ export default interface IDBUser extends IAuthentication {
   mobileNo: number;
   createdAt: Date;
 }
+
+export type TDataKeyChange =
+  | "fName"
+  | "lName"
+  | "email"
+  | "location"
+  | "cartPro";

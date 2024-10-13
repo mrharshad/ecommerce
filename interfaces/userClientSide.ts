@@ -36,6 +36,12 @@ export interface ISearches {
   cached: Array<{ sorted: TSearchSort; page: number | null }>;
 }
 
+export interface IViewedPro {
+  _id: number;
+  tOf: string;
+  category: string;
+  time: number;
+}
 export interface IFindSuggestion {
   preKey: string;
   loading: boolean;
@@ -52,16 +58,6 @@ export interface IAlert {
   duration?: "2s" | "3s" | "4s" | "5s";
 }
 
-export interface IReduxUserData extends Omit<IAuthorizedUser, "searches"> {
-  searches: Array<{
-    key: string;
-    byUser: boolean;
-    priority: number;
-    identity: "category" | "tOfP" | "name" | number;
-    cached: Array<{ sorted: TSearchSort; page: number | null }>;
-  }>;
-}
-
 export interface IHome {
   scrolled: number;
 }
@@ -74,7 +70,11 @@ export type TPending =
   | "Login"
   | "District"
   | "Recovery-Password"
-  | "Sign-Up";
+  | "Sign-Up"
+  | "Cart";
+
+export interface IReduxUserData
+  extends Omit<IAuthorizedUser, "searches" | "nOfNOrder"> {}
 
 export interface IReduxUser {
   data: IReduxUserData;
@@ -82,12 +82,17 @@ export interface IReduxUser {
   numOfCart: number;
   searchKey: string;
   searches: Array<ISearches>;
+  viewedPro: Array<IViewedPro>;
   searchSort: TSearchSort;
   toggleSuggestion: IToggleSuggestion;
   storedSuggestions: ISuggestion[];
   suggestions: ISuggestion[];
   districts: string[];
-  alerts: IAlert[];
+  alerts: Array<{
+    type: "Success" | "Error" | "Message";
+    text: string;
+    duration?: "2s" | "3s" | "4s" | "5s";
+  }>;
   findSuggestion: IFindSuggestion;
   newOrder: string[];
   canceled: string[];
@@ -99,7 +104,6 @@ export interface IReduxUser {
   proLoading: boolean;
   loadings: Array<TPending>;
   active: IActive;
-
   randomPage: number | null;
 }
 
@@ -108,6 +112,7 @@ export type TMainKeys =
   | "token"
   | "numOfCart"
   | "searchKey"
+  | "loadings"
   | "searches"
   | "searchSort"
   | "toggleSuggestion"
@@ -124,4 +129,6 @@ export type TMainKeys =
   | "products"
   | "proLoading"
   | "active"
-  | "randomPage";
+  | "randomPage"
+  | "alerts"
+  | "viewedPro";

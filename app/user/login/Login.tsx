@@ -7,7 +7,7 @@ import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { ILoginInfo, ILoginResponse } from "./loginTypes";
-import { mainKeyChange } from "@/app/redux/UserSlice";
+
 import { IAlert } from "@/interfaces/userClientSide";
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
 
@@ -71,7 +71,7 @@ const Login = () => {
       localStorage.removeItem(storeName);
       dispatch(authenticated({ text, data, token, completed: "Login" }));
       setTimeout(() => {
-        router.replace("/");
+        router.back();
       }, 2000);
     } else {
       if (resHoldOnVerification) {
@@ -107,6 +107,7 @@ const Login = () => {
       },
     });
     const { success, text, resReTryForget } = await user.json();
+    console.log("success, text, resReTryForget", success, text, resReTryForget);
     if (resReTryForget) {
       const newInfo = { holdOnVerification, reTryForgot: resReTryForget };
       localStorage.setItem(storeName, JSON.stringify(newInfo));

@@ -11,6 +11,8 @@ const redisUserExpire: number = 86400;
 const redisOrdersCache: TCacheStatus = "enable";
 const redisProductsCache: TCacheStatus = "enable";
 const redisProductExpire: number = 86400;
+const redisSingleProCache: TCacheStatus = "enable";
+const redisSingleProExpire: number = 86400;
 const redisSignUpCache: TCacheStatus = "enable";
 const cookieExpire = Number(env.COOKIE_EXPIRE);
 const _config = {
@@ -18,6 +20,8 @@ const _config = {
   redisUserExpire,
   redisProductsCache,
   redisProductExpire,
+  redisSingleProCache,
+  redisSingleProExpire,
   redisOrdersCache,
   redisSignUpCache,
   fDomainName: env.F_Domain_NAME as string,
@@ -54,4 +58,15 @@ const _config = {
   searchesQty: Number(env.SEARCHES_QTY),
   interestedSearch: Number(env.INTERESTED_SEARCH),
 };
+
+const deliveryTime = {
+  districtMinTime: 4,
+  districtMaxTime: 5,
+  stateMinTime: 8,
+  stateMaxTime: 10,
+  countryMinTime: 10,
+  countryMaxTime: 14,
+};
+
+export { deliveryTime };
 export default Object.freeze(_config);

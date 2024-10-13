@@ -14,14 +14,18 @@ import ISignUpFirstStep from "@/server/models/signUpType";
 import IDBUser, {
   IAuthentication,
   IAuthorizedUser,
+  IJwtInfo,
   ISearches,
 } from "@/interfaces/userServerSide";
 import { IValidToken } from "@/app/user/sign-up/interface";
 import { IReduxUserData } from "@/interfaces/userClientSide";
+import { locationCookieName } from "@/server/utils/cookies";
+import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
 
 // apply api - /user/sign-up
 export async function POST(req: Request) {
   try {
+    const cookie = cookies();
     const {
       redisSignUpCache,
       redisUserCache,
@@ -310,6 +314,14 @@ export async function POST(req: Request) {
                 ...userSearch.slice(0, searchesQty),
                 ...interested,
               ];
+              const userLocation = {
+                _id: new Date(),
+                address,
+                pinCode: Number(pinCode),
+                state,
+                district,
+                area,
+              };
               const authorizedUser: IAuthorizedUser = {
                 _id: findLastId.lastUserId,
                 fName,
@@ -320,16 +332,7 @@ export async function POST(req: Request) {
                 bYear: Number(bYear),
                 gender,
                 searches: newSearches,
-                location: [
-                  {
-                    _id: Date.now() as any,
-                    address,
-                    pinCode: Number(pinCode),
-                    state,
-                    district,
-                    area,
-                  },
-                ],
+                location: [userLocation],
                 nOfNOrder: 0,
                 cartPro: [],
               };
@@ -350,18 +353,20 @@ export async function POST(req: Request) {
               };
 
               const createData = await User.create(newData);
-              const jwtToken = Jwt.sign(
-                {
-                  _id: createData._id,
-                  role: ["User"],
-                },
-                jwtSecretCode,
-                {
-                  expiresIn: jwtExpireTime,
-                  algorithm: "HS256",
-                }
-              );
-              cookies().set({
+
+              const jwtInfo: IJwtInfo = {
+                _id: createData._id,
+                role: ["User"],
+              };
+              const jwtToken = Jwt.sign(jwtInfo, jwtSecretCode, {
+                expiresIn: jwtExpireTime,
+                algorithm: "HS256",
+              });
+              cookie.set({
+                name: locationCookieName,
+                value: JSON.stringify(userLocation),
+              });
+              cookie.set({
                 name: cookieName,
                 value: jwtToken,
                 expires: new Date(
@@ -410,7 +415,7 @@ export async function POST(req: Request) {
                 numOfSendToken,
                 text: `Verification code is incorrect new code sent to ${email}`,
                 success: true,
-                data: {} as IReduxUserData,
+                data: {} as IAuthenticatedUserData,
               },
               200
             );
@@ -430,7 +435,7 @@ export async function POST(req: Request) {
           success: true,
           numOfSendToken,
           text: `Token has expired New code sent to ${email}`,
-          data: {} as IReduxUserData,
+          data: {} as IAuthenticatedUserData,
         },
         200
       );
@@ -445,7 +450,7 @@ export async function POST(req: Request) {
         success: true,
         numOfSendToken: 1,
         text: `The verification code has been sent to ${email}`,
-        data: {} as IReduxUserData,
+        data: {} as IAuthenticatedUserData,
       },
       200
     );

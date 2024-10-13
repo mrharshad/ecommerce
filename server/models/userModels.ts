@@ -70,8 +70,9 @@ const userSchema = new Schema<IDBUser>({
   cartPro: [
     {
       _id: Number,
-      vD: String,
-      iSN: String,
+      variant: String,
+      option: String,
+      added: Date,
     },
   ],
   gender: String,

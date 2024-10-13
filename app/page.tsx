@@ -1,9 +1,9 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import style from "./page.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, IReduxStoreData } from "./redux/ReduxStore";
-import { checkChangingKey, mainKeyChange, position } from "./redux/UserSlice";
+import { checkChangingKey, mainKeyChange } from "./redux/UserSlice";
 import {
   fetchKeyProduct,
   fetchRandom,
@@ -12,17 +12,15 @@ import {
 import { useRouter } from "next/navigation";
 import SearchProduct from "./utils/SearchProduct";
 
-import Observer from "./utils/Observer";
+import Observer from "./Observer";
 import { ISearches } from "@/interfaces/userClientSide";
 import { IMainKeyChange } from "./redux/UserSliceInterface";
 import { ISearchProduct } from "@/interfaces/productServerSide";
+import SearchProductSkeletons from "./skeletons/SearchProductSkeletons";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
-  const skeleton = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-    22, 23, 24, 25, 26, 27, 28,
-  ];
+
   const router = useRouter();
   const {
     searchKey,
@@ -35,7 +33,9 @@ export default function Home() {
     randomPage,
     storedProducts,
   } = useSelector((data: IReduxStoreData) => data.user);
+
   const numOfProducts = products.length;
+
   const fetchRandomProducts = () => {
     dispatch(
       fetchRandom({
@@ -169,44 +169,13 @@ export default function Home() {
     }
   }, [findSuggestion, dispatch]);
 
-  useEffect(() => {
-    const { addEventListener } = window;
-    // scrollTo({
-
-    //   top: scrolled,
-    //   left: 0,
-    //   behavior: "smooth",
-    // });
-
-    const scrollHandler = () => {
-      dispatch(position());
-    };
-    addEventListener("scroll", scrollHandler);
-
-    // return () => {
-    //   removeEventListener("scroll", scrollHandler);
-    // };
-  }, [dispatch]);
-
   return (
     <main id="mainContent" className={style.container}>
       <section className={style.products}>
         {products.map((data) => (
           <SearchProduct data={data} key={data._id} />
         ))}
-        {proLoading &&
-          skeleton.map((id) => (
-            <div key={id} className={style.product}>
-              <div className={style.ratingReviews}></div>
-              <p className={style.name}></p>
-              <div className={style.imgCover}></div>
-              <div className={style.options}>
-                <p></p>
-                <p></p>
-                <p></p>
-              </div>
-            </div>
-          ))}
+        {proLoading && <SearchProductSkeletons numOfSkeleton={28} />}
         {!numOfProducts && searchKey && !proLoading ? (
           <p className={style.notFound}>Product Not Found</p>
         ) : null}

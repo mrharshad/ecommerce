@@ -4,6 +4,7 @@ import { IAppMount, INewAlert } from "../Layouts/interface";
 
 import {
   IAuthenticated,
+  IDataKeyChange,
   IMainKeyChange,
   ISearchBarInput,
   StateType,
@@ -21,12 +22,13 @@ import {
 import {
   ISearches,
   IFindSuggestion,
-  IReduxUserData,
   ISuggestion,
   IAlert,
   IReduxUser,
   TPending,
   TDevice,
+  IReduxUserData,
+  IViewedPro,
 } from "../../interfaces/userClientSide";
 
 import { ISearchProduct } from "@/interfaces/productServerSide";
@@ -35,7 +37,7 @@ import {
   suggestionLimit,
   suggestionPerReq,
 } from "@/clientConfig";
-import { ICartPro } from "@/interfaces/userServerSide";
+import { IAuthorizedUser, ICartPro } from "@/interfaces/userServerSide";
 
 const initialFindSuggestion = {
   preKey: "",
@@ -58,6 +60,7 @@ const initialState: IReduxUser = {
   active: "other",
   findSuggestion: initialFindSuggestion,
   searches: [],
+  viewedPro: [],
   storedProducts: [],
   products: [],
   searchSort: "Popular",
@@ -84,10 +87,23 @@ const UserSlice = createSlice({
         }
       };
       const { initialToken, userData }: IAppMount = action.payload;
-      const { cartPro, nOfNOrder, searches } = userData;
+      const { searches, ...data } = userData;
+      const { nOfNOrder, cartPro } = data;
       state.data = initialToken
-        ? userData
-        : ({ cartPro: [] as ICartPro[] } as IReduxUserData);
+        ? data
+        : ({
+            cartPro: [] as ICartPro[],
+            location: [
+              {
+                _id: new Date(),
+                district: "",
+                state: "",
+                pinCode: 4920,
+                area: "",
+                address: "",
+              },
+            ],
+          } as IReduxUserData);
       state.nOfNOrder = nOfNOrder || 0;
       state.numOfCart = cartPro?.length || 0;
       state.searches = (initialToken ? searches : localData(searchesLocal)).map(
@@ -119,6 +135,14 @@ const UserSlice = createSlice({
       for (let { name, value } of keys) state[name] = value;
     },
 
+    dataKeyChange: (
+      state: StateType,
+      action: PayloadAction<IDataKeyChange[]>
+    ) => {
+      const keys = action.payload;
+      for (let { name, value } of keys) state.data[name] = value;
+    },
+
     newAlert: (state, action: PayloadAction<INewAlert>) => {
       const { info, completed } = action.payload;
       state.alerts.push(info);
@@ -139,13 +163,8 @@ const UserSlice = createSlice({
       state.alerts = alerts;
     },
 
-    position: (state) => {
+    hideSuggestion: (state) => {
       state.toggleSuggestion = "0px";
-      // const current = action.payload;
-      // const oldP = state.home.scrolled;
-      // if (oldP + 500 < current || oldP > current + 500) {
-      //   state.home.scrolled = current;
-      // }
     },
 
     searchBarInput: (state, action: PayloadAction<string>) => {
@@ -227,16 +246,19 @@ const UserSlice = createSlice({
 
     authenticated: (state, action: PayloadAction<IAuthenticated>) => {
       const { data, text, token, completed } = action.payload;
-      const { nOfNOrder, cartPro, searches } = data;
+      const { searches, nOfNOrder, cartPro, ...otherData } = data;
       state.token = token;
-      state.data = data;
-      state.alerts.push({ text, type: "Success", duration: "2s" });
+      state.data = { ...otherData, cartPro };
+      state.alerts.push({ text, type: "Success", duration: "4s" });
       state.loadings = state.loadings.filter(
         (pending) => pending !== completed
       );
       state.nOfNOrder = nOfNOrder || 0;
       state.numOfCart = Array.isArray(cartPro) ? cartPro.length : 0;
       state.searches = searches;
+    },
+    visitedProductPage: (state, action: PayloadAction<IViewedPro>) => {
+      state.viewedPro.unshift(action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -403,9 +425,11 @@ export const {
   mainKeyChange,
   newAlert,
   removeAlert,
-  position,
+  hideSuggestion,
   searchBarInput,
   checkChangingKey,
   authenticated,
   newLoading,
+  dataKeyChange,
+  visitedProductPage,
 } = UserSlice.actions;

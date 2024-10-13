@@ -51,7 +51,6 @@
   row-gap: 10px;
 }
 .section {
-  margin: max(9svh, 55px) 1% 1% 1%;
   position: relative;
   background-color: black;
   min-height: 90svh;

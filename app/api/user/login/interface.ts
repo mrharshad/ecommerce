@@ -1,8 +1,9 @@
+import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
 import {
   ISearches as ISearchesClientSide,
   IReduxUserData,
 } from "@/interfaces/userClientSide";
-import { IAuthorizedUser, ITokens, TRoles } from "@/interfaces/userServerSide";
+import { ITokens } from "@/interfaces/userServerSide";
 
 export interface IRequest {
   email: string;
@@ -13,13 +14,11 @@ export interface IRequest {
 export interface IResponseUserData extends IReduxUserData {
   tokens: ITokens;
 }
-export interface INewData extends IResponseUserData {
-  _doc?: IResponseUserData;
-}
+
 export interface ISendResponse {
   success: boolean;
   text: string;
   resHoldOnVerification?: Date;
-  data?: IReduxUserData;
+  data?: IAuthenticatedUserData;
   token?: string;
 }

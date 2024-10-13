@@ -1,3 +1,4 @@
+import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
 import { IReduxUserData } from "@/interfaces/userClientSide";
 
 export interface ILoginInfo {
@@ -9,6 +10,6 @@ export interface ILoginResponse {
   success: boolean;
   text: string;
   resHoldOnVerification?: Date;
-  data: IReduxUserData;
+  data: IAuthenticatedUserData;
   token: string;
 }
