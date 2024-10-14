@@ -68,5 +68,9 @@ const deliveryTime = {
   countryMaxTime: 14,
 };
 
+export const newPasswordToken = 3;
+export const emailVerificationToken = 5;
+export const incorrectPasswords = 3;
+export const tokenValidityMinute = 15;
 export { deliveryTime };
 export default Object.freeze(_config);

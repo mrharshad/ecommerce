@@ -1,23 +1,34 @@
 import nodeMailer from "nodemailer";
 import { NextRequest } from "next/server";
-import { IFindUser, ISendResponse } from "./passwordInterfce";
+
 import dbConnect from "@/server/config/dbConnect";
 import client from "@/server/config/redisConnect";
 import crypto from "crypto";
 // apply api - /user/login
-import config from "@/server/config/config";
+import config, {
+  newPasswordToken,
+  tokenValidityMinute,
+} from "@/server/config/config";
 import errors from "@/server/utils/errorHandler";
 import User from "@/server/models/userModels";
 import { ITokens } from "@/interfaces/userServerSide";
 import { ICustomError } from "@/interfaces/clientAndServer";
 import { authentication } from "@/server/utils/userProjection";
+import { IFindUser, ISendResponse } from "@/app/user/login/interface";
+
 export async function PUT(req: NextRequest) {
   try {
     const response = (res: ISendResponse) =>
       new Response(JSON.stringify(res), {
         status: 200,
       });
-    const { redisUserCache, smtpMail, smtpPassword, smtpService } = config;
+    const {
+      redisUserCache,
+      smtpMail,
+      smtpPassword,
+      smtpService,
+      redisUserExpire,
+    } = config;
     let redisCache = redisUserCache === "enable";
     let isRedis = false;
     let findUser = {} as IFindUser;
@@ -104,7 +115,7 @@ export async function PUT(req: NextRequest) {
       );
       if (!update.modifiedCount) throw new Error("Data Base Error");
     };
-    if (tokensSent === 3) {
+    if (tokensSent === newPasswordToken) {
       tokens.tokensSent = 0;
       tokens.holdOnToken = new Date(Date.now() + 24 * 60 * 60 * 1000);
       if (holdOnToken) delete tokens.holdOnToken;
@@ -112,7 +123,11 @@ export async function PUT(req: NextRequest) {
 
       if (redisCache) {
         try {
-          await client.setEx(`email:${email}`, 86400, JSON.stringify(findUser));
+          await client.setEx(
+            `email:${email}`,
+            redisUserExpire,
+            JSON.stringify(findUser)
+          );
         } catch (err) {
           await tokenUpdate(tokens);
         }
@@ -148,7 +163,9 @@ export async function PUT(req: NextRequest) {
     const sendMail = await transporter.sendMail(mailOption);
 
     if (sendMail.accepted.length > 0) {
-      tokens.tokenExpire = new Date(Date.now() + 15 * 60 * 1000);
+      tokens.tokenExpire = new Date(
+        Date.now() + tokenValidityMinute * 60 * 1000
+      );
       tokens.tokensSent = tokensSent + 1;
       tokens.token = crypto
         .createHash("sha256")
@@ -157,7 +174,11 @@ export async function PUT(req: NextRequest) {
       findUser.tokens = tokens;
       if (redisCache) {
         try {
-          await client.setEx(`email:${email}`, 86400, JSON.stringify(findUser));
+          await client.setEx(
+            `email:${email}`,
+            redisUserExpire,
+            JSON.stringify(findUser)
+          );
         } catch (err) {
           await tokenUpdate(tokens);
         }

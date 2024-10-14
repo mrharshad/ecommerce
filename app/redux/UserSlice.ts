@@ -6,6 +6,7 @@ import {
   IAuthenticated,
   IDataKeyChange,
   IMainKeyChange,
+  INewAutoSearch,
   ISearchBarInput,
   StateType,
 } from "./UserSliceInterface";
@@ -36,6 +37,7 @@ import {
   searchesLocal,
   suggestionLimit,
   suggestionPerReq,
+  viewedProLocal,
 } from "@/clientConfig";
 import { IAuthorizedUser, ICartPro } from "@/interfaces/userServerSide";
 
@@ -95,7 +97,7 @@ const UserSlice = createSlice({
             cartPro: [] as ICartPro[],
             location: [
               {
-                _id: new Date(),
+                _id: new Date().toISOString() as any,
                 district: "",
                 state: "",
                 pinCode: 4920,
@@ -116,7 +118,7 @@ const UserSlice = createSlice({
           };
         }
       );
-
+      state.viewedPro = localData(viewedProLocal);
       state.token = initialToken;
       const { width, height } = window.screen;
       state.device =
@@ -259,6 +261,29 @@ const UserSlice = createSlice({
     },
     visitedProductPage: (state, action: PayloadAction<IViewedPro>) => {
       state.viewedPro.unshift(action.payload);
+    },
+    newAutoSearch: (state, action: PayloadAction<INewAutoSearch>) => {
+      const { key: newKey, identity: newIdentity } = action.payload;
+
+      const searches = state.searches;
+      const findSearchIndex = searches.findIndex(
+        ({ key, identity }) => key === newKey && identity === newIdentity
+      );
+      if (findSearchIndex >= 0) {
+        state.searches = searches.map((obj, index) => {
+          if (index === findSearchIndex) {
+            return { ...obj, priority: obj.priority + 1 };
+          } else return obj;
+        });
+      } else {
+        state.searches.push({
+          key: newKey,
+          priority: 1,
+          byUser: false,
+          identity: newIdentity,
+          cached: [],
+        });
+      }
     },
   },
   extraReducers: (builder) => {
@@ -432,4 +457,5 @@ export const {
   newLoading,
   dataKeyChange,
   visitedProductPage,
+  newAutoSearch,
 } = UserSlice.actions;

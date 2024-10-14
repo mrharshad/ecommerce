@@ -51,8 +51,6 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
 
     const { success, data, message } = (await request.json()) as IGetProductRes;
 
-    console.log("success", success, message);
-
     if (!success) {
       notFound();
     }
@@ -91,6 +89,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
     const { images } = imageSets.find(
       (obj) => obj._id === optionId
     ) as IImageSets;
+
     let stateQty: number = 0;
     let districtQty: number = 0;
     let globalQty: number = 0;
@@ -157,7 +156,9 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
     };
 
     const exInfoElements: Array<JSX.Element> = [];
-    exInfo.push(...info.split("\n"));
+    console.log("exInfo", exInfo);
+
+    exInfo.push(...info.split("\n").filter((pair) => pair.trim()));
 
     for (let info of exInfo) {
       const [key, value] = info.split(":");
@@ -376,7 +377,6 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       </>
     );
   } catch (err) {
-    console.log("error is a: ", err);
     notFound();
   }
 };

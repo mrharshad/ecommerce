@@ -6,7 +6,7 @@ import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { ILoginInfo, ILoginResponse } from "./loginTypes";
+import { ILoginInfo, ILoginResponse } from "./interface";
 
 import { IAlert } from "@/interfaces/userClientSide";
 import { IReduxStoreData } from "@/app/redux/ReduxStore";

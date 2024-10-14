@@ -38,7 +38,7 @@ export interface ISearches {
 
 export interface IViewedPro {
   _id: number;
-  tOf: string;
+  tOfP: string;
   category: string;
   time: number;
 }

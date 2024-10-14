@@ -59,3 +59,9 @@ export interface IAuthenticated {
   token: string;
   completed: TPending;
 }
+
+export type TNewAutoSearchIdentity = "category" | "tOfP";
+export interface INewAutoSearch {
+  key: string;
+  identity: TNewAutoSearchIdentity;
+}

@@ -16,6 +16,7 @@ import {
   visitedProductPage,
 } from "../redux/UserSlice";
 import { IMainKeyChange } from "../redux/UserSliceInterface";
+import { newPasswordToken } from "@/server/config/config";
 const Handler: FC<IHandlerProps> = ({
   productId,
   categoryName,
@@ -98,7 +99,7 @@ const Handler: FC<IHandlerProps> = ({
       visitedProductPage({
         _id: productId,
         category: categoryName,
-        tOf: tOfPName,
+        tOfP: tOfPName,
         time: Date.now(),
       })
     );

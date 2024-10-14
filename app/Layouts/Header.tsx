@@ -5,7 +5,10 @@ import style from "./Header.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { HeaderProps } from "./interface";
-import { IMainKeyChange } from "../redux/UserSliceInterface";
+import {
+  IMainKeyChange,
+  TNewAutoSearchIdentity,
+} from "../redux/UserSliceInterface";
 import Navbar from "./Navbar";
 import SearchFilter from "./SearchFilter";
 
@@ -15,6 +18,7 @@ import {
   hideSuggestion,
   removeAlert,
   searchBarInput,
+  newAutoSearch,
 } from "../redux/UserSlice";
 import { mainKeyChange } from "../redux/UserSlice";
 
@@ -26,7 +30,13 @@ import {
 } from "../../interfaces/userClientSide";
 import Suggestions from "./Suggestions";
 import Link from "next/link";
-import { searchesLocal, storeByPriority } from "@/clientConfig";
+import {
+  autoSearchCategory,
+  autoSearchTOfP,
+  searchesLocal,
+  storeByPriority,
+  viewedProLocal,
+} from "@/clientConfig";
 
 import { deleteSearch, setNewSearches } from "../redux/UserApiRequest";
 
@@ -172,17 +182,29 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
       dispatch(setNewSearches({ token, searches }));
     }
   }, [searches, dispatch]);
-
   useEffect(() => {
     const categories: { [key: string]: number } = {};
     const tOfProducts: { [key: string]: number } = {};
-    viewedPro.forEach(({ tOf, category }) => {
+    viewedPro.forEach(({ tOfP, category }) => {
       categories[category] = categories[category] + 1 || 1;
-      tOfProducts[category] = tOfProducts[category] + 1 || 1;
+      tOfProducts[tOfP] = tOfProducts[tOfP] + 1 || 1;
     });
-    console.log("tOfProducts", tOfProducts);
-    console.log("categories", categories);
-    console.log("viewedPro", viewedPro);
+    const findKey = (
+      obj: { [key: string]: number },
+      minViewed: number,
+      identity: TNewAutoSearchIdentity
+    ) => {
+      for (let key in obj) {
+        const value = obj[key];
+        if (Number.isInteger(value / minViewed)) {
+          dispatch(newAutoSearch({ key, identity }));
+        }
+      }
+    };
+    findKey(tOfProducts, autoSearchTOfP, "tOfP");
+    findKey(categories, autoSearchCategory, "category");
+
+    if (device) localStorage.setItem(viewedProLocal, JSON.stringify(viewedPro));
   }, [viewedPro]);
 
   useEffect(() => {

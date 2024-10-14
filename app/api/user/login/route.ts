@@ -5,8 +5,8 @@ import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
-import { IRequest, ISendResponse } from "./interface";
-import config from "@/server/config/config";
+
+import config, { incorrectPasswords } from "@/server/config/config";
 
 import errors from "@/server/utils/errorHandler";
 import {
@@ -20,8 +20,10 @@ import {
   ISearches,
 } from "@/interfaces/userServerSide";
 import { ICustomError } from "@/interfaces/clientAndServer";
-import { authentication, authorizedUser } from "@/server/utils/userProjection";
+import { authentication } from "@/server/utils/userProjection";
 import { locationCookieName } from "@/server/utils/cookies";
+import { IRequest, ISendResponse } from "@/app/user/login/interface";
+
 // apply api - /user/login
 export async function PUT(req: NextRequest) {
   try {
@@ -262,7 +264,7 @@ export async function PUT(req: NextRequest) {
         data: { ...authorizedData, searches: newSearchesClientSide },
       });
     } else {
-      if (verificationFailed === 3) {
+      if (verificationFailed === incorrectPasswords) {
         tokens.verificationFailed = 0;
         tokens.holdOnVerification = new Date(Date.now() + 24 * 60 * 60 * 1000);
       } else {

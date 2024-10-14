@@ -8,7 +8,7 @@ import SignUpFirstStep from "@/server/models/signUp";
 import { hash } from "bcrypt";
 import { cookies } from "next/headers";
 import { IRequest, ISignUpResponse, TTokenStatus } from "./interface";
-import config from "@/server/config/config";
+import config, { emailVerificationToken } from "@/server/config/config";
 import ISignUpFirstStep from "@/server/models/signUpType";
 
 import IDBUser, {
@@ -161,11 +161,11 @@ export async function POST(req: Request) {
     ) => {
       if (tokenStatus == "update") {
         data.numOfSendToken = data.numOfSendToken + 1;
-        if (data.numOfSendToken >= 5) {
+        if (data.numOfSendToken >= emailVerificationToken) {
           data.reTry = new Date(Date.now() + 24 * 60 * 60 * 1000);
         }
       }
-      if (data.numOfSendToken >= 5) {
+      if (data.numOfSendToken >= emailVerificationToken) {
         data.numOfSendToken = 0;
       }
       const mongodbCreate = async () => {

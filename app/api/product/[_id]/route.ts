@@ -15,9 +15,7 @@ export async function GET(
   }
 ) {
   try {
-    console.log("single product api called");
     const { redisSingleProCache, redisSingleProExpire } = config;
-    console.log("_id type", typeof context.params._id);
     const _id = +(context.params._id as string);
     let data = {} as ISingleProduct;
     let cache: boolean | null = redisSingleProCache === "enable";
@@ -59,7 +57,6 @@ export async function GET(
     );
   } catch (err) {
     if (err instanceof Error) {
-      console.log("single product api error ", err.message);
       return new Response(
         JSON.stringify({
           success: false,
