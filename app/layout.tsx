@@ -8,9 +8,10 @@ import { cookies } from "next/headers";
 
 import Footer from "./Layouts/Footer";
 
-import { IAuthorizedUser } from "@/interfaces/userServerSide";
+import { IAuthorizedUser } from "@/server/interfaces/user";
+import { authCookie } from "@/server/utils/tokens";
+import { backEndServer, frontEndServer } from "@/exConfig";
 
-const { fDomainName, cookieName, bHost, bProtocol } = config;
 const inter = Inter({ subsets: ["latin"] });
 export interface IFetch {
   success: boolean;
@@ -18,8 +19,9 @@ export interface IFetch {
   data: IAuthorizedUser;
 }
 
+const { hostname, protocol, tLD } = backEndServer;
 export const metadata: Metadata = {
-  title: fDomainName,
+  title: frontEndServer.hostname,
   description: "Create by mrharshad",
 };
 
@@ -29,11 +31,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = cookies();
-  let value = cookieStore.get(cookieName)?.value;
+  let value = cookieStore.get(authCookie.name)?.value;
   let userData = {} as IAuthorizedUser;
   if (value) {
     const req = await fetch(
-      `${bProtocol}${bHost}/api/admin/user/data/${value}
+      `${protocol}${hostname}${tLD}/api/admin/user/data/${value}
         `,
       {
         headers: {

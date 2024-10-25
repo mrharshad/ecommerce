@@ -42,8 +42,8 @@
 }
 
 .container label {
-  margin-top: 1em;
-  font-size: small;
+  margin-top: 0.5em;
+  font-size: 14px;
 }
 
 .container input {
@@ -105,7 +105,7 @@
 }
 
 .gender p {
-  font-size: var(--fifteen);
+  font-size: 14px;
   display: flex;
   margin-top: 1rem;
   margin-right: 30%;
@@ -145,7 +145,7 @@
   background-color: rgb(255 255 255 / 10%);
   border-radius: 3px;
   left: 1px;
-  top: -14px;
+  top: -7px;
   padding-top: 3px;
   box-shadow: 1px 1px 0px 0px #ffffff47;
   padding-left: 5px;
@@ -163,7 +163,7 @@
 .stateContainer > label {
   width: 45%;
   margin-bottom: 0.3em;
-  margin-top: 2em;
+  margin-top: 1em;
 }
 
 .stateContainer > input {
@@ -252,8 +252,18 @@
   font-size: 0.9em !important;
 }
 @media screen and (min-width: 481px) {
+  .container label {
+    margin-top: 1em;
+    font-size: medium;
+  }
   .email span {
     font-size: large;
+  }
+  .birth > label {
+    top: -15px;
+  }
+  .gender p {
+    font-size: medium;
   }
 }
 

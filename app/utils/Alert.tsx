@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { IAlert } from "../../interfaces/userClientSide";
+import { IAlert } from "../interfaces/user";
 import styles from "./alert.module.css";
 interface IProps extends IAlert {
   removeAlert: (text: string) => void;

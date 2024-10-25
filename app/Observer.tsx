@@ -1,5 +1,5 @@
 "use client";
-import { TSearchSort } from "@/interfaces/userClientSide";
+import { TSearchSort } from "@/app/interfaces/user";
 import React, { FC, useEffect, useState } from "react";
 
 interface IProps {

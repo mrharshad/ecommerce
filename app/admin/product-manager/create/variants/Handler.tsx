@@ -19,7 +19,7 @@ import {
 import Image from "next/image";
 import CreatedVariants from "./CreatedVariants";
 import { ISelected } from "./interface";
-import { IAlert } from "@/interfaces/userClientSide";
+import { IAlert } from "@/app/interfaces/user";
 const Variants: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const emptySelected = {

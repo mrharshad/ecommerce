@@ -1,4 +1,4 @@
-import { ICommonData } from "@/interfaces/proManagerClientSide";
+import { ICommonData } from "@/app/interfaces/proManager";
 import { ICategoriesInfo, IExInfoData } from "@/static-data/categoriesInfo";
 export interface IDiscounts {
   min: number;

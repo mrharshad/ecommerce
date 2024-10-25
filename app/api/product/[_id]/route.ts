@@ -1,11 +1,11 @@
-import { IServerResponse } from "@/interfaces/clientAndServer";
 import { NextRequest } from "next/server";
-import config from "@/server/config/config";
-import { ISingleProduct } from "@/interfaces/productServerSide";
+import { ISingleProduct } from "@/server/interfaces/product";
 import client from "@/server/config/redisConnect";
-import Product from "@/server/models/productModels";
+import Product from "@/server/models/product";
 import { singleProduct } from "@/server/utils/productProjection";
 import { IGetProductRes } from "@/app/product/interface";
+import { singleProduct as config } from "@/exConfig";
+import { IServerResponse } from "@/server/utils/serverMethods";
 export async function GET(
   req: NextRequest,
   context: {
@@ -15,30 +15,32 @@ export async function GET(
   }
 ) {
   try {
-    const { redisSingleProCache, redisSingleProExpire } = config;
     const _id = +(context.params._id as string);
     let data = {} as ISingleProduct;
-    let cache: boolean | null = redisSingleProCache === "enable";
-    const redisUrl = `single:${_id}`;
+    const { cache, expire, keyName } = config;
+    let caching: boolean | null = cache;
+    const redisUrl = keyName + _id;
 
-    if (cache) {
+    if (caching) {
       try {
         const redisData = await client.get(redisUrl);
         if (redisData) {
           data = JSON.parse(redisData) as any;
-          cache = null;
+          caching = null;
         }
       } catch (err) {
-        cache = false;
+        caching = false;
       }
     }
-    if (cache !== null) {
+    if (caching !== null) {
       data = (await Product.findById(_id, singleProduct)) as ISingleProduct;
     }
     const { name } = data || {};
 
-    if (cache && name) {
-      await client.setEx(redisUrl, redisSingleProExpire, JSON.stringify(data));
+    if (caching && name) {
+      try {
+        await client.setEx(redisUrl, expire, JSON.stringify(data));
+      } catch (err) {}
     }
 
     if (!name) {

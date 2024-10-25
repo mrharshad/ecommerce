@@ -1,6 +1,6 @@
 import { Model, Schema, model, models } from "mongoose";
 // const validator = require("validator");
-import ISignUp from "./signUpType";
+import ISignUp from "../interfaces/signUp";
 const Structure = new Schema<ISignUp>({
   _id: String,
   token: String,

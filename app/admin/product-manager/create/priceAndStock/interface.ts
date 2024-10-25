@@ -1,11 +1,11 @@
-import { IListOfLocation, ILocation } from "@/interfaces/proManagerClientSide";
+import { IListOfLocation, ILocation } from "@/app/interfaces/proManager";
 import {
   IImageSets,
   IMainKeyChange,
   IVariant,
   IVariantOption,
 } from "../interface";
-import { IAlert } from "@/interfaces/userClientSide";
+import { IAlert } from "@/app/interfaces/user";
 export interface ISelectedVariant extends IVariant {
   optionId: string;
 }

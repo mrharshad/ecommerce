@@ -5,9 +5,9 @@ import Image from "next/image";
 import logo from "@/public/logo.png";
 interface INavbarProp {
   fName: string | undefined;
-  numOfCart: number;
+  token: string | null;
 }
-const Navbar: FC<INavbarProp> = ({ fName, numOfCart }) => {
+const Navbar: FC<INavbarProp> = ({ token, fName }) => {
   return (
     <>
       <input
@@ -24,7 +24,7 @@ const Navbar: FC<INavbarProp> = ({ fName, numOfCart }) => {
         </Link>
 
         <div className={style.loggedIn}>
-          {fName ? (
+          {token ? (
             <Link className={style.orders} href="/admin/user/product/orders">
               <svg viewBox="0 0 98 98" id="list">
                 <g data-name="<Group>">
@@ -81,7 +81,7 @@ const Navbar: FC<INavbarProp> = ({ fName, numOfCart }) => {
             </Link>
           ) : null}
           <Link
-            href={fName ? "/admin/user/account" : `/user/login`}
+            href={token ? "/admin/user/account" : `/user/login`}
             className={style.profileLogo}
           >
             <svg className={style.svg} viewBox="0 0 24 24">

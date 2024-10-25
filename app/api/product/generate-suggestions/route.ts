@@ -1,6 +1,6 @@
-import { ISuggestion } from "@/interfaces/userClientSide";
+import { ISuggestion } from "@/app/interfaces/user";
 import dbConnect from "@/server/config/dbConnect";
-import Product from "@/server/models/productModels";
+import Product from "@/server/models/product";
 import categoriesInfo from "@/static-data/categoriesInfo";
 
 export async function GET() {

@@ -1,5 +1,5 @@
 import { ISignUpResponse } from "@/app/api/user/create-account/interface";
-import { ISearches } from "@/interfaces/userClientSide";
+import { ISearches } from "@/app/interfaces/user";
 
 export interface IFirstStep {
   fName?: string;

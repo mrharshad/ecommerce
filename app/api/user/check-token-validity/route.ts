@@ -1,20 +1,15 @@
-import { cookies } from "next/headers";
-import bcrypt from "bcrypt";
 import crypto from "crypto";
-import Jwt from "jsonwebtoken";
 import { NextRequest } from "next/server";
 import dbConnect from "@/server/config/dbConnect";
-
-import { ISearches as IClientSearches } from "@/interfaces/userClientSide";
-import config from "@/server/config/config";
 import client from "@/server/config/redisConnect";
-import User from "@/server/models/userModels";
-import errors from "@/server/utils/errorHandler";
+import User from "@/server/models/user";
+import errors, { ICustomError } from "@/server/utils/errorHandler";
 
-import { ICustomError, IServerResponse } from "@/interfaces/clientAndServer";
-import { IAuthentication, ISearches } from "@/interfaces/userServerSide";
+import { IAuthentication } from "@/server/interfaces/user";
 import { authentication } from "@/server/utils/userProjection";
 import { ICheckTokenValidityRes } from "@/app/user/password-recovery/interface";
+import { email as emailConfig, user } from "@/exConfig";
+import { IServerResponse } from "@/server/utils/serverMethods";
 
 // apply api - /user/password-recovery
 export async function GET(req: NextRequest) {
@@ -25,37 +20,36 @@ export async function GET(req: NextRequest) {
 
     dbConnect();
     const token = crypto.createHash("sha256").update(key).digest("hex");
-    const { redisUserCache, redisUserExpire } = config;
-
-    let redisCache = redisUserCache === "enable";
+    let { emailCache, emailExpire, emailKeyName } = emailConfig;
 
     let findUser = {} as IAuthentication;
-    const redisUrl = `email:${email}`;
-    if (redisCache) {
+    const redisUrl = emailKeyName + email;
+    if (emailCache) {
       try {
         let result = await client.get(redisUrl);
         if (result) {
           findUser = JSON.parse(result);
         }
       } catch (err) {
-        redisCache = false;
+        emailCache = false;
       }
     }
-    if (findUser?.email && !findUser?._id) {
+    const userName = findUser.fName;
+    if (findUser?._id && !userName) {
       throw new Error("invalid token");
     }
 
-    if (!findUser.email) {
+    if (!userName) {
       findUser =
         (await User.findOne({ email }, authentication).select("+password")) ||
         ({} as IAuthentication);
       const _id = findUser._id;
-      if (redisCache) {
+      if (emailCache) {
         try {
           await client.setEx(
             redisUrl,
-            redisUserExpire,
-            JSON.stringify(_id ? findUser : { email })
+            emailExpire,
+            JSON.stringify(_id ? findUser : { _id: email })
           );
         } catch {}
       }

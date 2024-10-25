@@ -1,5 +1,5 @@
 import { Model, Schema, model, models } from "mongoose";
-import IAdditionalInfo from "./additionalInfoType";
+import IAdditionalInfo from "../interfaces/additionalInfo";
 const Structure = new Schema<IAdditionalInfo>({
   _id: String,
   lastProductId: Number,

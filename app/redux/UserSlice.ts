@@ -4,9 +4,11 @@ import { IAppMount, INewAlert } from "../Layouts/interface";
 
 import {
   IAuthenticated,
+  ICartQtyChange,
   IDataKeyChange,
   IMainKeyChange,
   INewAutoSearch,
+  IRemoveCart,
   ISearchBarInput,
   StateType,
 } from "./UserSliceInterface";
@@ -16,6 +18,7 @@ import {
   fetchKeyProduct,
   fetchRandom,
   getDistricts,
+  getUserContacts,
   setNewSearches,
   suggestionsGet,
 } from "./UserApiRequest";
@@ -30,17 +33,19 @@ import {
   TDevice,
   IReduxUserData,
   IViewedPro,
-} from "../../interfaces/userClientSide";
+  ICartPro,
+} from "../interfaces/user";
 
-import { ISearchProduct } from "@/interfaces/productServerSide";
+import { ISearchProduct } from "@/server/interfaces/product";
 import {
-  searchesLocal,
-  suggestionLimit,
-  suggestionPerReq,
   viewedProLocal,
-} from "@/clientConfig";
-import { IAuthorizedUser, ICartPro } from "@/interfaces/userServerSide";
-
+  suggestions as suggestionsConfig,
+  searches as searchesConfig,
+} from "@/exConfig";
+import { IGetUserContactsRes, INewOrderRes } from "./UserApiRequestInterface";
+import { INewOrder } from "@/server/interfaces/newOrder";
+const { perRequest, showClient } = suggestionsConfig;
+const { storeName } = searchesConfig;
 const initialFindSuggestion = {
   preKey: "",
   loading: false,
@@ -90,9 +95,9 @@ const UserSlice = createSlice({
       };
       const { initialToken, userData }: IAppMount = action.payload;
       const { searches, ...data } = userData;
-      const { nOfNOrder, cartPro } = data;
+      const { cartPro } = data;
       state.data = initialToken
-        ? data
+        ? (data as IReduxUserData)
         : ({
             cartPro: [] as ICartPro[],
             location: [
@@ -106,9 +111,9 @@ const UserSlice = createSlice({
               },
             ],
           } as IReduxUserData);
-      state.nOfNOrder = nOfNOrder || 0;
+
       state.numOfCart = cartPro?.length || 0;
-      state.searches = (initialToken ? searches : localData(searchesLocal)).map(
+      state.searches = (initialToken ? searches : localData(storeName)).map(
         ({ identity, ...obj }: ISearches) => {
           return {
             ...obj,
@@ -214,16 +219,14 @@ const UserSlice = createSlice({
             !loading &&
             key.includes(preKey) &&
             key !== preKey &&
-            (preCountData === undefined
-              ? true
-              : preCountData === suggestionPerReq)
+            (preCountData === undefined ? true : preCountData === perRequest)
           ) {
             findNew.changing = null;
             state.findSuggestion = findNew;
           } else if (
             !key.includes(preKey) &&
             changing !== false &&
-            newSuggestion.length < suggestionLimit
+            newSuggestion.length < showClient
           ) {
             findNew.changing = true;
             state.findSuggestion = findNew;
@@ -248,14 +251,13 @@ const UserSlice = createSlice({
 
     authenticated: (state, action: PayloadAction<IAuthenticated>) => {
       const { data, text, token, completed } = action.payload;
-      const { searches, nOfNOrder, cartPro, ...otherData } = data;
+      const { searches, cartPro, ...otherData } = data;
       state.token = token;
-      state.data = { ...otherData, cartPro };
+      state.data = { ...otherData, cartPro } as IReduxUserData;
       state.alerts.push({ text, type: "Success", duration: "4s" });
       state.loadings = state.loadings.filter(
         (pending) => pending !== completed
       );
-      state.nOfNOrder = nOfNOrder || 0;
       state.numOfCart = Array.isArray(cartPro) ? cartPro.length : 0;
       state.searches = searches;
     },
@@ -283,6 +285,55 @@ const UserSlice = createSlice({
           identity: newIdentity,
           cached: [],
         });
+      }
+    },
+    cartQtyChange: (state, action: PayloadAction<ICartQtyChange>) => {
+      const { newQty, newDiscount, cartIdentity } = action.payload;
+      const { _id, added } = cartIdentity;
+      state.data.cartPro = state.data.cartPro.map((obj) => {
+        if (obj._id === _id && obj.added === added) {
+          return { ...obj, quantity: newQty, discount: newDiscount };
+        } else return obj;
+      });
+    },
+    removeCart: (state, action: PayloadAction<IRemoveCart>) => {
+      const { cartInfo, response } = action.payload;
+      const { status, success, message } = response;
+      state.loadings = state.loadings.filter((pending) => pending !== "Cart");
+      state.alerts.push({
+        text: message,
+        type: status === 201 ? "Message" : success ? "Success" : "Error",
+      });
+      if (success) {
+        const { _id: cartId, added: cartAdded } = cartInfo;
+        state.data.cartPro = state.data.cartPro.filter(
+          ({ _id, added }) => _id !== cartId && added !== cartAdded
+        );
+        state.numOfCart -= 1;
+      }
+    },
+    newOrder: (state, action: PayloadAction<INewOrderRes>) => {
+      const {
+        success,
+        message,
+        newClientCartPro = [],
+        newClientSearches = [],
+        newOrderDoc,
+      } = action.payload;
+
+      state.loadings = state.loadings.filter((key) => key !== "Order");
+      state.alerts.push({ text: message, type: success ? "Success" : "Error" });
+      if (success) {
+        state.data.cartPro = newClientCartPro;
+        state.numOfCart = newClientCartPro.length;
+        state.data.mobileNo = undefined;
+        state.data.email = undefined;
+        state.searches = newClientSearches;
+        if (Array.isArray(newOrderDoc)) {
+          state.newOrder = newOrderDoc;
+        } else {
+          state.newOrder.push(newOrderDoc);
+        }
       }
     },
   },
@@ -441,6 +492,23 @@ const UserSlice = createSlice({
         state.searches.unshift(removedSearch);
       }
     });
+    builder.addCase(getUserContacts.pending, (state, action) => {
+      state.loadings.push("Contact");
+    });
+
+    builder.addCase(
+      getUserContacts.fulfilled,
+      (state, action: PayloadAction<IGetUserContactsRes>) => {
+        const { success, message, data } = action.payload;
+        if (success) {
+          state.data.email = data?.email;
+          state.data.mobileNo = data?.mobileNo;
+        } else {
+          state.alerts.push({ text: message, type: "Error" });
+        }
+        state.loadings = state.loadings.filter((key) => key !== "Contact");
+      }
+    );
   },
 });
 
@@ -458,4 +526,7 @@ export const {
   dataKeyChange,
   visitedProductPage,
   newAutoSearch,
+  cartQtyChange,
+  removeCart,
+  newOrder,
 } = UserSlice.actions;

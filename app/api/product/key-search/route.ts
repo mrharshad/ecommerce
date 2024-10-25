@@ -5,16 +5,13 @@ import {
   IFetchKeyProductRes,
 } from "./../../../redux/UserApiRequestInterface";
 
-import config from "@/server/config/config";
 import dbConnect from "@/server/config/dbConnect";
-import Product from "@/server/models/productModels";
-import { ISearchProduct } from "@/interfaces/productServerSide";
+import Product from "@/server/models/product";
+import { ISearchProduct } from "@/server/interfaces/product";
 import client from "@/server/config/redisConnect";
-
+import { keySearchPro, suggestedPro } from "@/exConfig";
 export async function PUT(req: NextRequest) {
   try {
-    const { productPerReq, redisProductExpire, redisProductsCache } = config;
-
     let { identity, key, page, searchSort } =
       (await req.json()) as IFetchKeyProduct;
 
@@ -39,18 +36,23 @@ export async function PUT(req: NextRequest) {
       default:
         sortBy = { popular: -1 };
     }
-    let caching = redisProductsCache === "enable" && searchSort === "Popular";
-    let skipIndex = (page - 1) * productPerReq;
+    const { keyExpire, keyCache, keyName, keyPerReq } = keySearchPro;
+
+    const { suggestedCache, suggestedExpire } = suggestedPro;
+    let skipIndex = (page - 1) * keyPerReq;
     const proName = identity === "name";
+    let caching = proName
+      ? keyCache
+      : suggestedCache && searchSort === "Popular";
     let data: ISearchProduct[] = [];
-    const redisKey = proName ? `searchKey:${key}` : `${identity}:${key}`;
+    const redisKey = proName ? keyName + key : `${identity}:${key}`;
 
     if (caching) {
       try {
         data = (await client.lRange(
           redisKey,
           skipIndex,
-          skipIndex + productPerReq - 1
+          skipIndex + keyPerReq - 1
         )) as any;
       } catch (err) {
         caching = false;
@@ -71,7 +73,7 @@ export async function PUT(req: NextRequest) {
       })
         .sort(sortBy)
         .skip(skipIndex)
-        .limit(productPerReq)
+        .limit(keyPerReq)
         .exec();
       dataQty = data.length;
 
@@ -82,7 +84,10 @@ export async function PUT(req: NextRequest) {
               redisKey,
               data.map((obj) => JSON.stringify(obj))
             );
-            await client.expire(redisKey, redisProductExpire);
+            await client.expire(
+              redisKey,
+              proName ? keyExpire : suggestedExpire
+            );
           } else {
             await client.rPushX(
               redisKey,
@@ -92,7 +97,7 @@ export async function PUT(req: NextRequest) {
         } catch (err) {}
       }
     }
-    const resPage = dataQty < productPerReq ? null : page + 1;
+    const resPage = dataQty < keyPerReq ? null : page + 1;
 
     return new Response(
       JSON.stringify({

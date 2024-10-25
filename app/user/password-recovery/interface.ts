@@ -1,10 +1,7 @@
 import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
-import { IServerResponse } from "@/interfaces/clientAndServer";
 
-import {
-  ISearches as IClientSearches,
-  IReduxUserData,
-} from "@/interfaces/userClientSide";
+import { ISearches as IClientSearches } from "@/app/interfaces/user";
+import { IServerResponse } from "@/server/utils/serverMethods";
 
 export interface ICheckTokenValidityRes
   extends Omit<IServerResponse, "message"> {

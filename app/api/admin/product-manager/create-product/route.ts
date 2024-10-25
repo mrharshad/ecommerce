@@ -1,9 +1,9 @@
 import { ICreateProduct } from "@/app/admin/product-manager/create/interface";
 import dbConnect from "@/server/config/dbConnect";
-import Product from "@/server/models/productModels";
-import { numStrNum, onlyNumbers } from "@/server/utils/dateFormatters";
-import errors from "@/server/utils/errorHandler";
-import { verifyRole } from "@/server/utils/jwtMethods";
+import Product from "@/server/models/product";
+
+import errors, { ICustomError } from "@/server/utils/errorHandler";
+import { verifyRole } from "@/server/utils/serverMethods";
 import cloudinaryConfig from "@/server/config/cloudinaryConnect";
 import { NextRequest } from "next/server";
 import {
@@ -12,11 +12,13 @@ import {
   IReviews,
   IDBProduct,
   IVariant,
-} from "@/interfaces/productServerSide";
+} from "@/server/interfaces/product";
 
 import AdditionalInfo, { docId } from "@/server/models/additionalInfo";
 import { multipleImageDelete } from "@/server/utils/multipleImageDelete";
-import { ICustomError, IServerResponse } from "@/interfaces/clientAndServer";
+import { IServerResponse } from "@/server/utils/serverMethods";
+import { dateFormatterNNN, dateFormatterNSN } from "@/app/utils/methods";
+
 export interface ICreateProductRes extends IServerResponse {
   name: string;
 }
@@ -58,8 +60,8 @@ export async function POST(req: NextRequest) {
     const findProduct = await Product.findOne({ name });
     if (findProduct)
       throw new Error(`There's already a product called ${name}`);
-    const todayNumStrNum = numStrNum(new Date());
-    const todayOnlyNum = onlyNumbers(new Date());
+    const todayNumStrNum = dateFormatterNSN(new Date());
+    const todayOnlyNum = dateFormatterNNN(new Date());
     const newVariants: Array<IVariant> = variants.map(
       ({ discounts, ...doc }) => {
         return {

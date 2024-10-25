@@ -1,6 +1,6 @@
-import { IAlert, ISearches, TPending } from "@/interfaces/userClientSide";
+import { IAlert, ISearches, TPending } from "@/app/interfaces/user";
 import { IAuthenticated } from "../redux/UserSliceInterface";
-import { IAuthorizedUser } from "@/interfaces/userServerSide";
+import { IAuthorizedUser } from "@/server/interfaces/user";
 
 export interface IUserAppUpdate extends IAuthenticated {
   searches: ISearches[];

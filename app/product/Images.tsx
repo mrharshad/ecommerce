@@ -13,6 +13,7 @@ const Images: FC<IImagesProps> = ({ images }) => {
         <div className={style.images}>
           {images.map(({ _id, url }, index) => (
             <div
+              onMouseLeave={() => setSelectedImg(index)}
               key={_id}
               className={
                 selectedImg === index ? style.selectedImg : style.unSelectedImg

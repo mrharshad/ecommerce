@@ -1,7 +1,6 @@
 import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
 import { IClientResponse } from "@/app/user/sign-up/interface";
-import { IReduxUserData, ISearches } from "@/interfaces/userClientSide";
-import { IAuthorizedUser } from "@/interfaces/userServerSide";
+import { ISearches } from "@/app/interfaces/user";
 
 export interface IResData {
   userData: IClientResponse;

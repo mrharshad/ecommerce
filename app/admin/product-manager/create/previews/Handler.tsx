@@ -1,7 +1,7 @@
 import React, { FC, memo, useState } from "react";
 import { INewData } from "../interface";
 import style from "./PreHandler.module.css";
-import { IPreview } from "@/interfaces/proManagerClientSide";
+import { IPreview } from "@/app/interfaces/proManager";
 interface IProps {
   data: INewData;
 }

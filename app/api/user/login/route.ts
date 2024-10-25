@@ -1,28 +1,35 @@
 import dbConnect from "@/server/config/dbConnect";
 import client from "@/server/config/redisConnect";
-import User from "@/server/models/userModels";
+import User from "@/server/models/user";
 import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
-import config, { incorrectPasswords } from "@/server/config/config";
+import config from "@/server/config/config";
 
-import errors from "@/server/utils/errorHandler";
+import errors, { ICustomError } from "@/server/utils/errorHandler";
 import {
   ISearches as ISearchesClientSide,
   TSearchesIdentity,
-} from "@/interfaces/userClientSide";
+} from "@/app/interfaces/user";
 import {
   IAuthentication,
   IAuthorizedUser,
-  IJwtInfo,
   ISearches,
-} from "@/interfaces/userServerSide";
-import { ICustomError } from "@/interfaces/clientAndServer";
+} from "@/server/interfaces/user";
+
 import { authentication } from "@/server/utils/userProjection";
-import { locationCookieName } from "@/server/utils/cookies";
+
 import { IRequest, ISendResponse } from "@/app/user/login/interface";
+import { authCookie, authJWTOpt, locationCookie } from "@/server/utils/tokens";
+import {
+  user,
+  email as emailConfig,
+  searches as searchesConfig,
+  password as passwordConfig,
+} from "@/exConfig";
+import { IAuthJwtInfo } from "@/server/interfaces/tokens";
 
 // apply api - /user/login
 export async function PUT(req: NextRequest) {
@@ -38,46 +45,43 @@ export async function PUT(req: NextRequest) {
       new Response(JSON.stringify(res), {
         status: 200,
       });
-    const {
-      redisUserCache,
-      jwtSecretCode,
-      jwtExpireTime,
-      cookieName,
-      cookieExpire,
-      redisUserExpire,
-      interestedSearch,
-      searchesQty,
-    } = config;
-    let redisCache = redisUserCache === "enable";
+    const { jwtSecretCode } = config;
+    let { cache, expire, keyName } = user;
+    let { emailKeyName, emailExpire } = emailConfig;
+    const { interestedMax, searchMax } = searchesConfig;
+    const { incorrectLimit, wait } = passwordConfig;
+
     let isRedis = false;
     dbConnect();
     let findUser = {} as IAuthentication;
-    if (redisCache) {
+    if (cache) {
       try {
-        let result = await client.get(`email:${email}`);
+        let result = await client.get(emailKeyName + email);
 
         if (result) {
           findUser = JSON.parse(result);
           isRedis = true;
         }
       } catch (err) {
-        redisCache = false;
+        cache = false;
       }
     }
-    if (findUser.email && !findUser._id) {
+    const userName = findUser?.fName;
+    if (findUser._id && !userName) {
       throw new Error("Invalid email and password");
     }
-    if (!findUser.email) {
-      findUser = (await User.findOne({ email }, authentication).select(
-        "+password"
+    if (!userName) {
+      findUser = (await User.findOne(
+        { email },
+        authentication
       )) as IAuthentication;
       if (!findUser?._id) {
-        if (redisCache) {
+        if (cache) {
           try {
             await client.setEx(
-              `email:${email}`,
-              redisUserExpire,
-              JSON.stringify({ email })
+              emailKeyName + email,
+              emailExpire,
+              JSON.stringify({ _id: email })
             );
           } catch {}
         }
@@ -90,6 +94,7 @@ export async function PUT(req: NextRequest) {
       role,
       password,
       searches,
+      mobileNo,
       tokens = {},
     } = findUser as IAuthentication;
 
@@ -105,11 +110,11 @@ export async function PUT(req: NextRequest) {
       pendingMinutes = pendingMinutes < 0 ? Math.abs(pendingMinutes) : 0;
 
       if (pendingHours || pendingMinutes) {
-        if (!isRedis && redisCache) {
+        if (!isRedis && cache) {
           try {
             await client.setEx(
-              `email:${email}`,
-              86400,
+              emailKeyName + email,
+              emailExpire,
               JSON.stringify(findUser)
             );
           } catch {}
@@ -162,15 +167,15 @@ export async function PUT(req: NextRequest) {
       }
 
       let newDBSearches: ISearches[] = [
-        ...userSearch.slice(0, searchesQty),
-        ...interested.slice(0, interestedSearch),
+        ...userSearch.slice(0, searchMax),
+        ...interested.slice(0, interestedMax),
       ];
 
-      const jwtInfo: IJwtInfo = { _id, role };
+      const jwtInfo: IAuthJwtInfo = { _id, role, email, mobileNo };
 
       if (isRedis) {
         try {
-          await client.del(`email:${email}`);
+          await client.del(emailKeyName + email);
         } catch {}
       }
       const updatedValue = (await User.findByIdAndUpdate(
@@ -182,8 +187,6 @@ export async function PUT(req: NextRequest) {
       )) as IAuthentication;
 
       const {
-        bDate,
-        bMonth,
         bYear,
         cartPro,
         fName,
@@ -191,39 +194,25 @@ export async function PUT(req: NextRequest) {
         location,
         searches: updatedSearches,
         gender,
-        nOfNOrder,
-        issues,
       } = updatedValue;
       const authorizedData: IAuthorizedUser = {
         _id,
-        email,
-        bDate,
-        bMonth,
         bYear,
         cartPro,
         fName,
         gender,
         lName,
         location,
-        nOfNOrder,
         searches: updatedSearches,
       };
-      const authenticationData: IAuthentication = {
-        ...authorizedData,
-        password,
-        tokens: {},
-        role,
-        issues,
-      };
-
-      if (!updatedValue) throw new Error("Data Base Error");
-
-      if (redisCache) {
+      if (!fName) throw new Error("Data Base Error");
+      if (cache) {
         try {
+          updatedValue.tokens = {};
           await client.setEx(
-            `user:${_id}`,
-            redisUserExpire,
-            JSON.stringify(authenticationData)
+            keyName + _id,
+            expire,
+            JSON.stringify(updatedValue)
           );
         } catch (err) {}
       }
@@ -240,21 +229,16 @@ export async function PUT(req: NextRequest) {
           });
         }
       });
-      const newJwtToken = Jwt.sign(jwtInfo, jwtSecretCode, {
-        expiresIn: jwtExpireTime,
-      });
+      const newJwtToken = Jwt.sign(jwtInfo, jwtSecretCode, authJWTOpt);
 
       cookie.set({
-        name: locationCookieName,
+        ...locationCookie,
         value: JSON.stringify(location[0]),
       });
 
       cookie.set({
-        name: cookieName,
+        ...authCookie,
         value: newJwtToken,
-        expires: new Date(Date.now() + cookieExpire * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-        path: "/",
       });
 
       return response({
@@ -264,9 +248,11 @@ export async function PUT(req: NextRequest) {
         data: { ...authorizedData, searches: newSearchesClientSide },
       });
     } else {
-      if (verificationFailed === incorrectPasswords) {
+      if (verificationFailed === incorrectLimit) {
         tokens.verificationFailed = 0;
-        tokens.holdOnVerification = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        tokens.holdOnVerification = new Date(
+          Date.now() + wait * 60 * 60 * 1000
+        );
       } else {
         tokens.verificationFailed = verificationFailed + 1;
         if (holdOnVerification) delete tokens.holdOnVerification;
@@ -284,9 +270,13 @@ export async function PUT(req: NextRequest) {
         if (!update.modifiedCount) throw new Error("Data Base Error");
       };
 
-      if (redisCache) {
+      if (cache) {
         try {
-          await client.setEx(`email:${email}`, 86400, JSON.stringify(findUser));
+          await client.setEx(
+            emailKeyName + email,
+            emailExpire,
+            JSON.stringify(findUser)
+          );
         } catch (err) {
           await tokenUpdateInDB();
         }
@@ -297,7 +287,7 @@ export async function PUT(req: NextRequest) {
       if (tokens.holdOnVerification)
         return response({
           success: false,
-          text: "try after 24 hours",
+          text: `try after ${wait} hours`,
           resHoldOnVerification: tokens.holdOnVerification,
         });
       else

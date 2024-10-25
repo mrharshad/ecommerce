@@ -1,19 +1,37 @@
 import React, { FC } from "react";
 import { IGetProductRes, IProps, TStarRating } from "./interface";
-import config, { deliveryTime } from "@/server/config/config";
 import { notFound } from "next/navigation";
 import style from "./page.module.css";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
-import { ILocation } from "@/interfaces/userServerSide";
-import { locationCookieName } from "@/server/utils/cookies";
-import { IImageSets } from "@/interfaces/productServerSide";
+import { ILocation } from "@/server/interfaces/user";
+
+import { IImageSets } from "@/server/interfaces/product";
 import Link from "next/link";
 import Images from "./Images";
+import {
+  backEndServer,
+  deliveryTime,
+  frontEndServer,
+  indiaOffset,
+  msADay,
+} from "@/exConfig";
+import { locationCookie } from "@/server/utils/tokens";
 
+export function generateMetadata({ params, searchParams }: IProps) {
+  const productName = searchParams.k.split("-").join(" ");
+
+  const { hostname, tLD } = frontEndServer;
+  const data = `${productName} : ${hostname} ${tLD}: Product`;
+  return {
+    title: data,
+    description: data,
+  };
+}
 const page: FC<IProps> = async ({ params, searchParams }) => {
   try {
+    const { hostname, protocol, tLD } = backEndServer;
     const Handler = dynamic(() => import("./Handler"), { ssr: false });
     const {
       districtMinTime,
@@ -24,7 +42,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       countryMinTime,
     } = deliveryTime;
     const cookie = cookies();
-    const location = cookie.get(locationCookieName)?.value;
+    const location = cookie.get(locationCookie.name)?.value;
     const dateFormatter = new Intl.DateTimeFormat("en-In", {
       timeZone: "Asia/Kolkata",
       year: "numeric",
@@ -34,9 +52,8 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
     const { district, state, area }: ILocation = location
       ? JSON.parse(location)
       : {};
+    const { _id, o, v } = searchParams;
 
-    const { bProtocol, bHost } = config;
-    const { _id, k, o, v } = searchParams;
     const productId = Number(_id);
     const selectedOption = Number(o) || 0;
 
@@ -45,9 +62,13 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
     if (!productId) {
       notFound();
     }
-    const request = await fetch(`${bProtocol}${bHost}/api/product/${_id}`, {
-      cache: "no-cache",
-    });
+
+    const request = await fetch(
+      `${protocol}${hostname}${tLD}/api/product/${_id}`,
+      {
+        cache: "no-cache",
+      }
+    );
 
     const { success, data, message } = (await request.json()) as IGetProductRes;
 
@@ -72,7 +93,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       imgSetKey,
       category,
     } = data;
-
+    const proUrl = `/product?_id=${_id}&k=${name.replace(/ /g, "-")}`;
     const {
       _id: variantId,
       info,
@@ -96,6 +117,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
 
     loc.forEach((stateInfo) => {
       const [sta, dis, qty] = stateInfo.split(":");
+
       const convert = Number(qty);
       if (sta === state) {
         stateQty += convert;
@@ -118,12 +140,10 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
     });
     const minQty = Number(min);
     const discount = Number(dis);
-
-    const oneDay = 5.5 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000;
-
+    const currentMs = Date.now() + indiaOffset;
     const minimumDays = new Date(
-      Date.now() +
-        oneDay *
+      currentMs +
+        msADay *
           (districtQty >= minQty
             ? districtMinTime
             : stateQty >= minQty
@@ -131,15 +151,14 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
             : countryMinTime)
     );
     let maximumDays = new Date(
-      Date.now() +
-        oneDay *
-          (district >= min
+      currentMs +
+        msADay *
+          (districtQty >= minQty
             ? districtMaxTime
-            : state >= min
+            : stateQty >= minQty
             ? stateMaxTime
             : countryMaxTime)
     );
-
     const [one, two, three, four, five] = ratings;
     const ratingElement = (star: TStarRating, percent: number) => {
       return (
@@ -156,7 +175,6 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
     };
 
     const exInfoElements: Array<JSX.Element> = [];
-    console.log("exInfo", exInfo);
 
     exInfo.push(...info.split("\n").filter((pair) => pair.trim()));
 
@@ -175,7 +193,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
         <section id="mainContent" className={style.section}>
           <h1>{name}</h1>
           <div className={style.firstDiv}>
-            <p className={style.review}>Sold: {sold}</p>
+            <p>Sold: {sold}</p>
             <p className={style.rating}>
               ★ ★ ★ ★ ★
               <span style={{ width: `${rating || 4 * 20.2}%` }}>★ ★ ★ ★ ★</span>
@@ -223,9 +241,11 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
             <div className={style.price}>
               <p className={style.current}>
                 <span> ₹</span>
-                {dis ? (mrp - mrp * (discount / 100)).toFixed() : mrp}
+                {(+(
+                  discount ? mrp - mrp * (discount / 100) : mrp
+                ).toFixed()).toLocaleString("en-IN")}
               </p>
-              {dis ? (
+              {discount ? (
                 <>
                   <p className={style.discount}>-{dis}%</p>
                   <p className={style.mrp}>
@@ -250,7 +270,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
                             : {}
                         }
                         key={index}
-                        href={`/product?_id=${_id}&k=${k}&v=${index}`}
+                        href={proUrl + (index ? `&v=${index}` : "")}
                       >
                         {opt}
                       </Link>
@@ -264,7 +284,11 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
                   <p>{imgSetKey}</p>
                   {optionNames.map((opt, index) => (
                     <Link
-                      href={`/product?_id=${_id}&k=${k}&v=${selectedVariant}&o=${index}`}
+                      href={
+                        proUrl +
+                        (selectedVariant ? `&v=${selectedVariant}` : "") +
+                        (index ? `&o=${index}` : "")
+                      }
                       style={
                         index === selectedOption
                           ? {
@@ -296,7 +320,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
             </div>
           </div>
           <div className={style.productInfo}>
-            <p className={style.productInfoText}>Product Information</p>
+            <p>Product Information</p>
 
             {exInfoElements}
 
@@ -317,10 +341,9 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
               ))}
             </div>
           </div>
+
           <div className={style.reviewContainer}>
-            <h5 className={style.reviewsHeading}>
-              Reviews from people who have bought
-            </h5>
+            <h5>Reviews from people who have bought</h5>
             {sold > 0 ? (
               <div className={style.ratingInPercent}>
                 <span
@@ -352,7 +375,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
                   state,
                   comment,
                 }) => (
-                  <div key={_id} className={style.review}>
+                  <div key={_id}>
                     <p className={style.name}>{name}</p>
                     <p className={style.star}>
                       <span

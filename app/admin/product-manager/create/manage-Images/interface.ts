@@ -1,4 +1,4 @@
-import { IAlert } from "@/interfaces/userClientSide";
+import { IAlert } from "@/app/interfaces/user";
 import { ICertificates, IImageSets, INewProUpdate } from "../interface";
 
 export interface INewSet {

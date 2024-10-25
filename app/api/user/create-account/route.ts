@@ -1,5 +1,5 @@
 import dbConnect from "@/server/config/dbConnect";
-import User from "@/server/models/userModels";
+import User from "@/server/models/user";
 import nodeMailer from "nodemailer";
 import Jwt from "jsonwebtoken";
 import client from "@/server/config/redisConnect";
@@ -8,46 +8,58 @@ import SignUpFirstStep from "@/server/models/signUp";
 import { hash } from "bcrypt";
 import { cookies } from "next/headers";
 import { IRequest, ISignUpResponse, TTokenStatus } from "./interface";
-import config, { emailVerificationToken } from "@/server/config/config";
-import ISignUpFirstStep from "@/server/models/signUpType";
+
+import ISignUpFirstStep from "@/server/interfaces/signUp";
 
 import IDBUser, {
   IAuthentication,
   IAuthorizedUser,
-  IJwtInfo,
   ISearches,
-} from "@/interfaces/userServerSide";
+} from "@/server/interfaces/user";
 import { IValidToken } from "@/app/user/sign-up/interface";
-import { IReduxUserData } from "@/interfaces/userClientSide";
-import { locationCookieName } from "@/server/utils/cookies";
+
 import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
+import config, { orderSmtp } from "@/server/config/config";
+import {
+  user,
+  email as emailConfig,
+  searches as searchesConfig,
+  orderManage,
+  frontEndServer,
+} from "@/exConfig";
+import {
+  emailVerifyJWTOpt,
+  authCookie,
+  locationCookie,
+  authJWTOpt,
+} from "@/server/utils/tokens";
+import { IAuthJwtInfo, IEmailVerify } from "@/server/interfaces/tokens";
 
 // apply api - /user/sign-up
 export async function POST(req: Request) {
   try {
+    const { cache, expire, keyName } = user;
+    let {
+      emailCache,
+      emailKeyName,
+      tokenLimit: emailTokenLimit,
+      wait,
+      emailExpire,
+    } = emailConfig;
+
+    const { searchMax, interestedMax } = searchesConfig;
     const cookie = cookies();
-    const {
-      redisSignUpCache,
-      redisUserCache,
-      jwtSecretCode,
-      jwtExpireTime,
-      smtpService,
-      smtpHost,
-      smtpMail,
-      smtpPassword,
-      smtpPort,
-      cookieName,
-      cookieExpire,
-      searchesQty,
-      interestedSearch,
-      redisUserExpire,
-    } = config;
+    const { jwtSecretCode } = config;
+    const { service, host, password: smtpPassword, port } = orderSmtp;
+
+    const smtpMail = orderManage.mail;
     const response = (res: ISignUpResponse, status: number): Response => {
       return new Response(JSON.stringify(res), {
         status,
       });
     };
-    const hostname = new URL(req.url).hostname;
+    // const hostname = new URL(req.url).hostname;
+    const { hostname } = frontEndServer;
     let {
       fName,
       lName,
@@ -71,21 +83,20 @@ export async function POST(req: Request) {
     email = mailId + "@gmail.com";
     const { dateType } = birth;
     let findUser = {} as ISignUpFirstStep;
-    // let isRedis = "mongodb"; // jab redis kv ka use krenge to mongodb ki jagha par redis likhenge
-    const redisCache = redisSignUpCache === "enable";
-    let isRedis = redisCache;
-
-    if (isRedis) {
+    let isRedis = false;
+    if (emailCache) {
       try {
-        let result = (await client.get(`signUp:${email}`)) as any;
+        let result = (await client.get(emailKeyName + email)) as any;
         if (result) {
           findUser = JSON.parse(result);
         }
-      } catch {}
+      } catch {
+        emailCache = false;
+      }
     }
-
     dbConnect();
-    if (!findUser?._id) {
+    const userToken = findUser?.token;
+    if (!userToken) {
       findUser = (await SignUpFirstStep.findById(email)) as ISignUpFirstStep;
       if (!findUser?._id) {
         const registeredUser = await User.findOne({ email });
@@ -93,10 +104,11 @@ export async function POST(req: Request) {
         if (registeredUser) {
           throw new Error(`already has an account created`);
         }
-      } else {
-        isRedis = false;
       }
+    } else {
+      isRedis = true;
     }
+
     const holdTime = (pending: Date) => {
       const pendingTime = new Date(pending);
       let milliseconds = new Date().getTime() - pendingTime.getTime();
@@ -113,6 +125,7 @@ export async function POST(req: Request) {
         );
       }
     };
+
     const newToken = () => {
       const characters =
         "ABCstuDE67FGHIJKOPQRSTUVWXabcdefghijklmnopqrvwxyzYZ0123458LM9N";
@@ -123,18 +136,19 @@ export async function POST(req: Request) {
       }
       return {
         randomString,
-        token: Jwt.sign({ token: randomString, email }, jwtSecretCode, {
-          expiresIn: "15m",
-          algorithm: "HS256",
-        }),
+        token: Jwt.sign(
+          { token: randomString, email } as IEmailVerify,
+          jwtSecretCode,
+          emailVerifyJWTOpt
+        ),
       };
     };
 
     const sendToken = async (randomString: string): Promise<void> => {
       const transporter = nodeMailer.createTransport({
-        service: smtpService,
-        host: smtpHost,
-        port: Number(smtpPort),
+        service,
+        host,
+        port,
         // secure: true,
         auth: {
           user: smtpMail,
@@ -155,17 +169,18 @@ export async function POST(req: Request) {
         );
       }
     };
+
     const manageToken = async (
       data: ISignUpFirstStep,
       tokenStatus: TTokenStatus
     ) => {
       if (tokenStatus == "update") {
         data.numOfSendToken = data.numOfSendToken + 1;
-        if (data.numOfSendToken >= emailVerificationToken) {
-          data.reTry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        if (data.numOfSendToken >= emailTokenLimit) {
+          data.reTry = new Date(Date.now() + wait * 60 * 60 * 1000);
         }
       }
-      if (data.numOfSendToken >= emailVerificationToken) {
+      if (data.numOfSendToken >= emailTokenLimit) {
         data.numOfSendToken = 0;
       }
       const mongodbCreate = async () => {
@@ -187,8 +202,11 @@ export async function POST(req: Request) {
       };
       const redisCreateUpdate = async () => {
         try {
-          await client.setEx(`signUp:${email}`, 86400, JSON.stringify(data));
-          // await client.expire(`signUp:${email}`, 86400); //86400
+          await client.setEx(
+            emailKeyName + email,
+            emailExpire,
+            JSON.stringify(data)
+          );
         } catch (err) {
           const findEmail = await SignUpFirstStep.findById(email);
 
@@ -196,42 +214,37 @@ export async function POST(req: Request) {
           else await mongodbCreate();
         }
       };
-      if (
-        redisCache &&
-        isRedis &&
-        (tokenStatus == "create" || tokenStatus == "update")
-      ) {
+      if (emailCache && (tokenStatus == "create" || tokenStatus == "update")) {
         await redisCreateUpdate();
-      } else if (isRedis && tokenStatus == "delete") {
-        try {
-          await client.del(`signUp:${email}`);
-        } catch {}
-      } else if (!isRedis && tokenStatus == "create") {
+      } else if (!emailCache && tokenStatus == "create") {
         await mongodbCreate();
-      } else if (!isRedis && tokenStatus == "update") {
-        // delete data._id;
+      } else if (!emailCache && tokenStatus == "update") {
         await mongodbUpdate();
-      } else if (!isRedis && tokenStatus == "delete") {
+      } else if (tokenStatus == "delete") {
+        if (isRedis && emailCache) {
+          try {
+            await client.del(emailKeyName + email);
+          } catch {}
+        }
         await SignUpFirstStep.deleteOne({
           _id: email,
         });
       }
     };
-
     const finalTask = async (
       findUser: ISignUpFirstStep,
       method: TTokenStatus
     ) => {
       if (method === "update" && findUser.numOfSendToken == 4) {
         await manageToken(findUser, method);
-        return holdTime(new Date(Date.now() + 24 * 60 * 60 * 1000));
+        return holdTime(new Date(Date.now() + wait * 60 * 60 * 1000));
       }
       const { randomString, token } = newToken();
       await sendToken(randomString);
       findUser.token = token;
       await manageToken(findUser, method);
     };
-    if (findUser?._id) {
+    if (userToken) {
       let { reTry, token: clientToken, numOfSendToken } = findUser;
       holdTime(reTry);
 
@@ -303,16 +316,14 @@ export async function POST(req: Request) {
                 }
               );
 
-              clientInterested
-                .sort((a, b) => b.priority - a.priority)
-                .slice(0, interestedSearch);
+              clientInterested.sort((a, b) => b.priority - a.priority);
 
               const interested: ISearches[] = clientInterested.map(
                 ({ cached, priority, ...obj }) => obj as ISearches
               );
               const newSearches = [
-                ...userSearch.slice(0, searchesQty),
-                ...interested,
+                ...userSearch.slice(0, searchMax),
+                ...interested.slice(0, interestedMax),
               ];
               const userLocation = {
                 _id: new Date(),
@@ -326,54 +337,48 @@ export async function POST(req: Request) {
                 _id: findLastId.lastUserId,
                 fName,
                 lName,
-                email: storedToken.email,
-                bDate: Number(bDate),
-                bMonth: Number(bMonth),
                 bYear: Number(bYear),
                 gender,
                 searches: newSearches,
                 location: [userLocation],
-                nOfNOrder: 0,
                 cartPro: [],
               };
               const authentication: IAuthentication = {
                 ...authorizedUser,
+                email: storedToken.email,
+                bDate: Number(bDate),
+                bMonth: Number(bMonth),
                 password: hashedPassword,
                 role: ["User"],
                 tokens: {},
                 issues: {},
+                mobileNo: Number(mobileNo),
+                createdAt: new Date(),
               };
 
               const newData: IDBUser = {
                 ...authentication,
-                mobileNo: Number(mobileNo),
                 canceled: [],
                 delivered: [],
-                createdAt: new Date(),
               };
 
               const createData = await User.create(newData);
 
-              const jwtInfo: IJwtInfo = {
+              const jwtInfo: IAuthJwtInfo = {
                 _id: createData._id,
                 role: ["User"],
+                email,
+                mobileNo: Number(mobileNo),
               };
-              const jwtToken = Jwt.sign(jwtInfo, jwtSecretCode, {
-                expiresIn: jwtExpireTime,
-                algorithm: "HS256",
-              });
+              const jwtToken = Jwt.sign(jwtInfo, jwtSecretCode, authJWTOpt);
+
               cookie.set({
-                name: locationCookieName,
+                ...locationCookie,
                 value: JSON.stringify(userLocation),
               });
               cookie.set({
-                name: cookieName,
+                ...authCookie,
                 value: jwtToken,
-                expires: new Date(
-                  Date.now() + Number(cookieExpire) * 24 * 60 * 60 * 1000
-                ),
-                httpOnly: true,
-                path: "/", // all path
               });
               await manageToken(findUser, "delete");
 
@@ -381,11 +386,11 @@ export async function POST(req: Request) {
               newData.location = createData.location;
               newData.createdAt = createData.createdAt;
 
-              if (redisUserCache === "enable") {
+              if (cache) {
                 try {
                   await client.setEx(
-                    `user:${findLastId.lastUserId}`,
-                    redisUserExpire,
+                    keyName + findLastId.lastUserId,
+                    expire,
                     JSON.stringify(authentication)
                   );
                 } catch (err) {}
@@ -445,6 +450,7 @@ export async function POST(req: Request) {
       { _id: email, numOfSendToken: 1 } as ISignUpFirstStep,
       "create"
     );
+
     return response(
       {
         success: true,

@@ -2,19 +2,20 @@ import {
   IFetchRandom,
   IFetchRandomRes,
 } from "@/app/redux/UserApiRequestInterface";
-import { ISearchProduct } from "@/interfaces/productServerSide";
-import { TSearchesIdentity } from "@/interfaces/userClientSide";
-import config from "@/server/config/config";
+import { suggestedPro } from "@/exConfig";
+import { ISearchProduct } from "@/server/interfaces/product";
+import { TSearchesIdentity } from "@/app/interfaces/user";
 import dbConnect from "@/server/config/dbConnect";
 import client from "@/server/config/redisConnect";
-import Product from "@/server/models/productModels";
+import Product from "@/server/models/product";
 import { searchProduct } from "@/server/utils/productProjection";
 
 import { NextRequest } from "next/server";
-const { productPerReq, redisProductExpire, redisProductsCache } = config;
+
 export async function PUT(req: NextRequest) {
   try {
-    let caching = redisProductsCache === "enable";
+    let { suggestedCache, suggestedExpire, suggestedPerReq } = suggestedPro;
+
     let { page, searches } = (await req.json()) as IFetchRandom;
     page = Number(page);
     if (!Array.isArray(searches)) {
@@ -45,9 +46,9 @@ export async function PUT(req: NextRequest) {
       key?: string
     ) => {
       let valueData: Array<ISearchProduct> = [];
-      const skipIndex = (prePage - 1) * productPerReq;
+      const skipIndex = (prePage - 1) * suggestedPerReq;
       const redisKey = key ? `${identity}:${key}` : `random:product`;
-      if (caching) {
+      if (suggestedCache) {
         try {
           // valueData = (await client.lRange(
           //   redisKey,
@@ -55,7 +56,7 @@ export async function PUT(req: NextRequest) {
           //   skipIndex + productPerReq - 1
           // )) as any;
         } catch (err) {
-          caching = false;
+          suggestedCache = false;
         }
       }
       let dataQty = valueData.length;
@@ -73,18 +74,18 @@ export async function PUT(req: NextRequest) {
         )
           .sort({ [key ? "sold" : "popular"]: -1, _id: 1 })
           .skip(skipIndex)
-          .limit(productPerReq)
+          .limit(suggestedPerReq)
           .exec();
         dataQty = valueData.length;
 
-        if (dataQty > 0 && caching) {
+        if (dataQty > 0 && suggestedCache) {
           try {
             if (prePage === 1) {
               await client.lPush(
                 redisKey,
                 valueData.map((obj) => JSON.stringify(obj))
               );
-              await client.expire(redisKey, redisProductExpire);
+              await client.expire(redisKey, suggestedExpire);
             } else {
               await client.rPushX(
                 redisKey,
@@ -104,15 +105,15 @@ export async function PUT(req: NextRequest) {
         }
       }
 
-      return dataQty === productPerReq ? prePage + 1 : null;
+      return dataQty === suggestedPerReq ? prePage + 1 : null;
     };
 
     let loop = 0;
-    while (loop < productPerReq) {
+    while (loop < suggestedPerReq) {
       const { cached = [], key, identity } = cachedSearches[loop] || {};
       const prePage = cached.find((obj) => obj.sorted === "Popular")?.page;
 
-      if (!key || data.length >= productPerReq) break;
+      if (!key || data.length >= suggestedPerReq) break;
 
       if (prePage) {
         const nextPage = await findData(prePage, identity, key);
@@ -132,7 +133,7 @@ export async function PUT(req: NextRequest) {
       loop++;
     }
 
-    if (page && data.length < productPerReq) {
+    if (page && data.length < suggestedPerReq) {
       page = await findData(page, "name");
     }
 

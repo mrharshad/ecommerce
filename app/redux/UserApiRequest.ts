@@ -2,11 +2,13 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   IDeleteSearch,
   IDeleteSearchRes,
+  IFetchCartProductsRes,
   IFetchKeyProduct,
   IFetchKeyProductRes,
   IFetchRandom,
   IFetchRandomRes,
   IGetDistricts,
+  IGetUserContactsRes,
   ISetNewSearches,
   ISetNewSearchesRes,
   ISuggestionsGetRes,
@@ -80,6 +82,16 @@ export const deleteSearch = createAsyncThunk(
         "Content-Type": "application/json",
       },
     });
+    return await request.json();
+  }
+);
+
+export const getUserContacts = createAsyncThunk(
+  "getUserContacts",
+  async (token: string): Promise<IGetUserContactsRes> => {
+    const request = await fetch(
+      `/api/admin/user/data/source-of-contact?token=${token}`
+    );
     return await request.json();
   }
 );

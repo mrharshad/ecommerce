@@ -1,12 +1,15 @@
-import { IServerResponse } from "@/interfaces/clientAndServer";
+import { INewOrder } from "@/server/interfaces/newOrder";
 import {
   IAlert,
+  ICartPro as ICartClient,
   ISearches,
   ISuggestion,
   TSearchesIdentity,
   TSearchSort,
-} from "../../interfaces/userClientSide";
-import { ISearchProduct } from "@/interfaces/productServerSide";
+} from "../interfaces/user";
+import { ISearchProduct } from "@/server/interfaces/product";
+import { ICartPro as ICartServer } from "@/server/interfaces/user";
+import { IServerResponse } from "@/server/utils/serverMethods";
 
 export interface IGetDistricts {
   success: boolean;
@@ -61,4 +64,40 @@ export interface IDeleteSearch {
 
 export interface IDeleteSearchRes extends IServerResponse {
   removedSearch: ISearches;
+}
+
+export interface IFetchCartProductsRes extends IServerResponse {
+  data: Array<ICartClient>;
+  deletedCartPros: Array<ICartServer>;
+}
+
+export interface IRemoveCartsReq {
+  token: string;
+  cartsInfo: Array<ICartServer>;
+}
+
+export interface IRemoveCartsRes extends IServerResponse {}
+export interface IGetUserContactsRes extends Omit<IServerResponse, "data"> {
+  data?: { email: string; mobileNo: number };
+}
+
+export interface INewOrderReq {
+  token: string | null;
+  fullName: string;
+  address: string;
+  area: string;
+  pinCode: number;
+  district: string;
+  state: string;
+  openBox: boolean;
+  oneTime: boolean;
+  cartPro: Array<ICartClient>;
+  searches: Array<ISearches>;
+}
+
+export type TNewOrderDoc = INewOrder | Array<INewOrder>;
+export interface INewOrderRes extends Omit<IServerResponse, "data"> {
+  newClientCartPro: Array<ICartClient>;
+  newClientSearches: Array<ISearches>;
+  newOrderDoc: TNewOrderDoc;
 }

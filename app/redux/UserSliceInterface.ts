@@ -1,11 +1,18 @@
-import { IAuthorizedUser, TDataKeyChange } from "@/interfaces/userServerSide";
+import {
+  IAuthorizedUser,
+  ICartPro as ICartProServer,
+  TDataKeyChange,
+} from "@/server/interfaces/user";
 import {
   IActive,
   IFindSuggestion,
   ISearches,
+  TAlert,
   TMainKeys,
   TPending,
-} from "../../interfaces/userClientSide";
+} from "../interfaces/user";
+import { ICartIdentity } from "../admin/user/cart-products/interfaces";
+import { IServerResponse } from "@/server/utils/serverMethods";
 
 export interface IMainKeyData {
   name: string;
@@ -64,4 +71,15 @@ export type TNewAutoSearchIdentity = "category" | "tOfP";
 export interface INewAutoSearch {
   key: string;
   identity: TNewAutoSearchIdentity;
+}
+
+export interface ICartQtyChange {
+  newQty: number;
+  newDiscount: number;
+  cartIdentity: ICartIdentity;
+}
+
+export interface IRemoveCart {
+  response: IServerResponse;
+  cartInfo: ICartProServer;
 }

@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import proManager from "./ProManagerSlice";
 import user from "./UserSlice";
-import { IReduxUser } from "../../interfaces/userClientSide";
-import { IReduxProManager } from "../../interfaces/proManagerClientSide";
+import { IReduxUser } from "../interfaces/user";
+import { IReduxProManager } from "../interfaces/proManager";
 
 export interface IReduxStoreData {
   user: IReduxUser;

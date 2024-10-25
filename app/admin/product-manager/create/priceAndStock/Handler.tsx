@@ -17,7 +17,7 @@ import {
 } from "@/app/redux/ProManagerSlice";
 
 import OptionInfo from "./OptionInfo";
-import { IAlert, IReduxUser } from "@/interfaces/userClientSide";
+import { IAlert, IReduxUser } from "@/app/interfaces/user";
 import { ISelectedVariant, IStocks, TData } from "./interface";
 import { createProduct } from "../apiRequest";
 

@@ -18,11 +18,10 @@
   display: flex;
 }
 .sos span {
-  font-size: large;
+  font-size: 20px;
 }
 .sos p {
   color: black;
-  font-size: 15px;
   margin-top: auto;
   margin-bottom: auto;
 }
@@ -40,11 +39,17 @@
 @media screen and (max-width: 480px) {
   .sos {
     margin-right: auto;
-    border-radius: 5px;
     padding-top: 2px;
     width: 98%;
+    border-radius: 10px;
   }
   .sos div {
     width: 100%;
+  }
+  .sos span {
+    font-size: 18px;
+  }
+  .sos p {
+    font-size: 14px;
   }
 }

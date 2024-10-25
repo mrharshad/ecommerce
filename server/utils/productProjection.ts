@@ -1,4 +1,4 @@
-import { ISearchProduct, ISingleProduct } from "@/interfaces/productServerSide";
+import { ISearchProduct, ISingleProduct } from "@/server/interfaces/product";
 
 export const searchProduct: Record<keyof ISearchProduct, 1> = Object.freeze({
   _id: 1,

@@ -72,12 +72,6 @@
   position: relative;
   display: block;
 }
-.orders p {
-  right: 15%;
-  top: 10%;
-  font-size: large;
-  position: absolute;
-}
 
 .orders svg {
   width: 35px;
@@ -204,7 +198,6 @@
   border-radius: 5px;
   display: flex;
   background-color: white;
-  font-size: medium;
   align-items: center;
 }
 
@@ -226,7 +219,6 @@
   white-space: nowrap;
   width: 100%;
   color: black;
-  font-size: 14px;
 }
 
 .cart {
@@ -294,7 +286,12 @@
   margin-left: auto;
   cursor: pointer;
 }
+
 @media only screen and (min-width: 480px) {
+  .sortBy > span {
+    font-size: 15px;
+  }
+
   .sortBy > span:hover {
     background-color: #3598d32b;
   }
@@ -435,6 +432,7 @@
     padding: 2px 5px;
     margin-top: 2px;
     width: 100%;
+    font-size: 14px;
   }
   .searchKeys .deleteSvg {
     margin-right: 0px;

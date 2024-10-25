@@ -1,6 +1,6 @@
-import { IServerResponse } from "@/interfaces/clientAndServer";
-import { IImages, ISingleProduct } from "@/interfaces/productServerSide";
-import { ICartPro } from "@/interfaces/userServerSide";
+import { IImages, ISingleProduct } from "@/server/interfaces/product";
+import { ICartPro } from "@/server/interfaces/user";
+import { IServerResponse } from "@/server/utils/serverMethods";
 
 export interface IProps {
   params: Record<string, string>;

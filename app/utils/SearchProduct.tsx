@@ -1,4 +1,4 @@
-import { ISearchProduct } from "@/interfaces/productServerSide";
+import { ISearchProduct } from "@/server/interfaces/product";
 import style from "./searchProduct.module.css";
 import Link from "next/link";
 import React, { FC, memo } from "react";
@@ -30,13 +30,7 @@ const SearchProduct: FC<{ data: ISearchProduct }> = ({ data }) => {
 
       <p className={style.name}>{name}</p>
       <div className={style.imgCover}>
-        <Image
-          className={style.img}
-          src={thumbnail}
-          height={20}
-          width={200}
-          alt="product image"
-        />
+        <Image src={thumbnail} height={400} width={400} alt="product image" />
       </div>
 
       <div className={style.priceDiv}>

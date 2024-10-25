@@ -1,5 +1,5 @@
 "use client";
-import React, { FC, useCallback, useEffect, useMemo } from "react";
+import React, { FC, useEffect, useMemo } from "react";
 import { ICartRequest, ICartResponse, IHandlerProps } from "./interface";
 
 import { AppDispatch, IReduxStoreData } from "../redux/ReduxStore";
@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import style from "./handler.module.css";
 
 import SearchProduct from "../utils/SearchProduct";
-import { ISearchProduct } from "@/interfaces/productServerSide";
+import { ISearchProduct } from "@/server/interfaces/product";
 import { useRouter } from "next/navigation";
 import {
   dataKeyChange,
@@ -16,7 +16,7 @@ import {
   visitedProductPage,
 } from "../redux/UserSlice";
 import { IMainKeyChange } from "../redux/UserSliceInterface";
-import { newPasswordToken } from "@/server/config/config";
+
 const Handler: FC<IHandlerProps> = ({
   productId,
   categoryName,
@@ -75,7 +75,13 @@ const Handler: FC<IHandlerProps> = ({
 
     if (success) {
       keys.push({ name: "numOfCart", value: newCart.length });
-      dispatch(dataKeyChange([{ name: "cartPro", value: newCart }]));
+      const newCartData = newCart.map((obj) => {
+        const added = obj.added;
+        const findData = cartPro.find((cart) => cart.added === added);
+        if (findData) return findData;
+        else return obj;
+      });
+      dispatch(dataKeyChange([{ name: "cartPro", value: newCartData }]));
     }
     dispatch(mainKeyChange(keys));
   };

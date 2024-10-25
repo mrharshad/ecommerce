@@ -4,7 +4,7 @@ import {
   IMainKeyChange,
   IReduxProManager,
   TPending,
-} from "../../interfaces/proManagerClientSide";
+} from "../interfaces/proManager";
 import {
   appMountFuc,
   deleteDraftFunc,
@@ -23,7 +23,7 @@ import {
   pendingCreateProduct,
   rejectedCategoryFetching,
 } from "../admin/product-manager/create/apiRequest";
-import { IAlert } from "@/interfaces/userClientSide";
+import { IAlert } from "@/app/interfaces/user";
 
 const initialState = {} as IReduxProManager;
 const ProManageSlice = createSlice({

@@ -21,8 +21,8 @@
 .name {
   color: grey;
   font-weight: 600;
-  font-size: 13px;
-  height: 14%;
+  font-size: 14px;
+  height: 15%;
   overflow: hidden;
 }
 
@@ -31,7 +31,7 @@
   height: 35%;
 }
 
-.img {
+.imgCover img {
   margin: auto;
   width: fit-content;
   height: fit-content;
@@ -116,13 +116,27 @@
   overflow: hidden;
   margin-left: auto;
 }
+
 .container:hover {
   scale: 1.01;
+}
+
+@media screen and (min-width: 480px) {
+  .imgCover:hover {
+    min-width: 50%;
+    min-height: 60%;
+    position: absolute;
+    width: 98%;
+    height: 98%;
+    z-index: 1;
+    top: 5px;
+    right: 5px;
+    background-color: white;
+  }
 }
 @media screen and (max-width: 480px) {
   .name {
     grid-column: 1/-1;
-    font-size: 13px;
     height: 100%;
     overflow-x: hidden;
   }

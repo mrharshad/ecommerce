@@ -1,7 +1,7 @@
-import { IReduxUserData } from "@/interfaces/userClientSide";
+import { IReduxUserData } from "@/app/interfaces/user";
 import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
-import { ISearches as ISearchesClientSide } from "@/interfaces/userClientSide";
-import { ITokens } from "@/interfaces/userServerSide";
+import { ISearches as ISearchesClientSide } from "@/app/interfaces/user";
+
 export interface ILoginInfo {
   holdOnVerification?: Date;
   reTryForgot?: Date;
@@ -15,7 +15,7 @@ export interface ILoginResponse {
   token: string;
 }
 
-import IDBUser from "@/interfaces/userServerSide";
+import IDBUser, { ITokens } from "@/server/interfaces/user";
 
 export interface ISendResponse {
   success: boolean;

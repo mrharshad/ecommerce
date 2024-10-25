@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "ESNext", // maine add kiya
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,

@@ -1,22 +1,25 @@
 "use client";
-import { FormEvent, useActionState, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import style from "./login.module.css";
 import Link from "next/link";
 import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ILoginInfo, ILoginResponse } from "./interface";
 
-import { IAlert } from "@/interfaces/userClientSide";
+import { IAlert } from "@/app/interfaces/user";
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
+import { previousPathLocal } from "@/exConfig";
 
 const Login = () => {
-  const { alerts, searches } = useSelector(
+  const { alerts, searches, token } = useSelector(
     (data: IReduxStoreData) => data.user
   );
+
   const dispatch = useDispatch();
   const router = useRouter();
+  const previousPath = useRef(localStorage.getItem(previousPathLocal));
   const passwordInput = useRef<HTMLInputElement | null>(null);
   const emailInput = useRef<HTMLInputElement | null>(null);
   const manageAlert = (info: IAlert, loading?: boolean) =>
@@ -25,6 +28,7 @@ const Login = () => {
   const forgotRes = (info: IAlert) => {
     dispatch(newAlert({ info, completed: "Login" }));
   };
+
   const isPending = (time: Date): boolean => {
     let milliseconds = new Date().getTime() - new Date(time).getTime();
     const minutes = Math.floor(milliseconds / (1000 * 60));
@@ -64,15 +68,17 @@ const Login = () => {
         "Content-Type": "application/json",
       },
     });
+
     const resInfo = await user.json();
     const { success, text, resHoldOnVerification, data, token } =
       resInfo as ILoginResponse;
     if (success) {
       localStorage.removeItem(storeName);
       dispatch(authenticated({ text, data, token, completed: "Login" }));
-      setTimeout(() => {
+
+      if (previousPath.current === "/product") {
         router.back();
-      }, 2000);
+      } else router.replace("/");
     } else {
       if (resHoldOnVerification) {
         const newInfo = {
@@ -107,7 +113,7 @@ const Login = () => {
       },
     });
     const { success, text, resReTryForget } = await user.json();
-    console.log("success, text, resReTryForget", success, text, resReTryForget);
+
     if (resReTryForget) {
       const newInfo = { holdOnVerification, reTryForgot: resReTryForget };
       localStorage.setItem(storeName, JSON.stringify(newInfo));
@@ -121,6 +127,7 @@ const Login = () => {
     }
   };
   useEffect(() => {
+    if (token) router.replace("/");
     let data = localStorage.getItem(storeName);
     if (data) setLoginInfo(JSON.parse(data));
   }, []);

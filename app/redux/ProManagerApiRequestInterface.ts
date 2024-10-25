@@ -1,4 +1,4 @@
-import { ISingleProduct } from "@/interfaces/productServerSide";
+import { ISingleProduct } from "@/server/interfaces/product";
 
 export interface ISearchProduct {
   key: string;

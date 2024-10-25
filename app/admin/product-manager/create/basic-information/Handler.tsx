@@ -28,7 +28,7 @@ import {
   newAlert,
   newProUpdate,
 } from "@/app/redux/ProManagerSlice";
-import { IAlert } from "@/interfaces/userClientSide";
+import { IAlert } from "@/app/interfaces/user";
 const BasicInformation: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const showAlert = (obj: IAlert) => {

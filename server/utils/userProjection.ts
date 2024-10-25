@@ -1,35 +1,5 @@
-import { IAuthentication, IAuthorizedUser } from "@/interfaces/userServerSide";
+import { IUnAuthentication } from "@/server/interfaces/user";
 
-export const authentication: Record<keyof IAuthentication, 1> = Object.freeze({
-  _id: 1,
-  email: 1,
-  fName: 1,
-  lName: 1,
-  gender: 1,
-  password: 1,
-  location: 1,
-  bDate: 1,
-  bMonth: 1,
-  bYear: 1,
-  cartPro: 1,
-  nOfNOrder: 1,
-  searches: 1,
-  tokens: 1,
-  role: 1,
-  issues: 1,
-});
-
-export const authorizedUser: Record<keyof IAuthorizedUser, 1> = Object.freeze({
-  _id: 1,
-  email: 1,
-  fName: 1,
-  lName: 1,
-  gender: 1,
-  location: 1,
-  bDate: 1,
-  bMonth: 1,
-  bYear: 1,
-  cartPro: 1,
-  nOfNOrder: 1,
-  searches: 1,
-});
+export const authentication: Record<keyof IUnAuthentication, 0> = Object.freeze(
+  { delivered: 0, canceled: 0 }
+);

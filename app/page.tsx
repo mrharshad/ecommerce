@@ -13,10 +13,10 @@ import { useRouter } from "next/navigation";
 import SearchProduct from "./utils/SearchProduct";
 
 import Observer from "./Observer";
-import { ISearches } from "@/interfaces/userClientSide";
+import { ISearches } from "@/app/interfaces/user";
 import { IMainKeyChange } from "./redux/UserSliceInterface";
-import { ISearchProduct } from "@/interfaces/productServerSide";
-import SearchProductSkeletons from "./skeletons/SearchProductSkeletons";
+import { ISearchProduct } from "@/server/interfaces/product";
+import SearchProductSkeletons from "./utils/SearchProductSkeletons";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();

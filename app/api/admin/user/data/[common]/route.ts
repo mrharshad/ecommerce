@@ -1,22 +1,20 @@
 import dbConnect from "@/server/config/dbConnect";
-import User from "@/server/models/userModels";
+import User from "@/server/models/user";
 import { verify } from "jsonwebtoken";
 import client from "@/server/config/redisConnect";
-import errors from "@/server/utils/errorHandler";
+import errors, { ICustomError } from "@/server/utils/errorHandler";
 
 import config from "@/server/config/config";
+import { user } from "@/exConfig";
+import { IAuthentication, IAuthorizedUser } from "@/server/interfaces/user";
 
-import {
-  IAuthentication,
-  IAuthorizedUser,
-  IJwtTokenValue,
-} from "@/interfaces/userServerSide";
-import { ICustomError } from "@/interfaces/clientAndServer";
 import { NextRequest } from "next/server";
 import { authentication } from "@/server/utils/userProjection";
 import { IFetch } from "@/app/layout";
 import { cookies } from "next/headers";
-const { redisUserCache, redisUserExpire, cookieName } = config;
+import { authCookie } from "@/server/utils/tokens";
+import { IAuthJwtInfo } from "@/server/interfaces/tokens";
+
 interface IContext {
   params: {
     common: string;
@@ -28,12 +26,13 @@ export async function GET(req: NextRequest, context: IContext) {
     const { _id } = verify(
       context.params.common,
       config.jwtSecretCode
-    ) as IJwtTokenValue;
+    ) as IAuthJwtInfo;
+    const { cache, expire, keyName } = user;
     let data: null | IAuthentication = null;
-    let redisCache: null | boolean = redisUserCache == "enable";
+    let redisCache: null | boolean = cache;
     try {
       if (redisCache) {
-        const redisData = await client.get(`user:${_id}`);
+        const redisData = await client.get(keyName + _id);
         if (redisData) {
           data = JSON.parse(redisData) as any;
           redisCache = null;
@@ -44,53 +43,33 @@ export async function GET(req: NextRequest, context: IContext) {
     }
     if (redisCache !== null) {
       dbConnect();
-      data = (await User.findById(_id, authentication).select(
-        "+password"
-      )) as IAuthentication;
+      data = (await User.findById(_id, authentication)) as IAuthentication;
     }
 
-    let {
-      bDate,
-      bMonth,
-      bYear,
-      cartPro,
-      email,
-      fName,
-      gender,
-      lName,
-      location,
-      nOfNOrder,
-      searches,
-    } = (data || {}) as IAuthentication;
+    let { bYear, cartPro, fName, gender, lName, location, searches } = (data ||
+      {}) as IAuthentication;
 
     if (!fName) {
-      cookies().delete(cookieName);
+      cookies().delete(authCookie.name);
       throw new Error("token is invalid");
     }
     const sendData: IAuthorizedUser = {
       _id,
-      bDate,
-      bMonth,
       bYear,
       cartPro,
-      email,
       fName,
-      gender,
       lName,
       location,
-      nOfNOrder,
       searches,
+      gender,
     };
 
     if (redisCache) {
       try {
-        await client.setEx(
-          `user:${_id}`,
-          redisUserExpire,
-          JSON.stringify(data)
-        );
+        await client.setEx(keyName + _id, expire, JSON.stringify(data));
       } catch (err) {}
     }
+
     return new Response(
       JSON.stringify({
         success: true,

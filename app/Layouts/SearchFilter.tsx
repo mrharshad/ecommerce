@@ -1,6 +1,6 @@
 import React, { FC, memo } from "react";
 import style from "./Header.module.css";
-import { TSearchSort } from "@/interfaces/userClientSide";
+import { TSearchSort } from "@/app/interfaces/user";
 
 interface IProps {
   keyName: boolean;

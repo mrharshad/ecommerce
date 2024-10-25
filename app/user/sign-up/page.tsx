@@ -1,16 +1,15 @@
 import React, { FC, Fragment } from "react";
-import SignUpComponent from "./signUp";
+import SignUpComponent from "./SignUp";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import config from "@/server/config/config";
+import { authCookie } from "@/server/utils/tokens";
 
 export const metadata = {
   title: "Sing Up",
 };
-const signUp: FC = () => {
-  const { cookieName } = config;
+const SignUp: FC = () => {
   const cookieStore = cookies();
-  const loggedIn = cookieStore.get(cookieName)?.value;
+  const loggedIn = cookieStore.get(authCookie.name)?.value;
   if (loggedIn) {
     redirect("/");
   }
@@ -22,4 +21,4 @@ const signUp: FC = () => {
   );
 };
 
-export default signUp;
+export default SignUp;

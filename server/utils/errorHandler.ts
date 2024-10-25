@@ -1,4 +1,11 @@
-import { ICustomError } from "@/interfaces/clientAndServer";
+export interface ICustomError extends Error {
+  name: string;
+  code: number;
+  path: string;
+  type: string;
+}
+
+export type TSpecialMessages = "Try again after some time";
 
 const errors = (err: ICustomError) => {
   err.message = err.message || "internal server error";

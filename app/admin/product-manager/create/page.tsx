@@ -1,19 +1,19 @@
 import React from "react";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import config from "@/server/config/config";
 
 import Handler from "./Handler";
+import { authCookie } from "@/server/utils/tokens";
 
 export const generateMetadata = () => {
   return {
     title: "Create Product",
   };
 };
-const { cookieName } = config;
+
 const NewProduct = () => {
   const cookieStore = cookies();
-  const value = cookieStore.get(cookieName)?.value;
+  const value = cookieStore.get(authCookie.name)?.value;
   if (!value) {
     notFound();
   }

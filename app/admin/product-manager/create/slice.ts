@@ -7,7 +7,7 @@ import {
   IUpdateSingleVariant,
 } from "./interface";
 
-import { IListOfLocation } from "@/interfaces/proManagerClientSide";
+import { IListOfLocation } from "@/app/interfaces/proManager";
 import categories from "@/static-data/categories";
 export const newProDoc = {
   name: "",

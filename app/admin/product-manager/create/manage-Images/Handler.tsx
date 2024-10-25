@@ -1,4 +1,4 @@
-import { IAlert } from "@/interfaces/userClientSide";
+import { IAlert } from "@/app/interfaces/user";
 import {
   mainKeyChange,
   newAlert,

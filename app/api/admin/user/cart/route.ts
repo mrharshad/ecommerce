@@ -1,61 +1,49 @@
-import {
-  ISetNewSearches,
-  ISetNewSearchesRes,
-} from "@/app/redux/UserApiRequestInterface";
 import dbConnect from "@/server/config/dbConnect";
 import { verify } from "jsonwebtoken";
 import { NextRequest } from "next/server";
 import config from "@/server/config/config";
-import IDBUser, {
-  IAuthentication,
-  ICartPro,
-  IJwtTokenValue,
-  ISearches,
-  TSearchesIdentity,
-} from "@/interfaces/userServerSide";
-import errors from "@/server/utils/errorHandler";
-import User from "@/server/models/userModels";
+import { IAuthentication, ICartPro } from "@/server/interfaces/user";
+import errors, { ICustomError } from "@/server/utils/errorHandler";
+import User from "@/server/models/user";
 import client from "@/server/config/redisConnect";
 import { cookies } from "next/headers";
-import { ICustomError } from "@/interfaces/clientAndServer";
+
 import { ICartRequest, ICartResponse } from "@/app/product/interface";
 import { authentication } from "@/server/utils/userProjection";
+import { user } from "@/exConfig";
+import { authCookie } from "@/server/utils/tokens";
+import { IAuthJwtInfo } from "@/server/interfaces/tokens";
 export async function PATCH(req: NextRequest) {
   try {
     const cookie = cookies();
-    const {
-      jwtSecretCode,
-      interestedSearch,
-      searchesQty,
-      redisUserCache,
-      redisUserExpire,
-      cookieName,
-    } = config;
-    let cache: null | boolean = redisUserCache === "enable";
+    const cookieName = authCookie.name;
+    const { cache, expire, keyName } = user;
+    const { jwtSecretCode } = config;
+    let caching: null | boolean = cache;
     let { token, optionId, productId, variantId }: ICartRequest =
       await req.json();
     if (!token || !optionId || !productId || !variantId) {
       throw new Error("Invalid Information");
     }
-    const info = verify(token, jwtSecretCode) as IJwtTokenValue;
+    const info = verify(token, jwtSecretCode) as IAuthJwtInfo;
     dbConnect();
     const _id = info._id;
     let data = {} as IAuthentication;
     try {
-      if (cache) {
-        const redisData = await client.get(`user:${_id}`);
+      if (caching) {
+        const redisData = await client.get(keyName + _id);
         if (redisData) {
           data = JSON.parse(redisData as any);
         }
       }
     } catch (err) {
-      cache = false;
+      caching = false;
     }
 
     if (!data?._id) {
       data = (await User.findById(_id, authentication)) as IAuthentication;
     } else {
-      cache = null;
+      caching = null;
     }
     const { cartPro } = data || {};
     if (!cartPro) {
@@ -90,14 +78,10 @@ export async function PATCH(req: NextRequest) {
       }
     );
     if (update.acknowledged && update.modifiedCount === 1) {
-      if (cache !== false) {
+      if (caching !== false) {
         try {
           data.cartPro = newCartPro;
-          await client.setEx(
-            `user:${_id}`,
-            redisUserExpire,
-            JSON.stringify(data)
-          );
+          await client.setEx(keyName + _id, expire, JSON.stringify(data));
         } catch (err) {
           cookies().delete(cookieName);
           throw new Error("token is invalid");

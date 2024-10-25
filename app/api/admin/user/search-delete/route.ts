@@ -6,27 +6,21 @@ import dbConnect from "@/server/config/dbConnect";
 import { verify } from "jsonwebtoken";
 import { NextRequest } from "next/server";
 import config from "@/server/config/config";
-import IDBUser, {
-  IJwtTokenValue,
-  ISearches,
-} from "@/interfaces/userServerSide";
-import errors from "@/server/utils/errorHandler";
-import User from "@/server/models/userModels";
+import IDBUser, { ISearches } from "@/server/interfaces/user";
+import errors, { ICustomError } from "@/server/utils/errorHandler";
+import User from "@/server/models/user";
 import client from "@/server/config/redisConnect";
 import { cookies } from "next/headers";
-import { ICustomError } from "@/interfaces/clientAndServer";
-import { ISearches as IClientSearches } from "@/interfaces/userClientSide";
+
+import { ISearches as IClientSearches } from "@/app/interfaces/user";
+import { user, searches as searchesConfig } from "@/exConfig";
+import { authCookie } from "@/server/utils/tokens";
+import { IAuthJwtInfo } from "@/server/interfaces/tokens";
 export async function DELETE(req: NextRequest) {
   try {
-    const {
-      jwtSecretCode,
-      interestedSearch,
-      searchesQty,
-      redisUserCache,
-      redisUserExpire,
-      cookieName,
-    } = config;
-    let cache = redisUserCache === "enable";
+    const { jwtSecretCode } = config;
+    const { cache, expire, keyName } = user;
+    const { interestedMax, searchMax } = searchesConfig;
     let { token, searches, key }: IDeleteSearch = (await req.json()) || {};
     const removedSearch = searches.find(
       (obj) => obj.key === key
@@ -45,7 +39,7 @@ export async function DELETE(req: NextRequest) {
       );
     };
     try {
-      const info = verify(token, jwtSecretCode) as IJwtTokenValue;
+      const info = verify(token, jwtSecretCode) as IAuthJwtInfo;
       dbConnect();
       const _id = info._id;
       if (!Array.isArray(searches)) {
@@ -65,9 +59,9 @@ export async function DELETE(req: NextRequest) {
 
       interested
         .sort((a, b) => b.priority - a.priority)
-        .slice(0, interestedSearch);
+        .slice(0, interestedMax);
       let newSearches = [
-        ...userSearch.slice(0, searchesQty),
+        ...userSearch.slice(0, searchMax),
         ...interested.map(({ byUser, key, identity }) => {
           return { byUser, key, identity };
         }),
@@ -85,18 +79,14 @@ export async function DELETE(req: NextRequest) {
       if (update.acknowledged && update.modifiedCount === 1) {
         if (cache) {
           try {
-            let result = await client.get(`user:${_id}`);
+            let result = await client.get(keyName + _id);
             if (result) {
               const data = JSON.parse(result) as IDBUser;
               data.searches = newSearches as Array<ISearches>;
               try {
-                await client.setEx(
-                  `user:${_id}`,
-                  redisUserExpire,
-                  JSON.stringify(data)
-                );
+                await client.setEx(keyName + _id, expire, JSON.stringify(data));
               } catch (err) {
-                cookies().delete(cookieName);
+                cookies().delete(authCookie.name);
                 throw new Error("token is expired");
               }
             }

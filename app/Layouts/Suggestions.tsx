@@ -6,7 +6,7 @@ import {
   ISuggestion,
   IToggleSuggestion,
   TSearchesIdentity,
-} from "@/interfaces/userClientSide";
+} from "@/app/interfaces/user";
 
 interface INewSuggestions extends ISuggestion {
   byUser?: boolean;
@@ -18,7 +18,7 @@ interface IProps {
   suggestions: Array<INewSuggestions>;
   searches: Array<ISearches>;
 }
-import { suggestionLimit } from "@/clientConfig";
+import { suggestions as suggestionsConfig } from "@/exConfig";
 const Suggestions: FC<IProps> = ({
   toggleSuggestion,
   suggestions,
@@ -36,7 +36,7 @@ const Suggestions: FC<IProps> = ({
   return (
     <div style={{ maxHeight: toggleSuggestion }} className={style.searchKeys}>
       {data
-        .slice(0, suggestionLimit)
+        .slice(0, suggestionsConfig.showClient)
         .map(({ key, byUser, identity }, index) => (
           <div key={index}>
             <svg>
