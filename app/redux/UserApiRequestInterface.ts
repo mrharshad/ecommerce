@@ -1,4 +1,4 @@
-import { INewOrder } from "@/server/interfaces/newOrder";
+import { email } from "./../../exConfig";
 import {
   IAlert,
   ICartPro as ICartClient,
@@ -91,13 +91,13 @@ export interface INewOrderReq {
   state: string;
   openBox: boolean;
   oneTime: boolean;
+  email: string;
+  mobileNo: number;
   cartPro: Array<ICartClient>;
   searches: Array<ISearches>;
 }
 
-export type TNewOrderDoc = INewOrder | Array<INewOrder>;
 export interface INewOrderRes extends Omit<IServerResponse, "data"> {
   newClientCartPro: Array<ICartClient>;
   newClientSearches: Array<ISearches>;
-  newOrderDoc: TNewOrderDoc;
 }

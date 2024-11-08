@@ -166,7 +166,7 @@ const Cart: FC<ICartProps> = ({ data, minMaxDay, qtyChange, deleteCart }) => {
           {quantity > 1 && (
             <p className={style.total}>
               <span>Total</span>: ₹
-              {(currentPrice * quantity).toLocaleString("en-IN")}
+              {Math.round(currentPrice * quantity).toLocaleString("en-IN")}
             </p>
           )}
           {variantKey && (

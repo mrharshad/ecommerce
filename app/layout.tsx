@@ -3,20 +3,19 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "./redux/store-provider";
 import Header from "./Layouts/Header";
-import config from "@/server/config/config";
 import { cookies } from "next/headers";
 
 import Footer from "./Layouts/Footer";
 
-import { IAuthorizedUser } from "@/server/interfaces/user";
 import { authCookie } from "@/server/utils/tokens";
 import { backEndServer, frontEndServer } from "@/exConfig";
+import { IClientSideShared } from "@/server/interfaces/user";
 
 const inter = Inter({ subsets: ["latin"] });
 export interface IFetch {
   success: boolean;
   text: string;
-  data: IAuthorizedUser;
+  data: IClientSideShared;
 }
 
 const { hostname, protocol, tLD } = backEndServer;
@@ -32,7 +31,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = cookies();
   let value = cookieStore.get(authCookie.name)?.value;
-  let userData = {} as IAuthorizedUser;
+  let userData = {} as IClientSideShared;
   if (value) {
     const req = await fetch(
       `${protocol}${hostname}${tLD}/api/admin/user/data/${value}
@@ -48,6 +47,7 @@ export default async function RootLayout({
     const { success, text, data }: IFetch = await req.json();
     if (success) userData = data;
   }
+  console.log("userData", userData.fName);
   return (
     <html lang="en">
       <body className={inter.className}>

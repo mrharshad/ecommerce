@@ -22,7 +22,7 @@ const Buy = () => {
   const [openBox, setOpenBox] = useState(true);
   const [isPayOnD, setIsPayOnD] = useState<boolean | null>(null);
 
-  const { token, data, loadings, numOfCart, searches } = useSelector(
+  const { token, data, loadings, numOfCart, searches, device } = useSelector(
     (data: IReduxStoreData) => data.user
   );
 
@@ -69,7 +69,7 @@ const Buy = () => {
           const totalMrp = mrp * quantity;
           totalItems += quantity;
           finalMrp += totalMrp;
-          amount += totalMrp - totalMrp * (discount / 100);
+          amount += Math.round(totalMrp - totalMrp * (discount / 100));
         }
       }
     }
@@ -106,9 +106,15 @@ const Buy = () => {
     if (!email && token) {
       dispatch(getUserContacts(token));
     }
-    if (!isLoading && !totalItems) router.replace("/admin/user/cart-products");
+    if (!isLoading && !totalItems) router.replace("/admin/user/cart");
+    const styleElement = document.getElementById("mainContent")?.style;
+    if (device === "Mobile" && styleElement) {
+      styleElement.paddingBottom = "0px";
+    }
     return () => {
       if (elementsId.length) changeStyle(10, elementsId);
+
+      if (styleElement) styleElement.paddingBottom = "100px";
     };
   }, [elementsId]);
   const createOrder = async () => {
@@ -129,6 +135,8 @@ const Buy = () => {
           oneTime,
           cartPro,
           fullName: `${fName} ${lName}`,
+          email,
+          mobileNo,
           searches,
         } as INewOrderReq),
         headers: {
@@ -143,7 +151,7 @@ const Buy = () => {
   };
 
   return !totalItems ? (
-    <div>ffdf</div>
+    <div className={style.noStock}>Out Of Stocks</div>
   ) : (
     <div className={style.mainDiv}>
       <p>Delivery Information</p>

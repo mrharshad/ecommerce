@@ -1,8 +1,11 @@
 "use client";
+import { IReduxStoreData } from "@/app/redux/ReduxStore";
 import Link from "next/link";
 import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
 
 const PageClient = () => {
+  const { numOfCart } = useSelector((data: IReduxStoreData) => data.user);
   useEffect(() => {
     const btn = document.querySelector<HTMLParagraphElement>(
       "#processToBuyBtn"
@@ -29,17 +32,22 @@ const PageClient = () => {
       observer.disconnect();
     };
   }, []);
-
+  useEffect(() => {
+    const element = document.getElementById("processToBuyBtn");
+    if (element) {
+      element.style.display = numOfCart ? "flex" : "none";
+    }
+  }, [numOfCart]);
   return (
     <>
       <p id="toggleProcessToBuy"></p>
       <div
         id="processToBuyBtn"
         style={{
-          display: "none",
           width: "100%",
           position: "absolute",
           bottom: "20px",
+          display: "none",
         }}
       >
         <Link
@@ -53,7 +61,7 @@ const PageClient = () => {
             fontSize: "large",
             color: "white",
           }}
-          href="cart-products/buy"
+          href="cart/buy"
         >
           Process to buy
         </Link>

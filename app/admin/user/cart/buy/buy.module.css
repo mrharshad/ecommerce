@@ -4,12 +4,14 @@
   display: flex;
   flex-direction: column;
   padding: 10px;
+  background-color: black;
 }
 .noStock {
-  color: white;
   font-size: x-large;
   text-align: center;
-  margin-top: 30svh;
+  font-weight: bold;
+  margin-top: 50px;
+  margin-bottom: 50px;
 }
 .changeLocation {
   color: white;
@@ -94,7 +96,6 @@
 .mainDiv > p {
   font-size: larger;
   font-weight: bold;
-  border-top: 1px solid gray;
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -241,6 +242,9 @@
 }
 
 @media screen and (min-width: 480px) {
+  .noStock {
+    color: white;
+  }
   .toggleLocation::after {
     content: "Delivery Locations";
   }
@@ -255,7 +259,6 @@
   }
   .mainDiv > p {
     text-align: center;
-    border-top: none;
   }
   #oneTime :last-child {
     font-size: medium;

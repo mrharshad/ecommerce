@@ -5,12 +5,12 @@ import Link from "next/link";
 import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 
 import { useDispatch, useSelector } from "react-redux";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ILoginInfo, ILoginResponse } from "./interface";
 
 import { IAlert } from "@/app/interfaces/user";
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
-import { previousPathLocal } from "@/exConfig";
+import { backEndServer, pathLocal } from "@/exConfig";
 
 const Login = () => {
   const { alerts, searches, token } = useSelector(
@@ -19,7 +19,7 @@ const Login = () => {
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const previousPath = useRef(localStorage.getItem(previousPathLocal));
+  const previousPath = useRef<null | string>();
   const passwordInput = useRef<HTMLInputElement | null>(null);
   const emailInput = useRef<HTMLInputElement | null>(null);
   const manageAlert = (info: IAlert, loading?: boolean) =>
@@ -29,7 +29,7 @@ const Login = () => {
     dispatch(newAlert({ info, completed: "Login" }));
   };
 
-  const isPending = (time: Date): boolean => {
+  const isPending = (time: number): boolean => {
     let milliseconds = new Date().getTime() - new Date(time).getTime();
     const minutes = Math.floor(milliseconds / (1000 * 60));
     let pendingHours = Math.floor(minutes / 60);
@@ -49,7 +49,7 @@ const Login = () => {
   const storeName = "loginInfo";
   const [loginInfo, setLoginInfo] = useState<ILoginInfo>({});
   let { holdOnVerification, reTryForgot } = loginInfo;
-
+  const { hostname, protocol, tLD } = backEndServer;
   const loginFunc = async (event: FormEvent) => {
     event.preventDefault();
     if ((holdOnVerification && isPending(holdOnVerification)) || alerts.length)
@@ -57,7 +57,8 @@ const Login = () => {
     dispatch(newLoading("Login"));
     const password = (passwordInput.current as HTMLInputElement).value;
     const email = (emailInput.current as HTMLInputElement).value;
-    let user = await fetch(`/api/user/login`, {
+
+    let user = await fetch(`${protocol}${hostname}${tLD}/api/user/login`, {
       method: "PUT",
       body: JSON.stringify({
         email,
@@ -75,7 +76,6 @@ const Login = () => {
     if (success) {
       localStorage.removeItem(storeName);
       dispatch(authenticated({ text, data, token, completed: "Login" }));
-
       if (previousPath.current === "/product") {
         router.back();
       } else router.replace("/");
@@ -87,6 +87,7 @@ const Login = () => {
         };
         localStorage.setItem(storeName, JSON.stringify(newInfo));
         setLoginInfo(newInfo);
+        isPending(resHoldOnVerification);
       }
       dispatch(
         newAlert({
@@ -96,6 +97,7 @@ const Login = () => {
       );
     }
   };
+
   const forgotPassword = async () => {
     if ((reTryForgot && isPending(reTryForgot)) || alerts.length) return;
     const email = emailInput.current?.value.trim();
@@ -103,21 +105,25 @@ const Login = () => {
       return showWarning("please enter email");
     }
     dispatch(newLoading("Login"));
-    let user = await fetch(`/api/user/forgot-password`, {
-      method: "PUT",
-      body: JSON.stringify({
-        email,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    let user = await fetch(
+      `${protocol}${hostname}${tLD}/api/user/forgot-password`,
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          email,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const { success, text, resReTryForget } = await user.json();
 
     if (resReTryForget) {
       const newInfo = { holdOnVerification, reTryForgot: resReTryForget };
       localStorage.setItem(storeName, JSON.stringify(newInfo));
       setLoginInfo(newInfo);
+      isPending(reTryForgot as number);
     }
     if (success) {
       forgotRes({ text, type: "Success" });
@@ -130,6 +136,7 @@ const Login = () => {
     if (token) router.replace("/");
     let data = localStorage.getItem(storeName);
     if (data) setLoginInfo(JSON.parse(data));
+    previousPath.current = localStorage.getItem(pathLocal);
   }, []);
 
   return (

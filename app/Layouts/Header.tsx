@@ -27,11 +27,11 @@ import UserAlerts from "./UserAlert";
 import { TSearchesIdentity, TSearchSort } from "../interfaces/user";
 import Suggestions from "./Suggestions";
 import Link from "next/link";
-import { previousPathLocal, searches as searchesConfig } from "@/exConfig";
+import { pathLocal, searches as searchesConfig } from "@/exConfig";
 
 import { deleteSearch, setNewSearches } from "../redux/UserApiRequest";
-import { TRemoveTokenByMsg } from "@/server/interfaces/tokens";
-import { cookies } from "next/headers";
+
+import { TErrorMessages } from "@/server/utils/errorHandler";
 
 const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -51,8 +51,9 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
     loadings,
     device,
     viewedPro,
+    urlKey,
   } = useSelector((data: IReduxStoreData) => data.user);
-
+  const { orders } = urlKey;
   const { autoAddCategory, autoAddTOfP, newReqByPriority, storeName } =
     searchesConfig;
   const { loading } = findSuggestion;
@@ -155,11 +156,11 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
   const removeAlertFunc = useCallback(
     (text: string) => {
       dispatch(removeAlert(text));
-      const login: Array<TRemoveTokenByMsg> = [
+      const login: Array<TErrorMessages> = [
         "token is invalid",
         "token is expired",
       ];
-      if (login.includes(text as TRemoveTokenByMsg)) {
+      if (login.includes(text as TErrorMessages)) {
         dispatch(mainKeyChange([{ name: "token", value: null }]));
         router.push("/user/login");
       } else if (text === "reload") {
@@ -205,8 +206,11 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
 
     if (device) localStorage.setItem(storeName, JSON.stringify(viewedPro));
   }, [viewedPro]);
+
   useEffect(() => {
-    localStorage.setItem(previousPathLocal, currentPath);
+    setTimeout(() => {
+      localStorage.setItem(pathLocal, currentPath);
+    }, 1000);
   }, [currentPath]);
   useEffect(() => {
     dispatch(appMount({ userData, initialToken }));
@@ -218,6 +222,7 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
 
     addEventListener("scroll", hideSuggestionHandler);
   }, [dispatch]);
+
   return (
     <>
       <UserAlerts
@@ -287,7 +292,7 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
             </div>
             <Link
               className={style.cart}
-              href={token ? "/admin/user/cart-products" : "/user/login"}
+              href={token ? "/admin/user/cart" : "/user/login"}
             >
               <svg fill="#FFFFFF" viewBox="0 0 36 36">
                 <circle fill="#FF0000" cx="13.5" cy="29.5" r="2.5"></circle>

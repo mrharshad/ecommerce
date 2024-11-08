@@ -5,8 +5,15 @@ export interface ICustomError extends Error {
   type: string;
 }
 
-export type TSpecialMessages = "Try again after some time";
-
+export type TErrorMessages =
+  | "internal server error"
+  | "This Resource Is Not Exist:"
+  | `token is invalid`
+  | `token is expired`
+  | "reload"
+  | "Try again after some time"
+  | "Account freezed"
+  | "Invalid Email";
 const errors = (err: ICustomError) => {
   err.message = err.message || "internal server error";
 

@@ -1,54 +1,36 @@
-import IDBUser from "../interfaces/user";
+import { TTofPay } from "../interfaces/newOrder";
+import IDBUser, { IVerification } from "../interfaces/user";
 import { Model, Schema, model, models } from "mongoose";
-
-const itemsStructure = {
-  _id: Number,
-  name: String,
-  tOfP: String,
-  image: String,
-  iSN: String,
-  imgSetDiff: String,
-  vD: String,
-  current: Number,
-  updated: Date,
-  qty: Number,
-  status: String,
-  varDiff: String,
-  couponCode: String,
-};
-const ordersStructure = {
-  _id: Number,
-  uName: String,
-  address: String,
-  area: String,
-  pinCode: Number,
-  district: String,
-  state: String,
-  tofPay: {
+const orderDocsSchema = new Schema({
+  newOrder: Number,
+  canceled: Number,
+  delivered: Number,
+});
+const tokenInfoSchema = new Schema({
+  token: String,
+  expire: Number,
+  count: Number,
+  freezed: Number,
+});
+const paymentSchema = new Schema({
+  _id: {
     type: String,
-    enum: [
-      "Pay on Delivery",
-      "Credit Card",
-      "Debit Card",
-      "Net Banking",
-      "PayPal",
-      "Google Pay",
-      "UPI",
-    ],
+    required: true,
   },
-  exInfo: {
-    openBox: Boolean,
-    oneTime: Boolean,
-    gitPack: String,
+  status: {
+    type: String,
+    enum: ["Pending", "Completed", "Failed"],
+    required: true,
   },
-  payId: String,
-  createdAt: Date,
-};
-const orderCanceled = {
-  ...ordersStructure,
-  items: { ...itemsStructure, time: String },
-};
-const orderDelivered = { ...ordersStructure, items: { ...itemsStructure } };
+  time: {
+    type: Date,
+    default: Date.now,
+  },
+  amount: {
+    type: Number,
+    required: true,
+  },
+});
 const userSchema = new Schema<IDBUser>({
   _id: Number,
   fName: String,
@@ -89,11 +71,57 @@ const userSchema = new Schema<IDBUser>({
     },
   ],
   // default: new Date(Date.now() + 5.5 * 60 * 60 * 1000),
-  tokens: {},
-  issues: {},
+  orderDocs: {
+    _id: false,
+    type: orderDocsSchema,
+    required: true,
+  },
+  coupons: [
+    {
+      _id: String,
+      brand: String,
+      type: {
+        type: String,
+        enum: ["Percentage", "Flat"],
+      },
+      value: Number,
+      valid: Date,
+    },
+  ],
+
+  verification: {
+    _id: false,
+    type: tokenInfoSchema,
+    required: true,
+  },
+  delivered: [],
+  canceled: [
+    {
+      _id: String, // order_id:product_id:variant:option
+      name: String,
+      reason: String,
+      tofPay: {
+        type: String,
+        default: "Pay on Delivery",
+        enum: [
+          "Pay on Delivery",
+          "Credit Card",
+          "Debit Card",
+          "Net Banking",
+          "PayPal",
+          "Google Pay",
+          "UPI",
+        ] as Array<TTofPay>,
+      },
+      refund: { required: false, type: paymentSchema },
+      price: Number,
+      quantity: Number,
+      imgUrl: String,
+      update: Date,
+      createdAt: Date,
+    },
+  ],
   createdAt: Date,
-  canceled: [orderCanceled],
-  delivered: [orderDelivered],
 });
 
 const User: Model<IDBUser> = models.User || model<IDBUser>("User", userSchema);

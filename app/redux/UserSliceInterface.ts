@@ -1,6 +1,6 @@
 import {
-  IAuthorizedUser,
   ICartPro as ICartProServer,
+  IClientSideShared,
   TDataKeyChange,
 } from "@/server/interfaces/user";
 import {
@@ -11,8 +11,9 @@ import {
   TMainKeys,
   TPending,
 } from "../interfaces/user";
-import { ICartIdentity } from "../admin/user/cart-products/interfaces";
+
 import { IServerResponse } from "@/server/utils/serverMethods";
+import { ICartIdentity } from "../admin/user/cart/interfaces";
 
 export interface IMainKeyData {
   name: string;
@@ -56,7 +57,7 @@ export interface IVisitPage {
 }
 
 export interface IAuthenticatedUserData
-  extends Omit<IAuthorizedUser, "searches"> {
+  extends Omit<IClientSideShared, "searches"> {
   searches: Array<ISearches>;
 }
 

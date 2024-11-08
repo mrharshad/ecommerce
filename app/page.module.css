@@ -26,11 +26,18 @@
 .notFound {
   font-size: max(35px, 3vw);
   position: absolute;
-  top: 35svh;
+  top: 0px;
   text-align: center;
   font-weight: bold;
-  width: 100%;
   height: 100%;
+  width: 100%;
+}
+
+.notFound img {
+  max-width: 300px;
+  width: 50%;
+  height: fit-content;
+  margin-top: 25svh;
 }
 
 @media screen and (max-width: 480px) {

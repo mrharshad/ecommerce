@@ -9,28 +9,34 @@ import {
   ISearches as ISearchesClientSide,
   TSearchesIdentity,
 } from "@/app/interfaces/user";
+
 import config from "@/server/config/config";
 import client from "@/server/config/redisConnect";
 import User from "@/server/models/user";
-import errors, { ICustomError } from "@/server/utils/errorHandler";
+import errors, {
+  ICustomError,
+  TErrorMessages,
+} from "@/server/utils/errorHandler";
 
-import {
-  IAuthentication,
-  IAuthorizedUser,
-  ISearches,
-} from "@/server/interfaces/user";
+import { IClientSideShared, ISearches } from "@/server/interfaces/user";
 import {
   INewPasswordReq,
   INewPasswordRes,
-} from "@/app/user/password-recovery/interface";
-import { authentication } from "@/server/utils/userProjection";
-import { locationCookie, authCookie, authJWTOpt } from "@/server/utils/tokens";
+} from "@/app/admin/user/password-recovery/interface";
+
+import {
+  locationCookie,
+  authCookie,
+  authJWTOpt,
+  orderDocsCookie,
+} from "@/server/utils/tokens";
 import {
   email as emailConfig,
   user,
   searches as searchesConfig,
 } from "@/exConfig";
 import { IAuthJwtInfo } from "@/server/interfaces/tokens";
+import { IWithSecureData, withSecureData } from "@/server/utils/userProjection";
 
 // apply api - /user/password-recovery
 export async function PUT(req: NextRequest) {
@@ -42,58 +48,58 @@ export async function PUT(req: NextRequest) {
       searches: clientSearches = [],
     }: INewPasswordReq = await req.json();
     dbConnect();
-    const token = crypto.createHash("sha256").update(key).digest("hex");
+    const clientToken = crypto.createHash("sha256").update(key).digest("hex");
     let { cache, expire, keyName } = user;
-    let { emailKeyName, emailExpire } = emailConfig;
+    let { emailKeyName, emailExpire, emailCache } = emailConfig;
     const { interestedMax, searchMax } = searchesConfig;
     const { jwtSecretCode } = config;
-    let isRedis = false;
-    let findUser = {} as IAuthentication;
+
+    let findUser = {} as IWithSecureData;
     const cookie = cookies();
-    if (cache) {
+    const emailUrl = emailKeyName + email;
+    if (emailCache) {
       try {
-        let result = await client.get(emailKeyName + email);
+        let result = await client.get(emailUrl);
         if (result) {
           findUser = JSON.parse(result);
-          isRedis = true;
         }
       } catch (err) {
-        cache = false;
+        emailCache = false;
       }
     }
     const userName = findUser?.fName;
     if (findUser?._id && !userName) {
-      throw new Error("invalid token");
+      throw new Error("token is invalid" as TErrorMessages);
     }
 
     if (!userName) {
       findUser = (await User.findOne(
         { email },
-        authentication
-      )) as IAuthentication;
+        withSecureData
+      )) as IWithSecureData;
       if (!findUser?._id) {
-        if (cache) {
+        if (emailCache) {
           try {
             await client.setEx(
-              emailKeyName + email,
+              emailUrl,
               emailExpire,
               JSON.stringify({ _id: email })
             );
           } catch {}
         }
-        throw new Error("invalid token");
+        throw new Error("token is invalid" as TErrorMessages);
       }
     }
 
-    const { _id, role, mobileNo, searches, tokens = {} } = findUser;
-    const tokenExpire = tokens.tokenExpire;
+    const { _id, role, mobileNo, searches, verification } = findUser;
+    const { expire: tokenExpire, token } = verification;
 
-    if (tokens.token !== token || !tokenExpire) {
-      throw new Error("token expired");
+    if (token !== clientToken) {
+      throw new Error("token is invalid" as TErrorMessages);
     }
 
-    if (new Date(tokenExpire) < new Date()) {
-      throw new Error("invalid token");
+    if (tokenExpire < Date.now()) {
+      throw new Error("token is expired" as TErrorMessages);
     }
 
     const userSearch: Array<ISearches> = [];
@@ -133,13 +139,19 @@ export async function PUT(req: NextRequest) {
       ...interestedSearches.slice(0, interestedMax),
     ];
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    findUser.verification = { count: 0, expire: 0, freezed: 0, token: "" };
     const updatedValue = (await User.findByIdAndUpdate(
       _id,
       {
-        $set: { tokens: {}, searches: newDBSearches, password: hashedPassword },
+        $set: {
+          verification: findUser.verification,
+          searches: newDBSearches,
+          password: hashedPassword,
+        },
       },
-      { new: true, projection: authentication }
-    )) as IAuthentication;
+      { new: true, projection: withSecureData }
+    )) as IWithSecureData;
 
     if (updatedValue) {
       const {
@@ -150,13 +162,14 @@ export async function PUT(req: NextRequest) {
         location,
         searches: updatedSearches,
         gender,
+        orderDocs,
       } = updatedValue;
-      if (isRedis) {
+      if (userName) {
         try {
           await client.del(emailKeyName + email);
         } catch {}
       }
-      const authorizedData: IAuthorizedUser = {
+      const authorizedData: IClientSideShared = {
         _id,
         bYear,
         cartPro,
@@ -168,7 +181,6 @@ export async function PUT(req: NextRequest) {
       };
 
       if (cache) {
-        updatedValue.tokens = {};
         try {
           await client.setEx(
             keyName + _id,
@@ -196,9 +208,15 @@ export async function PUT(req: NextRequest) {
         ...locationCookie,
         value: JSON.stringify(location[0]),
       });
+
       cookie.set({
         ...authCookie,
         value: newJwtToken,
+      });
+
+      cookie.set({
+        ...orderDocsCookie,
+        value: JSON.stringify(orderDocs),
       });
 
       return new Response(

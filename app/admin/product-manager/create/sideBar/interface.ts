@@ -1,4 +1,4 @@
-import { IDraft, INewData, TProcesses } from "../interface";
+import { IDraft, INewData } from "../interface";
 
 export interface IProps {
   drafts: IDraft[];

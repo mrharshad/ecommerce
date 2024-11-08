@@ -18,7 +18,7 @@ import { deliveryTime, indiaOffset, msADay } from "@/exConfig";
 
 import { ICartPro, IStockInfoCartPro } from "@/app/interfaces/user";
 import { ICartPro as ICartProServer } from "@/server/interfaces/user";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartIdentity, IMinMaxDayResponse } from "./interfaces";
@@ -105,7 +105,7 @@ const LayoutClient = () => {
   const removeCarts = async (
     cartsInfo: Array<ICartProServer>
   ): Promise<IRemoveCartsRes> => {
-    const request = await fetch(`/api/admin/user/remove-carts`, {
+    const request = await fetch(`/api/admin/user/cart/remove`, {
       method: "DELETE",
       body: JSON.stringify({ cartsInfo, token } as IRemoveCartsReq),
       headers: {
@@ -122,15 +122,10 @@ const LayoutClient = () => {
     },
     [dispatch]
   );
-  useEffect(() => {
-    const element = document.getElementById("processToBuyBtn");
-    if (element) {
-      element.style.display = numOfCart ? "flex" : "none";
-    }
-  }, [numOfCart]);
+
   useEffect(() => {
     const fetchCartProducts = async () => {
-      const request = await fetch(`/api/admin/user/cart-products`, {
+      const request = await fetch(`/api/admin/user/cart/products`, {
         method: "PATCH",
         body: JSON.stringify(pendingData),
         headers: {

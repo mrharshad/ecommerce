@@ -3,13 +3,12 @@ import dbConnect from "@/server/config/dbConnect";
 import {
   INewOrderReq,
   INewOrderRes,
-  TNewOrderDoc,
 } from "@/app/redux/UserApiRequestInterface";
 import { verify } from "jsonwebtoken";
 import config from "@/server/config/config";
 import { IAuthJwtInfo } from "@/server/interfaces/tokens";
 import { serverResponse } from "@/server/utils/serverMethods";
-import { IItems, INewOrder } from "@/server/interfaces/newOrder";
+import { IItems } from "@/server/interfaces/newOrder";
 import { ICartPro, ISearches } from "@/app/interfaces/user";
 import {
   deliveryTime,
@@ -19,18 +18,17 @@ import {
   searches as configSearches,
   orderManage,
 } from "@/exConfig";
-import { INewOrderICartPro } from "@/app/admin/user/cart-products/interfaces";
-import {
-  IAuthentication,
-  ICartPro as IDbCartPro,
-  ISearches as IDbSearches,
-} from "@/server/interfaces/user";
+import { INewOrderICartPro } from "@/app/admin/user/cart/interfaces";
+import IDBUser, { ISearches as IDbSearches } from "@/server/interfaces/user";
 import client from "@/server/config/redisConnect";
 import User from "@/server/models/user";
-import { authentication } from "@/server/utils/userProjection";
+
 import AdditionalInfo, { docId } from "@/server/models/additionalInfo";
-import { TSpecialMessages } from "@/server/utils/errorHandler";
+import { TErrorMessages } from "@/server/utils/errorHandler";
 import NewOrder from "@/server/models/newOrder";
+import { cookies } from "next/headers";
+import { orderDocsCookie } from "@/server/utils/tokens";
+import { commonData } from "@/server/utils/userProjection";
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,6 +43,8 @@ export async function POST(req: NextRequest) {
       openBox,
       pinCode,
       state,
+      email,
+      mobileNo,
       searches = [],
     }: INewOrderReq = await req.json();
     const { jwtSecretCode } = config;
@@ -98,19 +98,17 @@ export async function POST(req: NextRequest) {
         } else {
           tOfPS.push(tOfP);
           return {
+            _id: `${_id}:${variant}:${option}`,
             expected,
             imgUrl,
             name,
             tOfP,
-            imgSetKey: imgSetKey || "",
-            variantKey: variantKey || "",
-            _id,
-            option,
-            variant,
+            imgSetKey,
+            variantKey,
             quantity,
             update: new Date(),
             status: "Pending",
-            amount: mrp - mrp * (discount / 100) * quantity,
+            price: mrp - mrp * (discount / 100),
             message: "",
           };
         }
@@ -147,14 +145,13 @@ export async function POST(req: NextRequest) {
         },
       }
     );
-    const special: TSpecialMessages = "Try again after some time";
+    const special: TErrorMessages = "Try again after some time";
     if (!findLastId) {
       throw new Error(special);
     }
-    let userData = {} as IAuthentication;
-    let newOrderDoc = {} as TNewOrderDoc;
+
     try {
-      newOrderDoc = await NewOrder.create({
+      let newOrderDoc = await NewOrder.create({
         _id: findLastId.lastOrderId + 1,
         userId: _id,
         fullName,
@@ -165,9 +162,11 @@ export async function POST(req: NextRequest) {
         state,
         pinCode,
         openBox,
-        items,
         oneTime,
+        email,
+        mobileNo,
         createdAt: new Date(),
+        items,
       });
       if (!newOrderDoc) throw new Error(special);
 
@@ -188,7 +187,7 @@ export async function POST(req: NextRequest) {
 
       clientInterested.sort((a, b) => b.priority - a.priority);
 
-      userData = (await User.findByIdAndUpdate(
+      const userData = (await User.findByIdAndUpdate(
         _id,
         {
           $set: {
@@ -204,13 +203,33 @@ export async function POST(req: NextRequest) {
                 }),
             ],
           },
+          $inc: {
+            "orderDocs.newOrder": 1,
+          },
         },
-        { new: true, projection: authentication }
-      )) as IAuthentication;
+        { new: true, projection: commonData }
+      )) as IDBUser;
       if (!userData?.fName) {
         await NewOrder.deleteOne({ _id: newOrderDoc._id });
         throw new Error(special);
       }
+
+      const { cache, expire, keyName } = user;
+      if (cache) {
+        try {
+          await client.setEx(keyName + _id, expire, JSON.stringify(userData));
+        } catch (err) {}
+      }
+      const { cache: orderCache, newOrders } = orderManage;
+      const url = newOrders + _id;
+      if (orderCache) {
+        try {
+          await client.rPushX(url, JSON.stringify(newOrderDoc));
+          client.quit();
+        } catch {}
+      }
+      orderDocsCookie.value = JSON.stringify(userData.orderDocs);
+      cookies().set(orderDocsCookie);
     } catch (err) {
       if (err instanceof Error) {
         await AdditionalInfo.updateOne(docId, {
@@ -219,37 +238,13 @@ export async function POST(req: NextRequest) {
         throw new Error(err.message);
       }
     }
-    const { cache, expire, keyName } = user;
-    if (cache) {
-      try {
-        await client.setEx(keyName + _id, expire, JSON.stringify(userData));
-      } catch (err) {}
-    }
-    const { expire: orderExpire, cache: orderCache, newOrders } = orderManage;
 
-    if (orderCache) {
-      try {
-        const url = newOrders + _id;
-        const orders = await client.lRange(url, 0, -1);
-        if (orders?.length) {
-          newOrderDoc = orders
-            .map((strValue) => JSON.parse(strValue))
-            .concat(newOrderDoc);
-          await client.rPushX(url, JSON.stringify(newOrderDoc));
-        } else {
-          await client.lPush(url, JSON.stringify(newOrderDoc));
-          await client.expire(url, orderExpire);
-        }
-        client.quit();
-      } catch {}
-    }
     return new Response(
       JSON.stringify({
         success: true,
         message: "Order has been successfully received",
         newClientSearches,
         newClientCartPro,
-        newOrderDoc,
       } as INewOrderRes),
       {
         status: 200,

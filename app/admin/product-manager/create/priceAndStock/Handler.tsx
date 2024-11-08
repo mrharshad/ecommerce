@@ -2,17 +2,11 @@ import { useDispatch, useSelector } from "react-redux";
 import style from "./handler.module.css";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AppDispatch, IReduxStoreData } from "@/app/redux/ReduxStore";
-import {
-  IDiscounts,
-  IMainKeyChange,
-  IReduxCreateData,
-  IVariant,
-} from "../interface";
+import { IDiscounts, IMainKeyChange, IVariant } from "../interface";
 import VariantInfo from "./VariantInfo";
 import {
   mainKeyChange,
   newAlert,
-  newProDoc,
   updateSingleVariant,
 } from "@/app/redux/ProManagerSlice";
 

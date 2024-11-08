@@ -32,8 +32,9 @@ export const singleProduct: Record<keyof ISingleProduct, 1> = {
   description: 1,
   imageSets: 1,
   imgSetKey: 1,
-  ratings: 1,
+  stars: 1,
   reviews: 1,
   variantKey: 1,
   variants: 1,
+  returnAndExchange: 1,
 };

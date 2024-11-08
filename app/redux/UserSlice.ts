@@ -58,13 +58,9 @@ const initialState: IReduxUser = {
   numOfCart: 0,
   proLoading: false,
   toggleSuggestion: "0px",
-  canceled: [],
-  delivered: [],
-  newOrder: [],
   suggestions: [],
   storedSuggestions: [],
   districts: [],
-  active: "other",
   findSuggestion: initialFindSuggestion,
   searches: [],
   viewedPro: [],
@@ -77,6 +73,7 @@ const initialState: IReduxUser = {
   loadings: [],
   searchKey: "",
   randomPage: 1,
+  urlKey: { orders: 0 },
 };
 
 const UserSlice = createSlice({
@@ -318,7 +315,6 @@ const UserSlice = createSlice({
         message,
         newClientCartPro = [],
         newClientSearches = [],
-        newOrderDoc,
       } = action.payload;
 
       state.loadings = state.loadings.filter((key) => key !== "Order");
@@ -329,11 +325,6 @@ const UserSlice = createSlice({
         state.data.mobileNo = undefined;
         state.data.email = undefined;
         state.searches = newClientSearches;
-        if (Array.isArray(newOrderDoc)) {
-          state.newOrder = newOrderDoc;
-        } else {
-          state.newOrder.push(newOrderDoc);
-        }
       }
     },
   },
@@ -478,12 +469,6 @@ const UserSlice = createSlice({
 
     builder.addCase(deleteSearch.fulfilled, (state, action) => {
       const { message, success, removedSearch } = action.payload;
-      console.log(
-        "message, success, removedSearch ",
-        message,
-        success,
-        removedSearch
-      );
       if (!success) {
         state.alerts.push(
           { text: message, type: "Error", duration: "5s" },

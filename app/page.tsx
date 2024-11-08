@@ -17,7 +17,8 @@ import { ISearches } from "@/app/interfaces/user";
 import { IMainKeyChange } from "./redux/UserSliceInterface";
 import { ISearchProduct } from "@/server/interfaces/product";
 import SearchProductSkeletons from "./utils/SearchProductSkeletons";
-
+import Image from "next/image";
+import notFound from "@/public/empty search result.png";
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -176,10 +177,12 @@ export default function Home() {
           <SearchProduct data={data} key={data._id} />
         ))}
         {proLoading && <SearchProductSkeletons numOfSkeleton={28} />}
-        {!numOfProducts && searchKey && !proLoading ? (
-          <p className={style.notFound}>Product Not Found</p>
-        ) : null}
       </section>
+      {!numOfProducts && searchKey && !proLoading ? (
+        <div className={style.notFound}>
+          <Image src={notFound} alt="Product Not-Found" />
+        </div>
+      ) : null}
       <Observer
         keyProductFetch={keyProductFetch}
         scrolledFetch={scrolledFetch}

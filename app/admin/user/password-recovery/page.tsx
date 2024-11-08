@@ -2,7 +2,6 @@ import React, { FC, Fragment } from "react";
 import Recovery from "./Recovery";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import config from "@/server/config/config";
 import { IParams } from "./recoveryInterface";
 import { ICheckTokenValidityRes } from "./interface";
 import { backEndServer } from "@/exConfig";
@@ -27,11 +26,12 @@ const page: FC<IParams> = async ({ searchParams }) => {
     // { next: { revalidate: 21600 } }
   );
   const { success, message } = (await req.json()) as ICheckTokenValidityRes;
+
   if (!success) {
-    if (message === "invalid token") {
+    if (message === "token is invalid") {
       redirect("/");
     }
-    if (message === "token expired") {
+    if (message === "token is expired") {
       redirect("/user/login");
     }
   }

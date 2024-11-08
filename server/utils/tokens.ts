@@ -1,15 +1,25 @@
+import { msADay } from "@/exConfig";
 import { SignOptions } from "jsonwebtoken";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
-const expires = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
+const expires = Date.now() + 1 * msADay;
 
 export const locationCookie = {
   name: "location",
   expires,
+  httpOnly: true,
+  path: "/",
 } as ResponseCookie;
 
 export const authCookie = {
   name: "token",
+  expires,
+  httpOnly: true,
+  path: "/",
+} as ResponseCookie;
+
+export const orderDocsCookie = {
+  name: "orderDocs",
   expires,
   httpOnly: true,
   path: "/",

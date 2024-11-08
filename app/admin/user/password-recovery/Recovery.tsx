@@ -10,6 +10,7 @@ import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
 import { INewPasswordRes } from "./interface";
+import { backEndServer } from "@/exConfig";
 
 const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
   const dispatch = useDispatch();
@@ -51,20 +52,24 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
     if (alerts.length) return;
     const password = (passwordRef.current as HTMLInputElement).value;
     const confPassValue = (confirmPassword.current as HTMLInputElement).value;
+    const { hostname, protocol, tLD } = backEndServer;
     if (password.length > 7 && confPassValue === password) {
       dispatch(newLoading("Recovery-Password"));
-      const verify = await fetch(`/api/admin/user/new-password`, {
-        method: "PUT",
-        body: JSON.stringify({
-          password,
-          key,
-          email,
-          searches,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const verify = await fetch(
+        `${protocol}${hostname}${tLD}/api/admin/user/new-password`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            password,
+            key,
+            email,
+            searches,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const { success, message, token, data }: INewPasswordRes =
         await verify.json();

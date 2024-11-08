@@ -82,7 +82,6 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       sold,
       description,
       exInfo,
-      ratings,
       certificates,
       reviews,
       imageSets,
@@ -92,6 +91,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       tOfP,
       imgSetKey,
       category,
+      stars,
     } = data;
     const proUrl = `/product?_id=${_id}&k=${name.replace(/ /g, "-")}`;
     const {
@@ -159,7 +159,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
             ? stateMaxTime
             : countryMaxTime)
     );
-    const [one, two, three, four, five] = ratings;
+    const { one, two, three, four, five } = stars;
     const ratingElement = (star: TStarRating, percent: number) => {
       return (
         <p>

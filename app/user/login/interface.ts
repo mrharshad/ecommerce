@@ -3,43 +3,34 @@ import { IAuthenticatedUserData } from "@/app/redux/UserSliceInterface";
 import { ISearches as ISearchesClientSide } from "@/app/interfaces/user";
 
 export interface ILoginInfo {
-  holdOnVerification?: Date;
-  reTryForgot?: Date;
+  holdOnVerification?: number;
+  reTryForgot?: number;
 }
 
 export interface ILoginResponse {
   success: boolean;
   text: string;
-  resHoldOnVerification?: Date;
+  resHoldOnVerification?: number;
   data: IAuthenticatedUserData;
   token: string;
 }
 
-import IDBUser, { ITokens } from "@/server/interfaces/user";
-
 export interface ISendResponse {
   success: boolean;
   text: string;
-  resReTryForget?: Date;
+  resReTryForget?: number;
 }
 
-export interface IFindUser extends IDBUser {
-  tokens: ITokens;
-}
 export interface IRequest {
   email: string;
   password: string;
   searches: ISearchesClientSide[];
 }
 
-export interface IResponseUserData extends IReduxUserData {
-  tokens: ITokens;
-}
-
 export interface ISendResponse {
   success: boolean;
   text: string;
-  resHoldOnVerification?: Date;
+  resHoldOnVerification?: number;
   data?: IAuthenticatedUserData;
   token?: string;
 }

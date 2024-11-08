@@ -8,21 +8,28 @@ import { NextRequest } from "next/server";
 
 import config from "@/server/config/config";
 
-import errors, { ICustomError } from "@/server/utils/errorHandler";
+import errors, {
+  ICustomError,
+  TErrorMessages,
+} from "@/server/utils/errorHandler";
 import {
   ISearches as ISearchesClientSide,
   TSearchesIdentity,
 } from "@/app/interfaces/user";
 import {
-  IAuthentication,
-  IAuthorizedUser,
+  IClientSideShared,
+  ICommonData,
   ISearches,
+  IVerification,
 } from "@/server/interfaces/user";
 
-import { authentication } from "@/server/utils/userProjection";
-
 import { IRequest, ISendResponse } from "@/app/user/login/interface";
-import { authCookie, authJWTOpt, locationCookie } from "@/server/utils/tokens";
+import {
+  authCookie,
+  authJWTOpt,
+  locationCookie,
+  orderDocsCookie,
+} from "@/server/utils/tokens";
 import {
   user,
   email as emailConfig,
@@ -30,6 +37,11 @@ import {
   password as passwordConfig,
 } from "@/exConfig";
 import { IAuthJwtInfo } from "@/server/interfaces/tokens";
+import {
+  commonData,
+  IWithSecureData,
+  withSecureData,
+} from "@/server/utils/userProjection";
 
 // apply api - /user/login
 export async function PUT(req: NextRequest) {
@@ -47,91 +59,69 @@ export async function PUT(req: NextRequest) {
       });
     const { jwtSecretCode } = config;
     let { cache, expire, keyName } = user;
-    let { emailKeyName, emailExpire } = emailConfig;
+    let { emailKeyName, emailExpire, emailCache } = emailConfig;
+    const emailUrl = emailKeyName + email;
     const { interestedMax, searchMax } = searchesConfig;
     const { incorrectLimit, wait } = passwordConfig;
-
-    let isRedis = false;
+    const currentTimeMs = Date.now();
     dbConnect();
-    let findUser = {} as IAuthentication;
-    if (cache) {
+    let findUser = {} as IWithSecureData;
+    if (emailCache) {
       try {
-        let result = await client.get(emailKeyName + email);
-
+        let result = await client.get(emailUrl);
         if (result) {
           findUser = JSON.parse(result);
-          isRedis = true;
         }
       } catch (err) {
-        cache = false;
+        emailCache = false;
       }
     }
-    const userName = findUser?.fName;
-    if (findUser._id && !userName) {
+    const { fName: userName, password: userPass } = findUser || {};
+    if (findUser?._id && !userName) {
       throw new Error("Invalid email and password");
     }
-    if (!userName) {
+    if (!userPass) {
       findUser = (await User.findOne(
         { email },
-        authentication
-      )) as IAuthentication;
+        withSecureData
+      )) as IWithSecureData;
       if (!findUser?._id) {
-        if (cache) {
+        if (emailCache) {
           try {
             await client.setEx(
-              emailKeyName + email,
+              emailUrl,
               emailExpire,
               JSON.stringify({ _id: email })
             );
           } catch {}
         }
+
         throw new Error("Invalid email and password");
       }
     }
-
-    const {
-      _id,
-      role,
-      password,
-      searches,
-      mobileNo,
-      tokens = {},
-    } = findUser as IAuthentication;
-
-    let { holdOnVerification, verificationFailed = 0 } = tokens;
-
-    if (holdOnVerification) {
-      const pendingTime = new Date(holdOnVerification);
-      let milliseconds = new Date().getTime() - pendingTime.getTime();
-      const minutes = Math.floor(milliseconds / (1000 * 60));
-      let pendingHours = Math.floor(minutes / 60);
-      let pendingMinutes = minutes % 60;
-      pendingHours = pendingHours < 0 ? Math.abs(pendingHours) : 0;
-      pendingMinutes = pendingMinutes < 0 ? Math.abs(pendingMinutes) : 0;
-
-      if (pendingHours || pendingMinutes) {
-        if (!isRedis && cache) {
-          try {
-            await client.setEx(
-              emailKeyName + email,
-              emailExpire,
-              JSON.stringify(findUser)
-            );
-          } catch {}
-        }
-
-        return response({
-          success: false,
-          text: `Try After ${pendingHours && `${pendingHours} hours`} ${
-            pendingMinutes > 0 ? `: ${pendingMinutes} minutes` : ""
-          } `,
-          resHoldOnVerification: pendingTime,
-        });
+    const { _id, role, password, searches, mobileNo, verification } =
+      findUser as IWithSecureData;
+    const { count, freezed } = verification;
+    const isFreezed = freezed > currentTimeMs;
+    if (isFreezed) {
+      if (!userPass && emailCache) {
+        try {
+          await client.setEx(emailUrl, emailExpire, JSON.stringify(findUser));
+        } catch {}
       }
+
+      return response({
+        success: false,
+        text: "Account freezed" as TErrorMessages,
+        resHoldOnVerification: freezed,
+      });
     }
 
-    const verification = await bcrypt.compare(userEnter, password as string);
-    if (verification) {
+    const passVerification = await bcrypt.compare(
+      userEnter,
+      password as string
+    );
+    if (passVerification) {
       const userSearch: Array<ISearches> = [];
       const clientInterested = clientSearches.filter(
         ({ byUser, identity, key }) => {
@@ -173,19 +163,29 @@ export async function PUT(req: NextRequest) {
 
       const jwtInfo: IAuthJwtInfo = { _id, role, email, mobileNo };
 
-      if (isRedis) {
+      if (userPass) {
         try {
-          await client.del(emailKeyName + email);
+          await client.del(emailUrl);
         } catch {}
       }
       const updatedValue = (await User.findByIdAndUpdate(
         _id,
         {
-          $set: { tokens: {}, searches: newDBSearches },
+          $set: {
+            verification: {
+              count: 0,
+              expire: 0,
+              freezed: 0,
+              token: "",
+            } as IVerification,
+            searches: newDBSearches,
+          },
         },
-        { new: true, projection: authentication }
-      )) as IAuthentication;
-
+        {
+          new: true,
+          projection: commonData,
+        }
+      )) as ICommonData;
       const {
         bYear,
         cartPro,
@@ -194,8 +194,9 @@ export async function PUT(req: NextRequest) {
         location,
         searches: updatedSearches,
         gender,
+        orderDocs,
       } = updatedValue;
-      const authorizedData: IAuthorizedUser = {
+      const authorizedData: IClientSideShared = {
         _id,
         bYear,
         cartPro,
@@ -208,7 +209,6 @@ export async function PUT(req: NextRequest) {
       if (!fName) throw new Error("Data Base Error");
       if (cache) {
         try {
-          updatedValue.tokens = {};
           await client.setEx(
             keyName + _id,
             expire,
@@ -241,6 +241,11 @@ export async function PUT(req: NextRequest) {
         value: newJwtToken,
       });
 
+      cookie.set({
+        ...orderDocsCookie,
+        value: JSON.stringify(orderDocs),
+      });
+
       return response({
         success: true,
         text: "login successful",
@@ -248,35 +253,25 @@ export async function PUT(req: NextRequest) {
         data: { ...authorizedData, searches: newSearchesClientSide },
       });
     } else {
-      if (verificationFailed === incorrectLimit) {
-        tokens.verificationFailed = 0;
-        tokens.holdOnVerification = new Date(
-          Date.now() + wait * 60 * 60 * 1000
-        );
+      if (count === incorrectLimit) {
+        verification.count = 0;
+        verification.freezed = currentTimeMs + wait * 60 * 60 * 1000;
       } else {
-        tokens.verificationFailed = verificationFailed + 1;
-        if (holdOnVerification) delete tokens.holdOnVerification;
+        verification.count += 1;
       }
-
-      findUser.tokens = tokens;
-
       const tokenUpdateInDB = async () => {
         const update = await User.updateOne(
           { _id },
           {
-            $set: { tokens: findUser.tokens },
+            $set: verification,
           }
         );
         if (!update.modifiedCount) throw new Error("Data Base Error");
       };
-
-      if (cache) {
+      if (emailCache) {
+        findUser.verification = verification;
         try {
-          await client.setEx(
-            emailKeyName + email,
-            emailExpire,
-            JSON.stringify(findUser)
-          );
+          await client.setEx(emailUrl, emailExpire, JSON.stringify(findUser));
         } catch (err) {
           await tokenUpdateInDB();
         }
@@ -284,14 +279,14 @@ export async function PUT(req: NextRequest) {
         await tokenUpdateInDB();
       }
 
-      if (tokens.holdOnVerification)
-        return response({
-          success: false,
-          text: `try after ${wait} hours`,
-          resHoldOnVerification: tokens.holdOnVerification,
-        });
-      else
-        return response({ success: false, text: "invalid email and password" });
+      return response({
+        success: false,
+        text: "invalid email and password",
+        resHoldOnVerification:
+          verification.count === incorrectLimit
+            ? verification.freezed
+            : undefined,
+      });
     }
   } catch (error) {
     if (error instanceof Error) {

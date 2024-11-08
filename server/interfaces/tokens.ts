@@ -11,5 +11,3 @@ export interface IAuthJwtInfo {
   mobileNo: number;
   role: TRoles[];
 }
-
-export type TRemoveTokenByMsg = "token is invalid" | "token is expired";

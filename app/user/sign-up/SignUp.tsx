@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 import { getDistricts } from "@/app/redux/UserApiRequest";
-import { email as config, previousPathLocal } from "@/exConfig";
+import { backEndServer, email as config, pathLocal } from "@/exConfig";
 import Link from "next/link";
 import {
   IBirth,
@@ -38,7 +38,7 @@ const SignUpComponent: FC = () => {
   const router = useRouter();
   const [firstStep, setFirstStep] = useState<IFirstStep>({ ...initialData });
   const [birth, setBirth] = useState<IBirth>();
-  const previousPath = useRef(localStorage.getItem(previousPathLocal));
+  const previousPath = useRef<null | string>();
   const [email, setEmail] = useState<string>("");
   const password = useRef<HTMLInputElement>(null);
   const confirmPassword = useRef<HTMLInputElement>(null);
@@ -114,13 +114,17 @@ const SignUpComponent: FC = () => {
       state: formData.get("state"),
       district: formData.get("district"),
     };
-    const request = await fetch(`/api/user/create-account`, {
-      method: "POST",
-      body: JSON.stringify(useData),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const { hostname, protocol, tLD } = backEndServer;
+    const request = await fetch(
+      `${protocol}${hostname}${tLD}/api/user/create-account`,
+      {
+        method: "POST",
+        body: JSON.stringify(useData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const { success, text, numOfSendToken, data, token }: IClientResponse =
       await request.json();
 
@@ -136,10 +140,6 @@ const SignUpComponent: FC = () => {
         })
       );
     };
-    if (text === "already has an account created") {
-      showAlert();
-      return setTimeout(() => router.replace("/user/login"), 3000);
-    }
 
     if (request.status == 201) {
       localStorage.removeItem("newAccount");
@@ -183,7 +183,9 @@ const SignUpComponent: FC = () => {
       stateElement.value = defaultState;
     }
   }, [setFirstStep, setEmail, setBirth, stateChange]);
-
+  useEffect(() => {
+    previousPath.current = localStorage.getItem(pathLocal);
+  }, []);
   function funcSetPassword(e: ChangeEvent<HTMLInputElement>) {
     const input = e.target.value;
     let length = input.length;

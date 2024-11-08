@@ -3,13 +3,15 @@ import { NextRequest } from "next/server";
 import dbConnect from "@/server/config/dbConnect";
 import client from "@/server/config/redisConnect";
 import User from "@/server/models/user";
-import errors, { ICustomError } from "@/server/utils/errorHandler";
+import errors, {
+  ICustomError,
+  TErrorMessages,
+} from "@/server/utils/errorHandler";
 
-import { IAuthentication } from "@/server/interfaces/user";
-import { authentication } from "@/server/utils/userProjection";
-import { ICheckTokenValidityRes } from "@/app/user/password-recovery/interface";
+import { ICheckTokenValidityRes } from "@/app/admin/user/password-recovery/interface";
 import { email as emailConfig, user } from "@/exConfig";
 import { IServerResponse } from "@/server/utils/serverMethods";
+import { IWithSecureData, withSecureData } from "@/server/utils/userProjection";
 
 // apply api - /user/password-recovery
 export async function GET(req: NextRequest) {
@@ -19,10 +21,10 @@ export async function GET(req: NextRequest) {
     const email = searchParams.get("email") as string;
 
     dbConnect();
-    const token = crypto.createHash("sha256").update(key).digest("hex");
+    const clientToken = crypto.createHash("sha256").update(key).digest("hex");
     let { emailCache, emailExpire, emailKeyName } = emailConfig;
 
-    let findUser = {} as IAuthentication;
+    let findUser = {} as IWithSecureData;
     const redisUrl = emailKeyName + email;
     if (emailCache) {
       try {
@@ -34,15 +36,16 @@ export async function GET(req: NextRequest) {
         emailCache = false;
       }
     }
-    const userName = findUser.fName;
+    const { fName: userName, password: userPass } = findUser || {};
+
     if (findUser?._id && !userName) {
-      throw new Error("invalid token");
+      throw new Error("token is invalid" as TErrorMessages);
     }
 
-    if (!userName) {
+    if (!userPass) {
       findUser =
-        (await User.findOne({ email }, authentication).select("+password")) ||
-        ({} as IAuthentication);
+        (await User.findOne({ email }, withSecureData)) ||
+        ({} as IWithSecureData);
       const _id = findUser._id;
       if (emailCache) {
         try {
@@ -53,18 +56,20 @@ export async function GET(req: NextRequest) {
           );
         } catch {}
       }
+
       if (!_id) {
-        throw new Error("invalid token");
+        throw new Error("token is invalid" as TErrorMessages);
       }
     }
 
-    const { tokens = {} } = findUser;
-    const tokenExpire = tokens.tokenExpire;
-    if (tokens.token !== token || !tokenExpire) {
-      throw new Error("invalid token");
+    const { verification } = findUser;
+    const { freezed, expire, token } = verification;
+    const currentTimeMs = Date.now();
+    if (token !== clientToken || freezed > currentTimeMs) {
+      throw new Error("token is invalid" as TErrorMessages);
     }
-    if (new Date(tokenExpire) < new Date()) {
-      throw new Error("token expired");
+    if (currentTimeMs > expire) {
+      throw new Error("token is expired" as TErrorMessages);
     }
     return new Response(
       JSON.stringify({

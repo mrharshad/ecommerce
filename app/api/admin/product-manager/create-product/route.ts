@@ -147,10 +147,10 @@ export async function POST(req: NextRequest) {
         certificates: certificates.map(({ name, image }) => {
           return { _id: name, image, added: todayOnlyNum, verified: false };
         }),
-        ratings: [] as number[],
         reviews: [] as IReviews[],
         popular: 0,
         createdAt: new Date(),
+        stars: { one: 0, two: 0, three: 0, four: 0, five: 0 },
       } as IDBProduct);
     } catch (err) {
       if (err instanceof Error) {

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { authCookie } from "@/server/utils/tokens";
 
 export const metadata = {
-  title: "Sing Up",
+  title: "Sign Up",
 };
 const SignUp: FC = () => {
   const cookieStore = cookies();

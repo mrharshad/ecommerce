@@ -24,23 +24,24 @@ export async function PATCH(req: NextRequest) {
     const ids = [...uniqueIds];
     const data: Array<IClientCartPro> = [];
     const deletedCartPros: Array<ICartPro> = [];
-    const { cache, expire, keyName } = config;
-    let caching: boolean = cache;
+    let { cache, expire, keyName } = config;
 
     for (let _id of ids) {
       let product: null | ISingleProduct = null;
+      let redisCached = true;
       const redisUrl = keyName + _id;
-      if (caching) {
-        const redisData = await client.get(redisUrl);
+      if (cache) {
         try {
+          const redisData = await client.get(redisUrl);
           if (redisData) {
             product = JSON.parse(redisData);
           }
         } catch (err) {
-          caching = false;
+          cache = false;
         }
       }
       if (!product?._id) {
+        redisCached = false;
         product = (await Product.findById(
           _id,
           singleProduct
@@ -59,8 +60,9 @@ export async function PATCH(req: NextRequest) {
         variants,
         rating,
       } = product || {};
+      console.log("redisCached", redisCached);
       if (name) {
-        if (caching) {
+        if (!redisCached && cache) {
           try {
             await client.setEx(redisUrl, expire, JSON.stringify(product));
           } catch (err) {}
@@ -85,7 +87,7 @@ export async function PATCH(req: NextRequest) {
               return {
                 state,
                 district,
-                qty: _id === 1 || _id === 16 ? 0 : Number(qty),
+                qty: Number(qty),
               };
             });
             const [minQty, minDiscount] = discounts[0].split(":");
@@ -126,6 +128,7 @@ export async function PATCH(req: NextRequest) {
       }
     );
   } catch (error) {
+    console.log("error cart products get", error);
     if (error instanceof Error) {
       return new Response(
         JSON.stringify({

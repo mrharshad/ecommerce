@@ -1,6 +1,6 @@
 import { IAlert, ISearches, TPending } from "@/app/interfaces/user";
 import { IAuthenticated } from "../redux/UserSliceInterface";
-import { IAuthorizedUser } from "@/server/interfaces/user";
+import { IClientSideShared } from "@/server/interfaces/user";
 
 export interface IUserAppUpdate extends IAuthenticated {
   searches: ISearches[];
@@ -12,7 +12,7 @@ export interface INewAlert {
 }
 
 export interface IAppMount {
-  userData: IAuthorizedUser;
+  userData: IClientSideShared;
   initialToken: string | null;
 }
 export interface HeaderProps extends IAppMount {

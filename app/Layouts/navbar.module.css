@@ -1,0 +1,171 @@
+.sideBarInput {
+  display: none;
+}
+
+.container {
+  color: white;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  column-gap: 0.7em;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+.logo img {
+  width: fit-content;
+  height: max(4.5vh, 40px);
+  margin-left: 5px;
+}
+
+.container a {
+  white-space: nowrap;
+  font-size: max(1.7vh, 15px);
+  transition: color 500ms ease-in-out;
+}
+
+.container > a {
+  color: white;
+}
+.profileLogo {
+  display: flex;
+  position: absolute;
+  right: 5px;
+  width: 50px;
+  z-index: 2;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-top: none !important;
+  .svg {
+    height: 65%;
+    width: 25px;
+  }
+
+  .span {
+    color: white;
+    font-size: x-small;
+    font-weight: bold;
+  }
+}
+
+.profileLogo :hover + .span {
+  color: #00ceff;
+}
+@media only screen and (min-width: 480px) {
+  .container a:hover {
+    color: #00ceff;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .sideBarInput:checked ~ nav {
+    translate: 0;
+  }
+  .sideBarInput:checked ~ .dropBox {
+    translate: 0;
+  }
+
+  .sideBarInput:checked ~ .sideBarBtn {
+    translate: calc(99svw - max(45px, 10vw));
+
+    .first {
+      rotate: -50deg;
+      background-color: red;
+      position: absolute;
+      height: 10%;
+      transition: all 500ms ease-in;
+    }
+
+    .second {
+      opacity: 0;
+    }
+
+    .third {
+      position: absolute;
+      height: 10%;
+      transition: all 500ms ease-in;
+
+      background-color: red;
+      rotate: 50deg;
+    }
+  }
+  .sideBarInput:not(:checked) ~ .sideBarBtn {
+    transition: translate 200ms ease-in;
+    transition-delay: 300ms;
+  }
+
+  .dropBox {
+    transition: translate 500ms ease-in;
+    height: 100vh;
+    width: 100%;
+    translate: 100%;
+    top: 2px;
+    background: linear-gradient(to right, transparent, black);
+    position: fixed;
+    z-index: 3;
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 70%;
+    background: linear-gradient(to right, black, black, #393939 120%);
+    position: fixed;
+    transition: translate 500ms ease-in;
+    z-index: 5;
+    translate: -110%;
+    top: 2px;
+    height: 100vh;
+  }
+
+  .container > a {
+    width: 100%;
+    border-top: 2px solid #393939;
+    padding-left: 5px;
+    height: 6%;
+    display: flex;
+    align-items: center;
+  }
+  .container .first {
+    border-top: 2px solid white;
+    margin-top: 15px;
+    transition: all 400ms ease-in;
+  }
+
+  .logo img {
+    margin-top: 1rem;
+  }
+
+  .sideBarBtn {
+    display: flex;
+    z-index: 10;
+    margin-left: 1%;
+    margin-right: 1%;
+    flex-direction: column;
+    width: clamp(45px, 11vw, 55px);
+    min-width: 35px;
+    align-items: center;
+    height: 60%;
+    justify-content: space-around;
+    cursor: pointer;
+    position: relative;
+    background-color: black;
+  }
+
+  .sideBarBtn > span {
+    width: 80%;
+    color: red;
+    height: 6%;
+    background-color: aqua;
+  }
+
+  .profileLogo {
+    top: 10px;
+    left: 35%;
+  }
+}

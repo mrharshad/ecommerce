@@ -6,14 +6,14 @@ import errors, { ICustomError } from "@/server/utils/errorHandler";
 
 import config from "@/server/config/config";
 import { user } from "@/exConfig";
-import { IAuthentication, IAuthorizedUser } from "@/server/interfaces/user";
 
 import { NextRequest } from "next/server";
-import { authentication } from "@/server/utils/userProjection";
 import { IFetch } from "@/app/layout";
 import { cookies } from "next/headers";
-import { authCookie } from "@/server/utils/tokens";
+import { authCookie, orderDocsCookie } from "@/server/utils/tokens";
 import { IAuthJwtInfo } from "@/server/interfaces/tokens";
+import { IClientSideShared, ICommonData } from "@/server/interfaces/user";
+import { commonData } from "@/server/utils/userProjection";
 
 interface IContext {
   params: {
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, context: IContext) {
       config.jwtSecretCode
     ) as IAuthJwtInfo;
     const { cache, expire, keyName } = user;
-    let data: null | IAuthentication = null;
+    let data: null | ICommonData = null;
     let redisCache: null | boolean = cache;
     try {
       if (redisCache) {
@@ -43,17 +43,25 @@ export async function GET(req: NextRequest, context: IContext) {
     }
     if (redisCache !== null) {
       dbConnect();
-      data = (await User.findById(_id, authentication)) as IAuthentication;
+      data = (await User.findById(_id, commonData)) as ICommonData;
     }
 
-    let { bYear, cartPro, fName, gender, lName, location, searches } = (data ||
-      {}) as IAuthentication;
+    let {
+      bYear,
+      cartPro,
+      fName,
+      gender,
+      lName,
+      location,
+      searches,
+      orderDocs,
+    } = (data || {}) as ICommonData;
 
     if (!fName) {
       cookies().delete(authCookie.name);
       throw new Error("token is invalid");
     }
-    const sendData: IAuthorizedUser = {
+    const sendData: IClientSideShared = {
       _id,
       bYear,
       cartPro,
@@ -69,7 +77,10 @@ export async function GET(req: NextRequest, context: IContext) {
         await client.setEx(keyName + _id, expire, JSON.stringify(data));
       } catch (err) {}
     }
-
+    cookies().set({
+      ...orderDocsCookie,
+      value: JSON.stringify(orderDocs),
+    });
     return new Response(
       JSON.stringify({
         success: true,
@@ -84,7 +95,7 @@ export async function GET(req: NextRequest, context: IContext) {
     if (err instanceof Error) {
       return new Response(
         JSON.stringify({
-          success: true,
+          success: false,
           text: errors(err as ICustomError),
         }),
         {

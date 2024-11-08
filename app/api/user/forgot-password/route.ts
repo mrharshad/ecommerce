@@ -6,12 +6,13 @@ import client from "@/server/config/redisConnect";
 import crypto from "crypto";
 // apply api - /user/login
 import { orderSmtp } from "@/server/config/config";
-import errors, { ICustomError } from "@/server/utils/errorHandler";
+import errors, {
+  ICustomError,
+  TErrorMessages,
+} from "@/server/utils/errorHandler";
 import User from "@/server/models/user";
-import { ITokens } from "@/server/interfaces/user";
 
-import { authentication } from "@/server/utils/userProjection";
-import { IFindUser, ISendResponse } from "@/app/user/login/interface";
+import { ISendResponse } from "@/app/user/login/interface";
 import {
   user,
   email as emailConfig,
@@ -19,6 +20,9 @@ import {
   frontEndServer,
   orderManage,
 } from "@/exConfig";
+
+import { IVerification } from "@/server/interfaces/user";
+import { IWithSecureData, withSecureData } from "@/server/utils/userProjection";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -31,8 +35,7 @@ export async function PUT(req: NextRequest) {
     let { cache } = user;
     let { emailExpire, emailKeyName, wait } = emailConfig;
     const { tokenExpired, tokenLimit } = passwordConfig;
-    let isRedis = false;
-    let findUser = {} as IFindUser;
+    let findUser = {} as IWithSecureData;
 
     let { email } = await req.json();
     dbConnect();
@@ -47,20 +50,20 @@ export async function PUT(req: NextRequest) {
         let result = await client.get(emailKeyName + email);
         if (result) {
           findUser = JSON.parse(result);
-          isRedis = true;
         }
       } catch (err) {
         cache = false;
       }
     }
-
-    if (findUser._id && !findUser.fName) {
-      throw new Error("Invalid email and password");
+    const userFirstName = findUser?.fName;
+    if (findUser._id && !userFirstName) {
+      throw new Error("Invalid Email" as TErrorMessages);
     }
     if (!findUser.email) {
-      findUser = (await User.findOne({ email }, authentication).select(
-        "+password"
-      )) as IFindUser;
+      findUser = (await User.findOne(
+        { email },
+        withSecureData
+      )) as IWithSecureData;
       if (!findUser?._id) {
         if (cache) {
           try {
@@ -71,56 +74,44 @@ export async function PUT(req: NextRequest) {
             );
           } catch {}
         }
-        throw new Error("Invalid email and password");
+        throw new Error("Invalid Email" as TErrorMessages);
       }
     }
-    const { _id, fName, tokens = {} } = findUser;
+    const { _id, fName, verification } = findUser;
 
-    let { holdOnToken, tokensSent = 0 } = tokens;
-    if (holdOnToken) {
-      const pendingTime = new Date(holdOnToken);
-      let milliseconds = new Date().getTime() - pendingTime.getTime();
-      const minutes = Math.floor(milliseconds / (1000 * 60));
-      let pendingHours = Math.floor(minutes / 60);
-      let pendingMinutes = minutes % 60;
-      pendingHours = pendingHours < 0 ? Math.abs(pendingHours) : 0;
-      pendingMinutes = pendingMinutes < 0 ? Math.abs(pendingMinutes) : 0;
-
-      if (pendingHours || pendingMinutes) {
-        if (!isRedis && cache) {
-          try {
-            await client.setEx(
-              emailKeyName + email,
-              emailExpire,
-              JSON.stringify(findUser)
-            );
-          } catch {}
-        }
-        return response({
-          success: false,
-          text: `Try After ${pendingHours && `${pendingHours} hours`} ${
-            pendingMinutes > 0 ? `: ${pendingMinutes} minutes` : ""
-          } `,
-          resReTryForget: pendingTime,
-        });
+    let { count, freezed } = verification;
+    const currentTimeMs = Date.now();
+    const isFreezed = freezed > currentTimeMs;
+    if (isFreezed) {
+      if (!userFirstName && cache) {
+        try {
+          await client.setEx(
+            emailKeyName + email,
+            emailExpire,
+            JSON.stringify(findUser)
+          );
+        } catch {}
       }
+      return response({
+        success: false,
+        text: "Account freezed" as TErrorMessages,
+        resReTryForget: freezed,
+      });
     }
-    const tokenUpdate = async (tokens: ITokens) => {
+    const tokenUpdate = async (verification: IVerification) => {
       const update = await User.updateOne(
         { _id },
         {
-          $set: {
-            tokens,
-          },
+          $set: { verification },
         }
       );
       if (!update.modifiedCount) throw new Error("Data Base Error");
     };
-    if (tokensSent === tokenLimit) {
-      tokens.tokensSent = 0;
-      tokens.holdOnToken = new Date(Date.now() + wait * 60 * 60 * 1000);
-      if (holdOnToken) delete tokens.holdOnToken;
-      findUser.tokens = tokens;
+    if (count === tokenLimit) {
+      verification.count = 0;
+      verification.freezed = freezed = Date.now() + wait * 60 * 60 * 1000;
+
+      findUser.verification = verification;
 
       if (cache) {
         try {
@@ -130,23 +121,21 @@ export async function PUT(req: NextRequest) {
             JSON.stringify(findUser)
           );
         } catch (err) {
-          await tokenUpdate(tokens);
+          await tokenUpdate(verification);
         }
       } else {
-        await tokenUpdate(tokens);
+        await tokenUpdate(verification);
       }
       return response({
         success: false,
         text: `Try After ${wait} hours`,
-        resReTryForget: tokens.holdOnToken,
+        resReTryForget: freezed,
       });
     }
-    // const protocol = new URL(req.url).protocol;
-    // const hostname = new URL(req.url).hostname;
+
     const { protocol, hostname, tLD } = frontEndServer;
     const randomString = crypto.randomBytes(20).toString("hex");
-
-    const resetPasswordUrl = `${protocol}${hostname}${tLD}/user/password-recovery?key=${randomString}&email=${email}`;
+    const resetPasswordUrl = `${protocol}${hostname}${tLD}/admin/user/password-recovery?key=${randomString}&email=${email}`;
 
     const message = `Hi ${fName}  \n\n We have received a request for password recovery on ${hostname} via your email address, You can choose your new password through this URL, \n\n ${resetPasswordUrl} \n\n This URL will become invalid after some time,\n\n  If you did not request this code, it is possible that someone else is trying to password recovery for ${hostname} Do not forward or give this code to anyone.\n\n You received this message because your @gmail address was used to password recovery on ${hostname}`;
     const transporter = nodeMailer.createTransport({
@@ -167,14 +156,14 @@ export async function PUT(req: NextRequest) {
     const sendMail = await transporter.sendMail(mailOption);
 
     if (sendMail.accepted.length > 0) {
-      tokens.tokenExpire = new Date(Date.now() + tokenExpired * 60 * 1000);
-      tokens.tokensSent = tokensSent + 1;
-      tokens.token = crypto
+      verification.expire = Date.now() + tokenExpired * 60 * 1000;
+      verification.count = count + 1;
+      verification.token = crypto
         .createHash("sha256")
         .update(randomString)
         .digest("hex");
 
-      findUser.tokens = tokens;
+      findUser.verification = verification;
       if (cache) {
         try {
           await client.setEx(
@@ -183,10 +172,10 @@ export async function PUT(req: NextRequest) {
             JSON.stringify(findUser)
           );
         } catch (err) {
-          await tokenUpdate(tokens);
+          await tokenUpdate(verification);
         }
       } else {
-        await tokenUpdate(tokens);
+        await tokenUpdate(verification);
       }
       return response({ success: true, text: `Email send:- ${email}` });
     } else {

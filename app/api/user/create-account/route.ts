@@ -12,8 +12,9 @@ import { IRequest, ISignUpResponse, TTokenStatus } from "./interface";
 import ISignUpFirstStep from "@/server/interfaces/signUp";
 
 import IDBUser, {
-  IAuthentication,
-  IAuthorizedUser,
+  IClientSideShared,
+  ICommonData,
+  IOrderDocs,
   ISearches,
 } from "@/server/interfaces/user";
 import { IValidToken } from "@/app/user/sign-up/interface";
@@ -32,8 +33,10 @@ import {
   authCookie,
   locationCookie,
   authJWTOpt,
+  orderDocsCookie,
 } from "@/server/utils/tokens";
 import { IAuthJwtInfo, IEmailVerify } from "@/server/interfaces/tokens";
+import { TErrorMessages } from "@/server/utils/errorHandler";
 
 // apply api - /user/sign-up
 export async function POST(req: Request) {
@@ -59,6 +62,7 @@ export async function POST(req: Request) {
       });
     };
     // const hostname = new URL(req.url).hostname;
+    const currentTimeMs = Date.now();
     const { hostname } = frontEndServer;
     let {
       fName,
@@ -83,10 +87,10 @@ export async function POST(req: Request) {
     email = mailId + "@gmail.com";
     const { dateType } = birth;
     let findUser = {} as ISignUpFirstStep;
-    let isRedis = false;
     if (emailCache) {
       try {
         let result = (await client.get(emailKeyName + email)) as any;
+
         if (result) {
           findUser = JSON.parse(result);
         }
@@ -99,16 +103,13 @@ export async function POST(req: Request) {
     if (!userToken) {
       findUser = (await SignUpFirstStep.findById(email)) as ISignUpFirstStep;
       if (!findUser?._id) {
-        const registeredUser = await User.findOne({ email });
+        const registeredUser = await User.findOne({ email }, { _id: 1 });
 
         if (registeredUser) {
-          throw new Error(`already has an account created`);
+          throw new Error("Invalid Email" as TErrorMessages);
         }
       }
-    } else {
-      isRedis = true;
     }
-
     const holdTime = (pending: Date) => {
       const pendingTime = new Date(pending);
       let milliseconds = new Date().getTime() - pendingTime.getTime();
@@ -164,9 +165,7 @@ export async function POST(req: Request) {
       };
       const sendMail = await transporter.sendMail(mailOption);
       if (!sendMail.accepted.length) {
-        throw new Error(
-          "There was a problem sending  verification code, please try again later"
-        );
+        throw new Error("Try again after some time" as TErrorMessages);
       }
     };
 
@@ -177,7 +176,7 @@ export async function POST(req: Request) {
       if (tokenStatus == "update") {
         data.numOfSendToken = data.numOfSendToken + 1;
         if (data.numOfSendToken >= emailTokenLimit) {
-          data.reTry = new Date(Date.now() + wait * 60 * 60 * 1000);
+          data.reTry = new Date(currentTimeMs + wait * 60 * 60 * 1000);
         }
       }
       if (data.numOfSendToken >= emailTokenLimit) {
@@ -221,7 +220,7 @@ export async function POST(req: Request) {
       } else if (!emailCache && tokenStatus == "update") {
         await mongodbUpdate();
       } else if (tokenStatus == "delete") {
-        if (isRedis && emailCache) {
+        if (userToken && emailCache) {
           try {
             await client.del(emailKeyName + email);
           } catch {}
@@ -237,7 +236,7 @@ export async function POST(req: Request) {
     ) => {
       if (method === "update" && findUser.numOfSendToken == 4) {
         await manageToken(findUser, method);
-        return holdTime(new Date(Date.now() + wait * 60 * 60 * 1000));
+        return holdTime(new Date(currentTimeMs + wait * 60 * 60 * 1000));
       }
       const { randomString, token } = newToken();
       await sendToken(randomString);
@@ -333,7 +332,7 @@ export async function POST(req: Request) {
                 district,
                 area,
               };
-              const authorizedUser: IAuthorizedUser = {
+              const authorizedUser: IClientSideShared = {
                 _id: findLastId.lastUserId,
                 fName,
                 lName,
@@ -343,23 +342,29 @@ export async function POST(req: Request) {
                 location: [userLocation],
                 cartPro: [],
               };
-              const authentication: IAuthentication = {
+              const orderDocs: IOrderDocs = {
+                newOrder: 0,
+                canceled: 0,
+                delivered: 0,
+              };
+              const authentication: ICommonData = {
                 ...authorizedUser,
                 email: storedToken.email,
                 bDate: Number(bDate),
                 bMonth: Number(bMonth),
-                password: hashedPassword,
                 role: ["User"],
-                tokens: {},
-                issues: {},
                 mobileNo: Number(mobileNo),
-                createdAt: new Date(),
+                orderDocs,
               };
 
               const newData: IDBUser = {
+                createdAt: new Date(),
                 ...authentication,
                 canceled: [],
                 delivered: [],
+                coupons: [],
+                verification: { count: 0, expire: 0, freezed: 0, token: "" },
+                password: hashedPassword,
               };
 
               const createData = await User.create(newData);
@@ -380,11 +385,13 @@ export async function POST(req: Request) {
                 ...authCookie,
                 value: jwtToken,
               });
-              await manageToken(findUser, "delete");
 
-              newData.cartPro = [];
-              newData.location = createData.location;
-              newData.createdAt = createData.createdAt;
+              cookie.set({
+                ...orderDocsCookie,
+                value: JSON.stringify(orderDocs),
+              });
+
+              await manageToken(findUser, "delete");
 
               if (cache) {
                 try {
@@ -398,7 +405,7 @@ export async function POST(req: Request) {
               return response(
                 {
                   success: true,
-                  text: "Account created successfully ",
+                  text: "Account created successfully",
                   data: { ...authorizedUser, searches },
                   token: jwtToken,
                   numOfSendToken: 0,

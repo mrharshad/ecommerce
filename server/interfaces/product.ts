@@ -99,7 +99,13 @@ export interface ISingleProduct
     }
   ];
 
-  ratings: Array<number>;
+  stars: {
+    one: number;
+    two: number;
+    three: number;
+    four: number;
+    five: number;
+  };
   reviews: Array<{
     _id: number;
     name: string;
@@ -109,6 +115,7 @@ export interface ISingleProduct
     comment?: string;
     delivered: string;
   }>;
+  returnAndExchange?: number; // day
 }
 
 export interface IDBProduct extends IEasyAccess, ISingleProduct {}

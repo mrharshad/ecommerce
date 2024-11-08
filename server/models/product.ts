@@ -14,7 +14,8 @@ const productSchema = new Schema<IDBProduct>({
   exInfo: [String],
   sold: Number,
   thumbnail: String,
-  price: String,
+  price: Number,
+  mrp: String,
   discount: Number,
   imgSetKey: String,
   imageSets: [
@@ -45,7 +46,13 @@ const productSchema = new Schema<IDBProduct>({
   certificates: [
     { _id: String, image: String, added: String, verified: Boolean },
   ],
-  ratings: [Number],
+  stars: {
+    one: Number,
+    two: Number,
+    three: Number,
+    four: Number,
+    five: Number,
+  },
   reviews: [
     {
       _id: Number,

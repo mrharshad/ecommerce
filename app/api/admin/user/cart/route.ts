@@ -2,24 +2,27 @@ import dbConnect from "@/server/config/dbConnect";
 import { verify } from "jsonwebtoken";
 import { NextRequest } from "next/server";
 import config from "@/server/config/config";
-import { IAuthentication, ICartPro } from "@/server/interfaces/user";
+import { ICommonData, ICartPro } from "@/server/interfaces/user";
 import errors, { ICustomError } from "@/server/utils/errorHandler";
 import User from "@/server/models/user";
 import client from "@/server/config/redisConnect";
 import { cookies } from "next/headers";
 
 import { ICartRequest, ICartResponse } from "@/app/product/interface";
-import { authentication } from "@/server/utils/userProjection";
+
 import { user } from "@/exConfig";
 import { authCookie } from "@/server/utils/tokens";
 import { IAuthJwtInfo } from "@/server/interfaces/tokens";
+interface IUserData {
+  _id: number;
+  cartPro: ICartPro[];
+}
 export async function PATCH(req: NextRequest) {
   try {
     const cookie = cookies();
     const cookieName = authCookie.name;
-    const { cache, expire, keyName } = user;
+    let { cache, expire, keyName } = user;
     const { jwtSecretCode } = config;
-    let caching: null | boolean = cache;
     let { token, optionId, productId, variantId }: ICartRequest =
       await req.json();
     if (!token || !optionId || !productId || !variantId) {
@@ -28,24 +31,24 @@ export async function PATCH(req: NextRequest) {
     const info = verify(token, jwtSecretCode) as IAuthJwtInfo;
     dbConnect();
     const _id = info._id;
-    let data = {} as IAuthentication;
+    let data = {} as IUserData | ICommonData;
     try {
-      if (caching) {
+      if (cache) {
         const redisData = await client.get(keyName + _id);
         if (redisData) {
           data = JSON.parse(redisData as any);
         }
       }
     } catch (err) {
-      caching = false;
+      cache = false;
     }
 
     if (!data?._id) {
-      data = (await User.findById(_id, authentication)) as IAuthentication;
-    } else {
-      caching = null;
+      cache = false;
+      data = (await User.findById(_id, { cartPro: 1 })) as IUserData;
     }
     const { cartPro } = data || {};
+
     if (!cartPro) {
       cookie.delete(cookieName);
       throw new Error("token is invalid");
@@ -78,7 +81,7 @@ export async function PATCH(req: NextRequest) {
       }
     );
     if (update.acknowledged && update.modifiedCount === 1) {
-      if (caching !== false) {
+      if (cache) {
         try {
           data.cartPro = newCartPro;
           await client.setEx(keyName + _id, expire, JSON.stringify(data));
