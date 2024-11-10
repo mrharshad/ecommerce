@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -7,8 +7,8 @@ import { authCookie } from "@/server/utils/tokens";
 export const metadata = {
   title: "Login",
 };
-const page: FC = () => {
-  const cookieStore = cookies();
+const Page = async () => {
+  const cookieStore = await cookies();
   const cookie = cookieStore.get(authCookie.name)?.value;
   if (cookie) {
     return redirect("/");
@@ -16,4 +16,4 @@ const page: FC = () => {
   return <Login />;
 };
 
-export default page;
+export default Page;

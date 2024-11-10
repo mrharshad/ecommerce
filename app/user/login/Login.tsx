@@ -132,6 +132,7 @@ const Login = () => {
       forgotRes({ text, type: "Error" });
     }
   };
+
   useEffect(() => {
     if (token) router.replace("/");
     let data = localStorage.getItem(storeName);

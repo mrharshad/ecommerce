@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     let data: Array<INewOrder> = [];
     let { cache, newOrders, expire } = orderManage;
     const url = newOrders + userId;
+    // throw new Error("testing");
     if (cache) {
       try {
         data = (await client.lRange(url, 0, -1)).map((strOrder) =>

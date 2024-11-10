@@ -8,7 +8,7 @@ import React, { FC } from "react";
 import emptyOrder from "@/public/empty orders.png";
 import { IGetNewOrdersResponse, INewOrdersParams } from "./interface";
 import { TErrorMessages } from "@/server/utils/errorHandler";
-import ErrorMessage from "@/app/utils/ErrorMessage";
+
 import Link from "next/link";
 import style from "./page.module.css";
 import { dateFormatterNSN } from "@/app/utils/methods";
@@ -45,13 +45,16 @@ const page: FC<INewOrdersParams> = async ({ params, searchParams }) => {
   const { success, message, data } = newOrder
     ? ((await request.json()) as IGetNewOrdersResponse)
     : ({ success: true } as IGetNewOrdersResponse);
-
+  console.log("success", success, message);
   if (message === ("token is expired" as TErrorMessages))
     return redirect("/user/login");
 
+  if (!success) {
+    return redirect(`/server-side-error/?msg=${message}`);
+  }
   return (
     <section className={style.container} id="mainContent">
-      {newOrder && success ? (
+      {newOrder ? (
         <div className={style.orders}>
           {data.map(
             ({
@@ -204,8 +207,6 @@ const page: FC<INewOrdersParams> = async ({ params, searchParams }) => {
             }
           )}
         </div>
-      ) : !success ? (
-        <ErrorMessage message={message} />
       ) : (
         <div className={style.empty}>
           <Image src={emptyOrder} alt="empty order" />

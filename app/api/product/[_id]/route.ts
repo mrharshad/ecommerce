@@ -32,6 +32,7 @@ export async function GET(
         caching = false;
       }
     }
+
     if (caching !== null) {
       data = (await Product.findById(_id, singleProduct)) as ISingleProduct;
     }

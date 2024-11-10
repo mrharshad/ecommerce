@@ -70,8 +70,7 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       }
     );
 
-    const { success, data, message } = (await request.json()) as IGetProductRes;
-
+    const { success, data } = (await request.json()) as IGetProductRes;
     if (!success) {
       notFound();
     }
@@ -87,7 +86,6 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       imageSets,
       variants,
       variantKey,
-      createdAt,
       tOfP,
       imgSetKey,
       category,
@@ -98,8 +96,6 @@ const page: FC<IProps> = async ({ params, searchParams }) => {
       _id: variantId,
       info,
       discounts,
-      purchased,
-      created,
       options,
     } = variants[selectedVariant];
 

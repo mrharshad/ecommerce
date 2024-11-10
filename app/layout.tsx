@@ -11,6 +11,8 @@ import { authCookie } from "@/server/utils/tokens";
 import { backEndServer, frontEndServer } from "@/exConfig";
 import { IClientSideShared } from "@/server/interfaces/user";
 
+import { redirect } from "next/navigation";
+
 const inter = Inter({ subsets: ["latin"] });
 export interface IFetch {
   success: boolean;
@@ -29,30 +31,33 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   let value = cookieStore.get(authCookie.name)?.value;
-  let userData = {} as IClientSideShared;
-  if (value) {
-    const req = await fetch(
-      `${protocol}${hostname}${tLD}/api/admin/user/data/${value}
+
+  const req = value
+    ? await fetch(
+        `${protocol}${hostname}${tLD}/api/admin/user/data/${value}
         `,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-cache",
-      }
-      // { next: { revalidate: 21600 } }
-    );
-    const { success, text, data }: IFetch = await req.json();
-    if (success) userData = data;
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: "no-cache",
+        }
+        // { next: { revalidate: 21600 } }
+      )
+    : ({} as Response);
+  const { success, text, data } = value
+    ? ((await req.json()) as IFetch)
+    : ({ success: true, data: {} } as IFetch);
+  if (!success) {
+    return redirect(`/server-side-error/?msg=${text}`);
   }
-  console.log("userData", userData.fName);
   return (
     <html lang="en">
       <body className={inter.className}>
         <StoreProvider>
-          <Header userData={userData} initialToken={value || null} />
+          <Header userData={data} initialToken={value || null} />
           {children}
           <Footer />
         </StoreProvider>

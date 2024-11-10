@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import style from "./page.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, IReduxStoreData } from "./redux/ReduxStore";
@@ -12,7 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import SearchProduct from "./utils/SearchProduct";
 
-import Observer from "./Observer";
+import Observer from "./utils/Observer";
 import { ISearches } from "@/app/interfaces/user";
 import { IMainKeyChange } from "./redux/UserSliceInterface";
 import { ISearchProduct } from "@/server/interfaces/product";
