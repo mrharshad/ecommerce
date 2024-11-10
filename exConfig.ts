@@ -83,25 +83,25 @@ export const password = {
 };
 
 // -----------------------------------------------//
-// export const backEndServer = {
-//   protocol: "http://",
-//   hostname: "192.168.29.183:3000",
-//   tLD: "",
-// };
-
-// export const frontEndServer = {
-//   protocol: "http://",
-//   hostname: "192.168.29.183:3000",
-//   tLD: "",
-// };
 export const backEndServer = {
-  protocol: "https://",
-  hostname: "ecommerce-phi-neon",
-  tLD: ".vercel.app",
+  protocol: "http://",
+  hostname: "192.168.29.183:3000",
+  tLD: "",
 };
 
 export const frontEndServer = {
-  protocol: "https://",
-  hostname: "ecommerce-phi-neon",
-  tLD: ".vercel.app",
+  protocol: "http://",
+  hostname: "192.168.29.183:3000",
+  tLD: "",
 };
+// export const backEndServer = {
+//   protocol: "https://",
+//   hostname: "ecommerce-phi-neon",
+//   tLD: ".vercel.app",
+// };
+
+// export const frontEndServer = {
+//   protocol: "https://",
+//   hostname: "ecommerce-phi-neon",
+//   tLD: ".vercel.app",
+// };

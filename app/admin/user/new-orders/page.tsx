@@ -27,7 +27,7 @@ const page: FC<INewOrdersParams> = async ({ params, searchParams }) => {
   const getCookie = cookies().get;
   const token = getCookie(authCookie.name)?.value;
   const orderDocCookie = getCookie(orderDocsCookie.name)?.value;
-  const ClientSide = dynamic(() => import("./ClientSide"), { ssr: false });
+  // const ClientSide = dynamic(() => import("./ClientSide"), { ssr: false });
   if (!token) return redirect("/user/login");
   let newOrder =
     (orderDocCookie && (JSON.parse(orderDocCookie) as IOrderDocs).newOrder) ||
@@ -213,7 +213,7 @@ const page: FC<INewOrdersParams> = async ({ params, searchParams }) => {
           <Link href={"/"}>Go to Home</Link>
         </div>
       )}
-      <ClientSide docs={docs} />
+      {/* <ClientSide docs={docs} /> */}
     </section>
   );
 };
