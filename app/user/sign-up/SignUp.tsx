@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 import { getDistricts } from "@/app/redux/UserApiRequest";
-import { backEndServer, email as config, pathLocal } from "@/exConfig";
+import { backEndServer, email as config, visitedLocal } from "@/exConfig";
 import Link from "next/link";
 import {
   IBirth,
@@ -38,7 +38,6 @@ const SignUpComponent: FC = () => {
   const router = useRouter();
   const [firstStep, setFirstStep] = useState<IFirstStep>({ ...initialData });
   const [birth, setBirth] = useState<IBirth>();
-  const previousPath = useRef<null | string>();
   const [email, setEmail] = useState<string>("");
   const password = useRef<HTMLInputElement>(null);
   const confirmPassword = useRef<HTMLInputElement>(null);
@@ -144,7 +143,10 @@ const SignUpComponent: FC = () => {
     if (request.status == 201) {
       localStorage.removeItem("newAccount");
       localStorage.removeItem("Searches");
-      if (previousPath.current === "/product") {
+      const visited = JSON.parse(
+        localStorage.getItem(visitedLocal) as string
+      ) as Array<string>;
+      if (visited[visited.length - 2] === "/product") {
         router.back();
       } else router.replace("/");
       dispatch(authenticated({ text, data, token, completed: "Sign-Up" }));
@@ -183,9 +185,7 @@ const SignUpComponent: FC = () => {
       stateElement.value = defaultState;
     }
   }, [setFirstStep, setEmail, setBirth, stateChange]);
-  useEffect(() => {
-    previousPath.current = localStorage.getItem(pathLocal);
-  }, []);
+
   function funcSetPassword(e: ChangeEvent<HTMLInputElement>) {
     const input = e.target.value;
     let length = input.length;

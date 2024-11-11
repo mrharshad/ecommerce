@@ -10,7 +10,7 @@ import { authenticated, newAlert, newLoading } from "@/app/redux/UserSlice";
 
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
 import { INewPasswordRes } from "./interface";
-import { backEndServer } from "@/exConfig";
+import { backEndServer, visitedLocal } from "@/exConfig";
 
 const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
   const dispatch = useDispatch();
@@ -83,7 +83,12 @@ const Recovery: FC<IRecoveryParams> = ({ token: key, email }) => {
             completed: "Recovery-Password",
           })
         );
-        router.replace("/");
+        const visited = JSON.parse(
+          localStorage.getItem(visitedLocal) as string
+        ) as Array<string>;
+        if (visited[visited.length - 2] === "/product") {
+          router.back();
+        } else router.replace("/");
       } else {
         dispatch(
           newAlert({
