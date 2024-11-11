@@ -8,9 +8,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { ILoginInfo, ILoginResponse } from "./interface";
 
-import { IAlert } from "@/app/interfaces/user";
+import { IAlert, TUrlKey } from "@/app/interfaces/user";
 import { IReduxStoreData } from "@/app/redux/ReduxStore";
-import { backEndServer, pathLocal } from "@/exConfig";
+import { backEndServer, visitedLocal } from "@/exConfig";
 
 const Login = () => {
   const { alerts, searches, token } = useSelector(
@@ -19,7 +19,7 @@ const Login = () => {
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const previousPath = useRef<null | string>();
+
   const passwordInput = useRef<HTMLInputElement | null>(null);
   const emailInput = useRef<HTMLInputElement | null>(null);
   const manageAlert = (info: IAlert, loading?: boolean) =>
@@ -75,8 +75,12 @@ const Login = () => {
       resInfo as ILoginResponse;
     if (success) {
       localStorage.removeItem(storeName);
+      const visited = JSON.parse(
+        localStorage.getItem(visitedLocal) as string
+      ) as Array<string>;
       dispatch(authenticated({ text, data, token, completed: "Login" }));
-      if (previousPath.current === "/product") {
+
+      if (visited[visited.length - 2] === "/product") {
         router.back();
       } else router.replace("/");
     } else {
@@ -137,7 +141,6 @@ const Login = () => {
     if (token) router.replace("/");
     let data = localStorage.getItem(storeName);
     if (data) setLoginInfo(JSON.parse(data));
-    previousPath.current = localStorage.getItem(pathLocal);
   }, []);
 
   return (

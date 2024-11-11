@@ -18,7 +18,7 @@ export const searches = {
 
 export const viewedProLocal = "ViewedProduct"; //
 
-export const pathLocal = "Path"; //
+export const visitedLocal = "Visited"; //
 
 export const orderManage = {
   mail: "harshadecommerceapp@gmail.com",

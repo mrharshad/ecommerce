@@ -8,10 +8,9 @@ import NewOrder from "@/server/models/newOrder";
 import { verify } from "jsonwebtoken";
 import { NextRequest } from "next/server";
 
-export async function GET(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const token = searchParams.get("token") as string;
+    const token = ((await req.json()) as { token: string }).token;
     const { jwtSecretCode } = config;
     const userId = (verify(token as string, jwtSecretCode) as IAuthJwtInfo)
       ?._id;
@@ -19,7 +18,7 @@ export async function GET(req: NextRequest) {
     let data: Array<INewOrder> = [];
     let { cache, newOrders, expire } = orderManage;
     const url = newOrders + userId;
-    // throw new Error("testing");
+
     if (cache) {
       try {
         data = (await client.lRange(url, 0, -1)).map((strOrder) =>

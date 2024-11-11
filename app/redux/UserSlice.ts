@@ -43,7 +43,7 @@ import {
   searches as searchesConfig,
 } from "@/exConfig";
 import { IGetUserContactsRes, INewOrderRes } from "./UserApiRequestInterface";
-import { INewOrder } from "@/server/interfaces/newOrder";
+
 const { perRequest, showClient } = suggestionsConfig;
 const { storeName } = searchesConfig;
 const initialFindSuggestion = {

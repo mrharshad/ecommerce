@@ -1,5 +1,12 @@
 "use client";
-import React, { FC, useCallback, FormEvent, useEffect, useRef } from "react";
+import React, {
+  FC,
+  useCallback,
+  FormEvent,
+  useEffect,
+  useRef,
+  useMemo,
+} from "react";
 import style from "./Header.module.css";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -27,7 +34,7 @@ import UserAlerts from "./UserAlert";
 import { TSearchesIdentity, TSearchSort } from "../interfaces/user";
 import Suggestions from "./Suggestions";
 import Link from "next/link";
-import { pathLocal, searches as searchesConfig } from "@/exConfig";
+import { searches as searchesConfig, visitedLocal } from "@/exConfig";
 
 import { deleteSearch, setNewSearches } from "../redux/UserApiRequest";
 
@@ -53,7 +60,7 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
     viewedPro,
     urlKey,
   } = useSelector((data: IReduxStoreData) => data.user);
-  const { orders } = urlKey;
+  const visited = useRef<Array<string>>([]);
   const { autoAddCategory, autoAddTOfP, newReqByPriority, storeName } =
     searchesConfig;
   const { loading } = findSuggestion;
@@ -208,9 +215,10 @@ const Header: FC<HeaderProps> = ({ userData, initialToken }) => {
   }, [viewedPro]);
 
   useEffect(() => {
-    setTimeout(() => {
-      localStorage.setItem(pathLocal, currentPath);
-    }, 1000);
+    const visitedValue = visited.current;
+    visitedValue.push(currentPath);
+
+    localStorage.setItem(visitedLocal, JSON.stringify(visitedValue));
   }, [currentPath]);
   useEffect(() => {
     dispatch(appMount({ userData, initialToken }));

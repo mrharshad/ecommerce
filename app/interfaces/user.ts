@@ -1,4 +1,3 @@
-import { INewOrder } from "@/server/interfaces/newOrder";
 import { ISearchProduct } from "@/server/interfaces/product";
 
 import {
@@ -133,6 +132,7 @@ export interface IReduxUser {
   randomPage: number | null;
   urlKey: { orders: number };
 }
+export type TUrlKey = "orders";
 
 export type TMainKeys =
   | "data"

@@ -7,6 +7,7 @@ export const metadata = {
 };
 
 const Page = () => {
+  console.log("run cart page");
   return (
     <>
       <PageClient />

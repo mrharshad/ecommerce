@@ -56,7 +56,7 @@ const Page = ({ params, searchParams }: ICancelProps) => {
         ])
       );
       const request = await fetch(
-        `${protocol}${hostname}${tLD}/api/admin/user/new-order/cancel`,
+        `${protocol}${hostname}${tLD}/api/admin/order-cancel`,
         {
           method: "PUT",
           body: JSON.stringify({ ...searchParams, token, reason }),

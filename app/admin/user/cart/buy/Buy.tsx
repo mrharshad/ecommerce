@@ -121,7 +121,7 @@ const Buy = () => {
     const { hostname, protocol, tLD } = backEndServer;
     if (!loadings.length) dispatch(newLoading("Order"));
     const request = await fetch(
-      `${protocol}${hostname}${tLD}/api/admin/user/new-order`,
+      `${protocol}${hostname}${tLD}/api/admin/order-create`,
       {
         method: "POST",
         body: JSON.stringify({

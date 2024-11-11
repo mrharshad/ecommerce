@@ -7,7 +7,6 @@ import {
   IActive,
   IFindSuggestion,
   ISearches,
-  TAlert,
   TMainKeys,
   TPending,
 } from "../interfaces/user";
